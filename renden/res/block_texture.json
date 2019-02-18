@@ -1,0 +1,11 @@
+{
+  "width": 16,
+  "height": 16,
+
+  "textures": {
+    "stone": "stone.png",
+    "crafting_table_top": "crafting_table_top.png",
+    "crafting_table_side": "crafting_table_side.png",
+    "crafting_table_front": "crafting_table_front.png"
+  }
+}
