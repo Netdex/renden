@@ -1,28 +1,28 @@
-[submodule "renden/vendor/assimp"]
-    path = renden/vendor/assimp
-    url = https://github.com/assimp/assimp.git
-    branch = master
-[submodule "renden/vendor/glad"]
-    path = renden/vendor/glad
+[submodule "vendor/assimp"]
+	path = vendor/assimp
+	url = https://github.com/assimp/assimp.git
+	branch = master
+[submodule "vendor/glad"]
+    path = vendor/glad
     url = https://github.com/Dav1dde/glad.git
     branch = c
-[submodule "renden/vendor/glfw"]
-    path = renden/vendor/glfw
+[submodule "vendor/glfw"]
+    path = vendor/glfw
     url = https://github.com/glfw/glfw.git
     branch = master
-[submodule "renden/vendor/glm"]
-    path = renden/vendor/glm
+[submodule "vendor/glm"]
+    path = vendor/glm
     url = https://github.com/g-truc/glm.git
     branch = master
-[submodule "renden/vendor/stb"]
-    path = renden/vendor/stb
+[submodule "vendor/stb"]
+    path = vendor/stb
     url = https://github.com/nothings/stb.git
     branch = master
-[submodule "renden/vendor/bullet"]
-    path = renden/vendor/bullet
+[submodule "vendor/bullet"]
+    path = vendor/bullet
     url = https://github.com/bulletphysics/bullet3.git
     branch = master
-[submodule "renden/vendor/json"]
-    path = renden/vendor/json
+[submodule "vendor/json"]
+    path = vendor/json
     url = https://github.com/nlohmann/json.git
     branch = develop
