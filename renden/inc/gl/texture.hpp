@@ -62,7 +62,7 @@ namespace gl {
                 const std::string &path = paths[i];
                 int w, h, bpp;
                 unsigned char *imgbuf = stbi_load(path.c_str(), &w, &h, &bpp, 4);
-                assert(imgbuf != nullptr && width == w && height == h && bpp == 4);
+                assert(imgbuf != nullptr && width == w && height == h);
                 glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, w, h, 1,
                                 GL_RGBA, GL_UNSIGNED_BYTE, imgbuf);
                 stbi_image_free(imgbuf);
@@ -120,16 +120,15 @@ namespace gl {
                 texture_filter_mode filter_mode, texture_wrap_mode wrap_mode,
                 unsigned int tex_id) : tex_id(tex_id) {
             glGenTextures(1, &id);
-            glActiveTexture(GL_TEXTURE0 + tex_id);
             this->bind();
 
             for (int i = 0; i < 6; i++) {
                 const std::string &path = paths[i];
                 int w, h, bpp;
-                unsigned char *imgbuf = stbi_load(path.c_str(), &w, &h, &bpp, 4);
-                assert(imgbuf != nullptr && bpp == 4);
-                glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, GL_RGBA, w, h, 0,
-                             GL_RGBA, GL_UNSIGNED_BYTE, imgbuf);
+                unsigned char *imgbuf = stbi_load(path.c_str(), &w, &h, &bpp, 3);
+                assert(imgbuf != nullptr);
+                glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, GL_RGB, w, h, 0,
+                             GL_RGB, GL_UNSIGNED_BYTE, imgbuf);
                 stbi_image_free(imgbuf);
             }
 
@@ -141,7 +140,7 @@ namespace gl {
 
             if (filter_mode == NEAREST_MIPMAP_NEAREST || filter_mode == LINEAR_MIPMAP_NEAREST
                 || filter_mode == NEAREST_MIPMAP_LINEAR || filter_mode == LINEAR_MIPMAP_LINEAR) {
-                glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+                glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
             }
         }
 
@@ -154,9 +153,10 @@ namespace gl {
             glDeleteTextures(1, &id);
         }
 
-        texture2d operator=(const texture2d &o) = delete;
+        cubemap operator=(const texture2d &o) = delete;
 
         void bind() {
+            glActiveTexture(GL_TEXTURE0 + tex_id);
             glBindTexture(GL_TEXTURE_CUBE_MAP, id);
         }
 

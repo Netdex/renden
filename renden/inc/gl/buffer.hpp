@@ -28,17 +28,15 @@ namespace gl {
 
         buffer(const T *data, size_t size) {
             glGenBuffers(1, &this->id);
+            this->allocate(data, size);
             this->bind();
-            glBufferData(static_cast<GLenum>(type),
-                         static_cast<GLsizeiptr>(size), static_cast<const GLvoid *>(data),
-                         static_cast<GLenum>(usage));
         }
 
         explicit buffer(const std::vector<T> &data)
                 : buffer(&data[0], data.size() * sizeof(data[0])) {}
 
         ~buffer() {
-            glDeleteBuffers(1, &this->id);
+            glDeleteBuffers(1, &id);
         }
 
         buffer(const buffer &o) = delete;
@@ -49,11 +47,17 @@ namespace gl {
             glBindBuffer(static_cast<GLenum>(type), this->id);
         }
 
+        void unbind(){
+            glBindBuffer(static_cast<GLenum>(type), 0);
+        }
+
         size_t get_size() {
             if (cached_size == 0) {
+                this->bind();
                 GLint size;
                 glGetBufferParameteriv(type, GL_BUFFER_SIZE, &size);
                 cached_size = size;
+                this->unbind();
                 return static_cast<size_t>(size);
             } else {
                 return cached_size;
@@ -66,9 +70,19 @@ namespace gl {
 
         //T *map(/* access */);
 
+        void allocate(const T *data, size_t size) {
+            this->bind();
+            glBufferData(static_cast<GLenum>(type),
+                         static_cast<GLsizeiptr>(size), static_cast<const GLvoid *>(data),
+                         static_cast<GLenum>(usage));
+            this->unbind();
+        }
+
         void update(unsigned int offset, const T *data, size_t size) {
+            this->bind();
             glBufferSubData(type, static_cast<GLintptr>(offset),
                             static_cast<GLsizeiptr>(size), static_cast<const GLvoid *>(data));
+            this->unbind();
         }
 
         void update(unsigned int offset, const std::vector<T> &data) {

@@ -12,13 +12,15 @@
 #include <memory>
 #include <primitive/block_primitive.hpp>
 
+static const int MAXIMUM_BLOCKS = 256;
+
 class block_manager {
     // convert name of texture to index of 2D texture array
     std::unordered_map<std::string, unsigned int> texture_name_to_layer;
     std::shared_ptr<gl::texture2d> textures;
 
     // convert name of block to block primitive mesh
-    std::unordered_map<unsigned int, std::shared_ptr<block_primitive>> block_id_to_primitive;
+    std::shared_ptr<block_primitive> block_id_to_primitive[MAXIMUM_BLOCKS];
     std::unordered_map<std::string, unsigned int> block_name_to_id;
 
     void load_textures(const std::string &block_tex_conf);
@@ -35,9 +37,9 @@ public:
 namespace world {
     namespace entities {
         namespace blocks {
-            extern std::unique_ptr<block_manager> db;
+            extern std::weak_ptr<block_manager> db;
 
-            void load();
+            std::shared_ptr<block_manager> load();
         }
     }
 }

@@ -23,14 +23,21 @@ add_subdirectory(vendor/bullet)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(vendor/json)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    add_compile_options("/W4" "$<$<CONFIG:RELEASE>:/O2>")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+#    set(CMAKE_CXX_FLAGS_RELEASE "") MSVC hates this
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
+    add_compile_options("-Wall" "-Wextra" "-Werror" "$<$<CONFIG:RELEASE>:-O3>" "$<$<CONFIG:DEBUG>:-g>")
     if(NOT WIN32)
         set(GLAD_LIBRARIES dl)
     endif()
 endif()
+
 
 include_directories(renden/inc/
                     vendor/assimp/include/

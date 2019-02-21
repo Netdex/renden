@@ -7,5 +7,8 @@ in vec3 Texcoord;
 out vec4 outColor;
 
 void main() {
-	outColor = texture(tex, Texcoord);
+    vec4 texColor = texture(tex, Texcoord);
+    if(texColor.a < 0.1)
+        discard;
+	outColor = texColor;
 }

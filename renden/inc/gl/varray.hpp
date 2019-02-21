@@ -38,13 +38,18 @@ namespace gl {
         }
 
         varray(const varray &o) = delete;
+
         varray operator=(const varray &o) = delete;
+
+        ~varray() {
+            glDeleteVertexArrays(1, &id);
+        }
 
         void bind() {
             glBindVertexArray(id);
         }
 
-        void unbind(){
+        void unbind() {
             glBindVertexArray(0);
         }
 
@@ -54,7 +59,6 @@ namespace gl {
                                   static_cast<GLenum>(type), static_cast<GLboolean>(normalized),
                                   static_cast<GLsizei>(stride), reinterpret_cast<const GLvoid *>(offset));
             glEnableVertexAttribArray(location);
-
         }
     };
 }

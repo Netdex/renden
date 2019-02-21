@@ -10,17 +10,26 @@
 
 #include <gl/varray.hpp>
 #include <gl/shader.hpp>
+#include <world/skybox.hpp>
 
 namespace shaders {
     namespace block {
-        extern std::unique_ptr<gl::shader> shader;
+        extern std::weak_ptr<gl::shader> shader;
         extern std::vector<gl::varray_attribute> attribs;
 
-        void load();
+        std::shared_ptr<gl::shader> load();
 
     }
+    namespace tenbox{
+        extern std::weak_ptr<gl::shader> shader;
+        extern std::vector<gl::varray_attribute> attribs;
+        extern std::shared_ptr<skybox> tenbox;
 
-    void load();
+        std::shared_ptr<gl::shader> load();
+    }
+
+    // we keep a reference so we can control when it's destroyed
+    std::vector<std::shared_ptr<gl::shader>> load();
 }
 
 
