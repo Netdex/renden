@@ -32,7 +32,7 @@ if(MSVC)
 #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 #    set(CMAKE_CXX_FLAGS_RELEASE "") MSVC hates this
 else()
-    add_compile_options("-Wall" "-Wextra" "-Werror" "$<$<CONFIG:RELEASE>:-O3>" "$<$<CONFIG:DEBUG>:-g>")
+    add_compile_options("-Wall" "-Wextra" "$<$<CONFIG:RELEASE>:-O3>" "$<$<CONFIG:DEBUG>:-g>")
     if(NOT WIN32)
         set(GLAD_LIBRARIES dl)
     endif()

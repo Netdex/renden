@@ -27,6 +27,8 @@ namespace gl {
         unsigned int stride;
         unsigned int offset;
         bool normalized;
+
+        GLuint divisor;
     };
 
     class varray {
