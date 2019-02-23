@@ -65,7 +65,8 @@ block_primitive::block_primitive(std::array<float, 36 * 3> uv, bool is_opaque) :
 }
 
 
-void block_primitive::append_vertex_list(std::vector<float> &vlist, glm::ivec3 position, block_face_set faces) {
+size_t block_primitive::append_vertex_list(std::vector<float> &vlist, glm::ivec3 position, block_face_set faces) {
+    size_t count = vlist.size();
     for (int i = 0; i < 6; i++) {
         if (faces & FACE_IDX_TO_BLOCK_FACE[i]) {
             for (int j = 0; j < 6; j++) {
@@ -77,6 +78,7 @@ void block_primitive::append_vertex_list(std::vector<float> &vlist, glm::ivec3 p
             }
         }
     }
+    return vlist.size() - count;
 }
 
 

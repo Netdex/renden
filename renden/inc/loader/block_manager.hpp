@@ -11,6 +11,7 @@
 #include <gl/texture.hpp>
 #include <memory>
 #include <primitive/block_primitive.hpp>
+#include <gl/buffer.hpp>
 
 static const int MAXIMUM_BLOCKS = 256;
 
@@ -23,14 +24,20 @@ class block_manager {
     std::shared_ptr<block_primitive> block_id_to_primitive[MAXIMUM_BLOCKS];
     std::unordered_map<std::string, unsigned int> block_name_to_id;
 
+    unsigned int block_id_face_to_offset[MAXIMUM_BLOCKS][6];
+    std::shared_ptr<gl::buffer<gl::VERTEX_BUFFER, gl::STATIC_DRAW, float>> block_buffer;
+
     void load_textures(const std::string &block_tex_conf);
 
     void create_block_primitives(const std::string &block_def_conf);
+
+    void create_block_buffer();
 
 public:
     block_manager(const std::string &block_tex_conf, const std::string &block_def_conf);
 
     std::shared_ptr<block_primitive> get_block_by_name(const std::string &name);
+
     std::shared_ptr<block_primitive> get_block_by_id(unsigned int id);
 };
 

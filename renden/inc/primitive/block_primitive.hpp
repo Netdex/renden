@@ -31,7 +31,7 @@ public:
 
     explicit block_primitive(std::array<float, 36*3> uv, bool is_opaque);
 
-    void append_vertex_list(std::vector<float> &vlist, glm::ivec3 position, block_face_set faces);
+    size_t append_vertex_list(std::vector<float> &vlist, glm::ivec3 position, block_face_set faces);
 
 };
 

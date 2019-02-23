@@ -27,7 +27,6 @@ namespace gl {
         std::vector<std::shared_ptr<gl::buffer<gl::VERTEX_BUFFER, gl::STATIC_DRAW, float>>> vbo;
         std::shared_ptr<gl::buffer<gl::ELEMENT_BUFFER, gl::STATIC_DRAW, GLuint>> ebo;
 
-        bool instanced = false;
     public:
         glm::mat4 model = glm::mat4(1.f);
 
@@ -125,7 +124,6 @@ namespace gl {
         }
 
         void draw_instanced(const gl::shader &shader) {
-            assert(instanced);
             // TODO
         }
 
