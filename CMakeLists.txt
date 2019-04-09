@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(renden)
 
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
@@ -45,7 +45,8 @@ include_directories(renden/inc/
                     vendor/glad/include/
                     vendor/glfw/include/
                     vendor/glm/
-                    vendor/stb/)
+                    vendor/stb/
+					vendor/spdlog/include/)
 
 file(GLOB VENDORS_SOURCES vendor/glad/src/glad.c)
 file(GLOB_RECURSE PROJECT_HEADERS renden/inc/*.hpp)

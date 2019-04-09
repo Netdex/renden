@@ -22,224 +22,200 @@
 #include <loader/shader_manager.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
-
 #include <stb_image.h>
+#include "spdlog/spdlog.h"
+
+#include <debug.hpp>
 #include <primitive/block_primitive.hpp>
 #include <loader/block_manager.hpp>
 #include <world/chunk.hpp>
 #include <world/block.hpp>
-
+#include <loader/chunk_manager.hpp>
+#include "world/reticle.hpp"
 
 bool wireframe = false;
 bool focus = true;
 
+std::optional<glm::ivec3> target;
+
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-    if (action == GLFW_PRESS) {
-        switch (key) {
-            case GLFW_KEY_E:
-                wireframe = !wireframe;
-                if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                else
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                break;
-            case GLFW_KEY_LEFT_ALT:
-                focus = !focus;
-                if (focus) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-                else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                break;
-        }
-    }
+	if (action == GLFW_PRESS) {
+		switch (key) {
+		case GLFW_KEY_E:
+			wireframe = !wireframe;
+			if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			else
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			break;
+		case GLFW_KEY_LEFT_ALT:
+			focus = !focus;
+			if (focus) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+			else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			break;
+		}
+	}
 }
 
-void APIENTRY debug_callback(GLenum source, GLenum type, GLuint id,
-                             GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
-    printf("[");
-    switch (severity) {
-        case GL_DEBUG_SEVERITY_HIGH:
-            printf("High");
-            break;
-        case GL_DEBUG_SEVERITY_MEDIUM:
-            printf("Medium");
-            break;
-        case GL_DEBUG_SEVERITY_LOW:
-            printf("Low");
-            break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION:
-            printf("Notification");
-            break;
-    }
-    printf("] ");
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	auto cnk_mgr = world::chunk::db.lock();
 
-    switch (type) {
-        case GL_DEBUG_TYPE_ERROR:
-            printf("Error");
-            break;
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-            printf("Deprecated Behaviour");
-            break;
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-            printf("Undefined Behaviour");
-            break;
-        case GL_DEBUG_TYPE_PORTABILITY:
-            printf("Portability");
-            break;
-        case GL_DEBUG_TYPE_PERFORMANCE:
-            printf("Performance");
-            break;
-        case GL_DEBUG_TYPE_MARKER:
-            printf("Marker");
-            break;
-        case GL_DEBUG_TYPE_PUSH_GROUP:
-            printf("Push Group");
-            break;
-        case GL_DEBUG_TYPE_POP_GROUP:
-            printf("Pop Group");
-            break;
-        case GL_DEBUG_TYPE_OTHER:
-            printf("Other");
-            break;
-    }
-    printf(" - ");
-    switch (source) {
-        case GL_DEBUG_SOURCE_API:
-            printf("API");
-            break;
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-            printf("Window System");
-            break;
-        case GL_DEBUG_SOURCE_SHADER_COMPILER:
-            printf("Shader Compiler");
-            break;
-        case GL_DEBUG_SOURCE_THIRD_PARTY:
-            printf("Third Party");
-            break;
-        case GL_DEBUG_SOURCE_APPLICATION:
-            printf("Application");
-            break;
-        case GL_DEBUG_SOURCE_OTHER:
-            printf("Other");
-            break;
-    }
-    printf(": %s\n", message);
+	if (action == GLFW_PRESS) {
+		switch (button) {
+		case GLFW_MOUSE_BUTTON_LEFT: {
+			if (target) {
+				cnk_mgr->get_block_ref_at(*target)->id = 0;
+			}
+			break;
+		}
+		case GLFW_MOUSE_BUTTON_RIGHT: {
+			break;
+
+		}
+		}
+	}
 }
 
 int main(int argc, char *argv[]) {
-    // Load GLFW and Create a Window
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    auto mWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGL", nullptr, nullptr);
+	spdlog::set_level(spdlog::level::debug);
 
-    // Check for Valid Context
-    if (mWindow == nullptr) {
-        fprintf(stderr, "Failed to Create OpenGL Context");
-        return EXIT_FAILURE;
-    }
+	// Load GLFW and Create a Window
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	auto mWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGL", nullptr, nullptr);
+	glfwSetMouseButtonCallback(mWindow, mouse_button_callback);
 
-    // Create Context and Load OpenGL Functions
-    glfwMakeContextCurrent(mWindow);
-    glfwSwapInterval(1);
-    glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-    glfwSetKeyCallback(mWindow, key_callback);
+	// Check for Valid Context
+	if (mWindow == nullptr) {
+		fprintf(stderr, "Failed to Create OpenGL Context");
+		return EXIT_FAILURE;
+	}
 
-    gladLoadGL();
-    fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
+	// Create Context and Load OpenGL Functions
+	glfwMakeContextCurrent(mWindow);
+	glfwSwapInterval(1);
+	glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwSetKeyCallback(mWindow, key_callback);
 
-    glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(debug_callback, nullptr);
+	gladLoadGL();
+	fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
 
-    glFrontFace(GL_CCW);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glEnable(GL_MULTISAMPLE);
-    glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_DEBUG_OUTPUT);
+	//glDebugMessageCallback(debug_callback, nullptr);
 
-    camera cam(mWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
+	glFrontFace(GL_CCW);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glLineWidth(10.f);
 
-    {
-        auto all_shaders = shaders::load();
-        auto all_blocks = world::entities::blocks::load();
+	camera cam(mWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-        // temporary for testing
-        chunk cnk;
+	{
+		auto all_shaders = shaders::load();
+		auto all_blocks = world::entities::blocks::load();
+		auto all_chunks = world::chunk::load();
 
-        for (int i = 0; i < 5; i++)
-            cnk.data[i + 3][8][8] = block(17);
-        for (int y = 0; y < 3; y++)
-            for (int z = 0; z < 16; z++)
-                for (int x = 0; x < 16; x++) {
-                    if (y == 2)
-                        cnk.data[y][z][x] = block(2);
-                    else
-                        cnk.data[y][z][x] = block(3);
-                }
+		auto chunks = world::chunk::db.lock();
+		auto block_shader = shaders::block::shader.lock();
+		auto tenbox_shader = shaders::tenbox::shader.lock();
 
-        for (int y = 8; y < 13; y++) {
-            for (int z = 6; z < 11; z++)
-                for (int x = 6; x < 11; x++) {
-                    cnk.data[y][z][x] = block(18);
-                }
-        }
-        cnk.data[10][10][10] = block(5);
-        cnk.data[10][10][9] = block(4);
-        cnk.data[10][10][8] = block(40);
+		reticle reticle;
 
-        cnk.update_mesh();
+		const int scz = 16;
+		const int scx = 16;
+		// temporary for testing
 
+		for (int cz = 0; cz < scz; cz++) {
+			for (int cx = 0; cx < scx; cx++) {
+				auto cnk = chunks->get_chunk_at(cx, cz);
+				for (int i = 0; i < 5; i++)
+					cnk->get_block_ref_at(8, i + 3 + 64, 8) = block(17);
+				for (int y = 0; y < 3 + 64; y++)
+					for (int z = 0; z < 16; z++)
+						for (int x = 0; x < 16; x++) {
+							if (y == 2 + 64)
+								cnk->get_block_ref_at(z, y, x) = block(2);
+							else
+								cnk->get_block_ref_at(z, y, x) = block(3);
+						}
 
-        float lastTick = (float) glfwGetTime();
-        // Rendering Loop
-        while (glfwWindowShouldClose(mWindow) == false) {
-            if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-                glfwSetWindowShouldClose(mWindow, true);
-
-            float now = (float) glfwGetTime();
-            float deltaTime = now - lastTick;
-            lastTick = now;
-            cam.update(deltaTime, focus);
-
-
-            // Background Fill Color
-            glClearColor(1.f, 1.f, 1.f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				for (int y = 8 + 64; y < 13 + 64; y++) {
+					for (int z = 6; z < 11; z++)
+						for (int x = 6; x < 11; x++) {
+							cnk->get_block_ref_at(z, y, x) = block(18);
+						}
+				}
+				cnk->get_block_ref_at(10, 10 + 64, 10) = block(5);
+				cnk->get_block_ref_at(10, 10 + 64, 9) = block(4);
+				cnk->get_block_ref_at(10, 10 + 64, 8) = block(40);
+			}
+		}
 
 
-            if (auto block = shaders::block::shader.lock()) {
-                block->activate();
-                block->bind("view", cam.view);
-                block->bind("proj", cam.proj);
+		float lastTick = (float)glfwGetTime();
+		// Rendering Loop
+		while (glfwWindowShouldClose(mWindow) == false) {
+			if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+				glfwSetWindowShouldClose(mWindow, true);
 
-                cnk.draw(*block, glm::mat4(1.f));
-            }
+			float now = (float)glfwGetTime();
+			float deltaTime = now - lastTick;
+			lastTick = now;
+			cam.update(deltaTime, focus);
 
-            if (auto tenbox = shaders::tenbox::shader.lock()) {
-                glDepthFunc(GL_LEQUAL);
-                tenbox->activate();
-                tenbox->bind("view", glm::mat4(glm::mat3(cam.view))); // remove translation
-                tenbox->bind("proj", cam.proj);
-                shaders::tenbox::tenbox->draw(*tenbox);
-                glDepthFunc(GL_LESS);
-            }
+			target = cam.cast_target(*chunks, 10);
+			chunks->update_all_meshes();
 
+			// Background Fill Color
+			glClearColor(1.f, 1.f, 1.f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//        for (int z = 0; z < 1; z++) {
-//            for (int x = 0; x < 1; x++) {
-//glm::translate(glm::mat4(1.f), glm::vec3(x, sin((x * z) / 100.f + now) * 10, z))
+			block_shader->activate();
+			block_shader->bind("view", cam.view);
+			block_shader->bind("proj", cam.proj);
+			chunks->render(*block_shader);
 
-//        }
+			glDisable(GL_DEPTH);
+			glDepthFunc(GL_GEQUAL);
 
-            // Flip Buffers and Draw
-            glfwSwapBuffers(mWindow);
-            glfwPollEvents();
-        }
-    }
-    glfwTerminate();
-    return EXIT_SUCCESS;
+			if (target) {
+				block_shader->bind("view", cam.view);
+				block_shader->bind("proj", cam.proj);
+				reticle.draw(*block_shader, glm::translate(glm::mat4(1.f), 
+					glm::vec3(*target)));
+			}
+			glDepthFunc(GL_LESS);
+
+			glEnable(GL_DEPTH);
+
+			glDepthFunc(GL_LEQUAL);
+			tenbox_shader->activate();
+			tenbox_shader->bind("view", glm::mat4(glm::mat3(cam.view))); // remove translation
+			tenbox_shader->bind("proj", cam.proj);
+			shaders::tenbox::tenbox->draw(*tenbox_shader);
+			glDepthFunc(GL_LESS);
+
+			//        for (int z = 0; z < 1; z++) {
+			//            for (int x = 0; x < 1; x++) {
+			//glm::translate(glm::mat4(1.f), glm::vec3(x, sin((x * z) / 100.f + now) * 10, z))
+
+			//        }
+
+						// Flip Buffers and Draw
+			glfwSwapBuffers(mWindow);
+			glfwPollEvents();
+		}
+	}
+	glfwTerminate();
+	return EXIT_SUCCESS;
 }

@@ -56,12 +56,19 @@ namespace gl {
         }
 
         void set_attrib(GLuint location, size_t size, varray_attribute_type type,
-                        unsigned int stride, unsigned int offset, bool normalized = false) {
+                        unsigned int stride, unsigned int offset, bool normalized = false, GLuint divisor = 0) {
             glVertexAttribPointer(location, static_cast<GLint>(size),
                                   static_cast<GLenum>(type), static_cast<GLboolean>(normalized),
                                   static_cast<GLsizei>(stride), reinterpret_cast<const GLvoid *>(offset));
             glEnableVertexAttribArray(location);
+            glVertexAttribDivisor(location, divisor);
         }
+		/*void set_attribs(const std::vector<varray_attribute> &attribs) {
+			for (auto i : attribs) {
+				set_attrib(i.location, i.size, i.type, i.stride, i.offset, i.normalized, i.divisor);
+			}
+		}*/
+      
     };
 }
 #endif //RENDEN_VARRAY_HPP

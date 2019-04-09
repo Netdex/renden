@@ -24,8 +24,8 @@ namespace gl {
 
     class mesh {
         std::shared_ptr<gl::varray> vao;
-        std::vector<std::shared_ptr<gl::buffer<gl::VERTEX_BUFFER, gl::STATIC_DRAW, float>>> vbo;
-        std::shared_ptr<gl::buffer<gl::ELEMENT_BUFFER, gl::STATIC_DRAW, GLuint>> ebo;
+        std::vector<std::shared_ptr<gl::buffer<float>>> vbo;
+        std::shared_ptr<gl::buffer<GLuint>> ebo;
 
     public:
         glm::mat4 model = glm::mat4(1.f);
@@ -39,7 +39,7 @@ namespace gl {
                 : vao(std::make_shared<gl::varray>()), draw_mode(draw_mode) {
             assert(attribs.size() == vertices.size());
             for (int i = 0; i < vertices.size(); i++) {
-                vbo.push_back(std::make_shared<gl::buffer<gl::VERTEX_BUFFER, gl::STATIC_DRAW, float>>(vertices[i]));
+                vbo.push_back(std::make_shared<gl::buffer<float>>(vertices[i]));
                 for (auto a : attribs[i]) {
                     vao->set_attrib(a.location, a.size, a.type, a.stride, a.offset, a.normalized);
                     glVertexAttribDivisor(a.location, a.divisor);
@@ -52,9 +52,9 @@ namespace gl {
              mesh_draw_mode draw_mode,
              const varray_attribute *attributes, size_t attrib_count)
                 : vao(std::make_shared<gl::varray>()),
-                  vbo({std::make_shared<gl::buffer<gl::VERTEX_BUFFER, gl::STATIC_DRAW, float>>(vertices, vert_size)}),
-                  ebo(std::make_shared<gl::buffer<gl::ELEMENT_BUFFER, gl::STATIC_DRAW, GLuint>>(elements,
-                                                                                                elem_size)),
+                  vbo({std::make_shared<gl::buffer<float>>(vertices, vert_size)}),
+                  ebo(std::make_shared<gl::buffer<GLuint>>(elements,
+                                                           elem_size)),
                   draw_mode(draw_mode) {
 
             for (int i = 0; i < attrib_count; i++) {
@@ -75,7 +75,7 @@ namespace gl {
              mesh_draw_mode draw_mode,
              const varray_attribute *attributes, size_t attrib_count)
                 : vao(std::make_shared<gl::varray>()),
-                  vbo({std::make_shared<gl::buffer<gl::VERTEX_BUFFER, gl::STATIC_DRAW, float>>(vertices, vert_size)}),
+                  vbo({std::make_shared<gl::buffer<float>>(vertices, vert_size)}),
                   draw_mode(draw_mode) {
             for (int i = 0; i < attrib_count; i++) {
                 const varray_attribute &a = attributes[i];

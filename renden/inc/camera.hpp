@@ -5,9 +5,13 @@
 #ifndef RENDEN_CAMERA_HPP
 #define RENDEN_CAMERA_HPP
 
+#include <optional>
+
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/ext/scalar_constants.hpp>
+
+#include "loader/chunk_manager.hpp"
 
 class camera
 {
@@ -29,6 +33,7 @@ public:
     ~camera();
 
     void update(float deltaTime, bool focus);
+	std::optional<glm::ivec3> cast_target(world::chunk::chunk_mgr_t &cnk_mgr, int distance);
 };
 
 

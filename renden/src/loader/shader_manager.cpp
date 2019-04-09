@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <loader/shader_manager.hpp>
+#include "spdlog/spdlog.h"
 
 namespace shaders {
     namespace block {
@@ -27,6 +28,7 @@ namespace shaders {
             };
             // the loaded texture should never change
             shr_shader->bind("tex", 0);
+			spdlog::debug("loaded block shader");
             return shr_shader;
         }
     }
@@ -57,6 +59,9 @@ namespace shaders {
                     PROJECT_SOURCE_DIR "/renden/res/skybox/alps_bk.tga",
                     PROJECT_SOURCE_DIR "/renden/res/skybox/alps_ft.tga",
             });
+
+			spdlog::debug("loaded skybox shader");
+
             return shr_shader;
         }
     }

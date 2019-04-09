@@ -20,7 +20,7 @@ namespace shaders {
         std::shared_ptr<gl::shader> load();
 
     }
-    namespace tenbox{
+    namespace tenbox {
         extern std::weak_ptr<gl::shader> shader;
         extern std::vector<gl::varray_attribute> attribs;
         extern std::shared_ptr<skybox> tenbox;
