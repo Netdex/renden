@@ -33,7 +33,8 @@ public:
     ~camera();
 
     void update(float deltaTime, bool focus);
-	std::optional<glm::ivec3> cast_target(world::chunk::chunk_mgr_t &cnk_mgr, int distance);
+	std::optional<std::pair<glm::ivec3, glm::ivec3>> cast_target(world::chunk::chunk_mgr_t &cnk_mgr, int distance);
+	glm::vec3 get_direction() const;
 };
 
 

@@ -16,7 +16,7 @@
 
 template<unsigned int W, unsigned int H>
 class chunk {
-    std::unique_ptr<gl::mesh> mesh;
+	std::unique_ptr<gl::mesh> mesh;
 
 	std::shared_ptr<block_manager> cached_block_mgr;
 
@@ -57,15 +57,18 @@ public:
 		}
 	}
 
-	block chunk::get_block_at(int x, int y, int z) {
-		assert(x >= 0 && x < W && y >= 0 && y < H && z >= 0 && z < Z);
-		return data[y][x][z];
+	std::optional<block> chunk::get_block_at(unsigned int x, unsigned int y, unsigned int z) {
+		if (x >= 0 && x < W && y >= 0 && y < H && z >= 0 && z < W)
+			return data[y][x][z];
+		return {};
 	}
 
-	block& chunk::get_block_ref_at(int x, int y, int z) {
-		assert(x >= 0 && x < W && y >= 0 && y < H && z >= 0 && z < Z);
-		dirty = true;
-		return data[y][x][z];
+	block* chunk::get_block_ref_at(unsigned int x, unsigned int y, unsigned int z) {
+		if (x >= 0 && x < W && y >= 0 && y < H && z >= 0 && z < W) {
+			dirty = true;
+			return &data[y][x][z];
+		}
+		return nullptr;
 	}
 private:
 	bool chunk::face_occluded(glm::ivec3 position, block_face face) {

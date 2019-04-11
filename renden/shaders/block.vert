@@ -7,6 +7,7 @@ uniform mat4 view;
 uniform mat4 proj;
 
 in vec3 position;
+in vec3 normal;
 in vec3 texcoord;
 
 out vec3 Texcoord;
@@ -14,5 +15,5 @@ out vec3 Texcoord;
 void main()
 {
     Texcoord = texcoord;
-    gl_Position = proj * view * model * chunk * vec4(position, 1.0);
+    gl_Position = proj * view * model * chunk * vec4(position + normal*0, 1.0);
 }

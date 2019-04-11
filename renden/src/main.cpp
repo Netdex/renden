@@ -36,7 +36,7 @@
 bool wireframe = false;
 bool focus = true;
 
-std::optional<glm::ivec3> target;
+std::optional<std::pair<glm::ivec3, glm::ivec3>> target;
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
@@ -62,16 +62,14 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 	if (action == GLFW_PRESS) {
 		switch (button) {
-		case GLFW_MOUSE_BUTTON_LEFT: {
-			if (target) {
-				cnk_mgr->get_block_ref_at(*target)->id = 0;
-			}
+		case GLFW_MOUSE_BUTTON_LEFT:
+			if (target)
+				cnk_mgr->get_block_ref_at(target->first)->id = 0;
 			break;
-		}
-		case GLFW_MOUSE_BUTTON_RIGHT: {
+		case GLFW_MOUSE_BUTTON_RIGHT:
+			if (target)
+				cnk_mgr->get_block_ref_at(target->first + target->second, true)->id = 1;
 			break;
-
-		}
 		}
 	}
 }
@@ -105,8 +103,8 @@ int main(int argc, char *argv[]) {
 	gladLoadGL();
 	fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
 
-	//glEnable(GL_DEBUG_OUTPUT);
-	//glDebugMessageCallback(debug_callback, nullptr);
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(debug_callback, nullptr);
 
 	glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
@@ -128,6 +126,7 @@ int main(int argc, char *argv[]) {
 		auto chunks = world::chunk::db.lock();
 		auto block_shader = shaders::block::shader.lock();
 		auto tenbox_shader = shaders::tenbox::shader.lock();
+		auto reticle_shader = shaders::reticle::shader.lock();
 
 		reticle reticle;
 
@@ -139,25 +138,25 @@ int main(int argc, char *argv[]) {
 			for (int cx = 0; cx < scx; cx++) {
 				auto cnk = chunks->get_chunk_at(cx, cz);
 				for (int i = 0; i < 5; i++)
-					cnk->get_block_ref_at(8, i + 3 + 64, 8) = block(17);
+					*cnk->get_block_ref_at(8, i + 3 + 64, 8) = block(17);
 				for (int y = 0; y < 3 + 64; y++)
 					for (int z = 0; z < 16; z++)
 						for (int x = 0; x < 16; x++) {
 							if (y == 2 + 64)
-								cnk->get_block_ref_at(z, y, x) = block(2);
+								*cnk->get_block_ref_at(z, y, x) = block(2);
 							else
-								cnk->get_block_ref_at(z, y, x) = block(3);
+								*cnk->get_block_ref_at(z, y, x) = block(3);
 						}
 
 				for (int y = 8 + 64; y < 13 + 64; y++) {
 					for (int z = 6; z < 11; z++)
 						for (int x = 6; x < 11; x++) {
-							cnk->get_block_ref_at(z, y, x) = block(18);
+							*cnk->get_block_ref_at(z, y, x) = block(18);
 						}
 				}
-				cnk->get_block_ref_at(10, 10 + 64, 10) = block(5);
-				cnk->get_block_ref_at(10, 10 + 64, 9) = block(4);
-				cnk->get_block_ref_at(10, 10 + 64, 8) = block(40);
+				*cnk->get_block_ref_at(10, 10 + 64, 10) = block(5);
+				*cnk->get_block_ref_at(10, 10 + 64, 9) = block(4);
+				*cnk->get_block_ref_at(10, 10 + 64, 8) = block(40);
 			}
 		}
 
@@ -173,7 +172,7 @@ int main(int argc, char *argv[]) {
 			lastTick = now;
 			cam.update(deltaTime, focus);
 
-			target = cam.cast_target(*chunks, 10);
+			target = cam.cast_target(*chunks, 20);
 			chunks->update_all_meshes();
 
 			// Background Fill Color
@@ -185,18 +184,13 @@ int main(int argc, char *argv[]) {
 			block_shader->bind("proj", cam.proj);
 			chunks->render(*block_shader);
 
-			glDisable(GL_DEPTH);
-			glDepthFunc(GL_GEQUAL);
+			reticle_shader->activate();
+			//glDepthFunc(GL_LEQUAL);
+			reticle.draw(*reticle_shader, cam.view, cam.proj,
+				cam.position, cam.get_direction(), 
+				target ? std::optional<glm::ivec3>(target->first) : std::nullopt);
+			//glDepthFunc(GL_LESS);
 
-			if (target) {
-				block_shader->bind("view", cam.view);
-				block_shader->bind("proj", cam.proj);
-				reticle.draw(*block_shader, glm::translate(glm::mat4(1.f), 
-					glm::vec3(*target)));
-			}
-			glDepthFunc(GL_LESS);
-
-			glEnable(GL_DEPTH);
 
 			glDepthFunc(GL_LEQUAL);
 			tenbox_shader->activate();

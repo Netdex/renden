@@ -7,29 +7,20 @@
 #include "loader/shader_manager.hpp"
 #include "loader/block_manager.hpp""
 #include "primitive/block_primitive.hpp"
+#include <optional>
 
 class reticle {
-	std::unique_ptr<gl::mesh> mesh;
+	std::unique_ptr<gl::mesh> select_mesh;
+	std::unique_ptr<gl::mesh> reticle_mesh;
+	std::unique_ptr<gl::mesh> dir_mesh;
+	
 public:
-	reticle() : mesh(std::make_unique<gl::mesh>(gl::TRIANGLES, shaders::block::attribs)) {
-		// this is a disgusting hack
-		std::shared_ptr<block_primitive> block_primitive =
-			world::entities::blocks::db.lock()->get_block_by_id(1);
-		std::vector<float> vlist;
-		block_primitive->append_vertex_list(vlist, glm::vec3(0, 0, 0),
-			NEG_Z | NEG_Y | NEG_X | POS_Z | POS_Y | POS_X);
-		mesh->buffer_vertex_data(vlist);
-	}
+	reticle();
 
-	void draw(const gl::shader &shader, const glm::mat4 transform) {
-		shader.bind("chunk", glm::mat4(1.0f));
-		mesh->model = transform;
-		GLint polyMode;
-		glGetIntegerv(GL_POLYGON_MODE, &polyMode);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		mesh->draw(shader);
-		//glPolygonMode(GL_FRONT_AND_BACK, polyMode);
-	}
+	void draw(const gl::shader& shader, 
+		const glm::mat4 &view, const glm::mat4 &proj,
+		const glm::vec3 pos, const glm::vec3 dir,
+		const std::optional<glm::ivec3> &target);
 };
 
 #endif

@@ -18,14 +18,22 @@ namespace shaders {
         extern std::vector<gl::varray_attribute> attribs;
 
         std::shared_ptr<gl::shader> load();
-
     }
+
     namespace tenbox {
         extern std::weak_ptr<gl::shader> shader;
         extern std::vector<gl::varray_attribute> attribs;
         extern std::shared_ptr<skybox> tenbox;
 
         std::shared_ptr<gl::shader> load();
+    }
+
+	namespace reticle
+    {
+		extern std::weak_ptr<gl::shader> shader;
+		extern std::vector<gl::varray_attribute> attribs;
+
+		std::shared_ptr<gl::shader> load();
     }
 
     // we keep a reference so we can control when it's destroyed

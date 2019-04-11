@@ -88,6 +88,7 @@ namespace gl {
         //T *map(/* access */);
 
         void allocate(const T *data, size_t size) {
+			cached_size = 0;
             this->bind();
             glBufferData(static_cast<GLenum>(type),
                          static_cast<GLsizeiptr>(size), static_cast<const GLvoid *>(data),

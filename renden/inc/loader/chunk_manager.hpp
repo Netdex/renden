@@ -40,30 +40,38 @@ public:
 	void render(const gl::shader &block) {
 		for (auto cnk : chunks) {
 			cnk.second->draw(block, glm::translate(glm::mat4(1.f),
-				glm::vec3(cnk.first.first * W, 0, cnk.first.second * W)));
+				glm::vec3(cnk.first.first * int(W), 0, cnk.first.second * int(W))));
 		}
 	}
 
 	glm::ivec2 block_pos_to_chunk_pos(glm::ivec3 pos) {
-		return glm::ivec2(pos.x / W, pos.z / W);
+		return glm::ivec2(
+			(pos.x < 0 ? -1 : 0) + pos.x / int(W), 
+			(pos.z < 0 ? -1 : 0) + pos.z / int(W));
 	}
 
-	std::optional<block> get_block_at(glm::ivec3 world_pos) {
+	std::optional<block> get_block_at(glm::ivec3 world_pos, bool create_if_not_exists = false) {
 		glm::vec2 chunk_pos = block_pos_to_chunk_pos(world_pos);
-		if (!chunk_exists(chunk_pos.x, chunk_pos.y))
+		if (!create_if_not_exists && !chunk_exists(chunk_pos.x, chunk_pos.y))
 			return std::nullopt;
-		int loc_x = world_pos.x % W;
-		int loc_z = world_pos.z % W;
+		unsigned int loc_x = world_pos.x % W;
+		unsigned int loc_z = world_pos.z % W;
 		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_at(loc_x, world_pos.y, loc_z);
 	}
 
-	block* get_block_ref_at(glm::ivec3 world_pos) {
-		glm::vec2 chunk_pos = block_pos_to_chunk_pos(world_pos);
-		if (!chunk_exists(chunk_pos.x, chunk_pos.y))
+	block* get_block_ref_at(glm::ivec3 world_pos, bool create_if_not_exists = false) {
+
+		glm::ivec2 chunk_pos = block_pos_to_chunk_pos(world_pos);
+		if (!create_if_not_exists && !chunk_exists(chunk_pos.x, chunk_pos.y))
 			return nullptr;
-		int loc_x = world_pos.x % W;
-		int loc_z = world_pos.z % W;
-		return &get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_ref_at(loc_x, world_pos.y, loc_z);
+		unsigned int loc_x = world_pos.x % W;
+		unsigned int loc_z = world_pos.z % W;
+
+		spdlog::debug("block ref: ({},{},{}) -> ({},{}) ({},{},{})", 
+			world_pos.x, world_pos.y, world_pos.z,
+			chunk_pos.x, chunk_pos.y, loc_x, world_pos.y, loc_z);
+
+		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_ref_at(loc_x, world_pos.y, loc_z);
 	}
 
 	void update_all_meshes() {

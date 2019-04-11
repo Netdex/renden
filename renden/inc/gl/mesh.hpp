@@ -19,7 +19,8 @@ namespace gl {
         TRIANGLES = GL_TRIANGLES,
         TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
         LINE_STRIP = GL_LINE_STRIP,
-        QUADS = GL_QUADS
+        QUADS = GL_QUADS,
+		LINES = GL_LINES
     };
 
     class mesh {

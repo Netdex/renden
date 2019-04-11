@@ -17,14 +17,12 @@ namespace shaders {
         std::shared_ptr<gl::shader> load() {
             auto shr_shader = std::make_shared<gl::shader>();
             shader = shr_shader;
-            shr_shader->attach("block.vert")
-                    .attach("block.frag")
-                    .link();
+            shr_shader->attach("block.vert").attach("block.frag").link();
 
             attribs = std::vector<gl::varray_attribute>{
-                    {shr_shader->get_attribute("position"), 3, gl::FLOAT, 6 * sizeof(float), 0,                 false, 0},
-                    {shr_shader->get_attribute("texcoord"), 3, gl::FLOAT, 6 * sizeof(float), 3 *
-                                                                                             sizeof(float),     false, 0}
+					{shr_shader->get_attribute("position"), 3, gl::FLOAT, 9 * sizeof(float), 0,                 false, 0},
+					{shr_shader->get_attribute("normal"),   3, gl::FLOAT, 9 * sizeof(float), 3 * sizeof(float), false, 0},
+                    {shr_shader->get_attribute("texcoord"), 3, gl::FLOAT, 9 * sizeof(float), 6 * sizeof(float), false, 0}
             };
             // the loaded texture should never change
             shr_shader->bind("tex", 0);
@@ -41,9 +39,7 @@ namespace shaders {
         std::shared_ptr<gl::shader> load() {
             auto shr_shader = std::make_shared<gl::shader>();
             shader = shr_shader;
-            shr_shader->attach("skybox.vert")
-                    .attach("skybox.frag")
-                    .link();
+            shr_shader->attach("skybox.vert").attach("skybox.frag").link();
 
             attribs = std::vector<gl::varray_attribute>{
                     {shr_shader->get_attribute("position"), 3, gl::FLOAT, 3 * sizeof(float), 0, false, 0},
@@ -66,10 +62,30 @@ namespace shaders {
         }
     }
 
+	namespace reticle
+    {
+		std::weak_ptr<gl::shader> shader;
+		std::vector<gl::varray_attribute> attribs;
+
+		std::shared_ptr<gl::shader> load() {
+			auto shr_shader = std::make_shared<gl::shader>();
+			shader = shr_shader;
+			shr_shader->attach("reticle.vert").attach("reticle.frag").link();
+
+			attribs = std::vector<gl::varray_attribute>{
+					{shr_shader->get_attribute("position"), 3, gl::FLOAT, 3 * sizeof(float), 0, false, 0},
+			};
+			// the loaded texture should never change
+			spdlog::debug("loaded reticle shader");
+			return shr_shader;
+		}
+    }
+
     std::vector<std::shared_ptr<gl::shader>> load() {
         auto block_shader = block::load();
         auto skybox_shader = tenbox::load();
-        return {block_shader, skybox_shader};
+		auto reticle_shader = reticle::load();
+        return {block_shader, skybox_shader, reticle_shader};
     }
 
 
