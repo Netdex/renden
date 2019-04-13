@@ -17,12 +17,16 @@ namespace shaders {
         std::shared_ptr<gl::shader> load() {
             auto shr_shader = std::make_shared<gl::shader>();
             shader = shr_shader;
-            shr_shader->attach("block.vert").attach("block.frag").link();
+            shr_shader->attach("block.vert").attach("block.geom").attach("block.frag").link();
 
+			unsigned int total = (3 + 3 * 4) * sizeof(float) + sizeof(int);
             attribs = std::vector<gl::varray_attribute>{
-					{shr_shader->get_attribute("position"), 3, gl::FLOAT, 9 * sizeof(float), 0,                 false, 0},
-					{shr_shader->get_attribute("normal"),   3, gl::FLOAT, 9 * sizeof(float), 3 * sizeof(float), false, 0},
-                    {shr_shader->get_attribute("texcoord"), 3, gl::FLOAT, 9 * sizeof(float), 6 * sizeof(float), false, 0}
+					{0,		3, gl::FLOAT,	total, 0,								false, 0},
+					{1,		1, gl::FLOAT,		total, 3 * sizeof(float),				false, 0},
+					{2,		3, gl::FLOAT,	total, 3 * sizeof(float) + sizeof(int),	false, 0},
+					{2+1,	3, gl::FLOAT,	total, 6 * sizeof(float) + sizeof(int),	false, 0},
+					{2+2,	3, gl::FLOAT,	total, 9 * sizeof(float) + sizeof(int),	false, 0},
+					{2+3,	3, gl::FLOAT,	total, 12 * sizeof(float) + sizeof(int),false, 0},
             };
             // the loaded texture should never change
             shr_shader->bind("tex", 0);
@@ -73,7 +77,8 @@ namespace shaders {
 			shr_shader->attach("reticle.vert").attach("reticle.frag").link();
 
 			attribs = std::vector<gl::varray_attribute>{
-					{shr_shader->get_attribute("position"), 3, gl::FLOAT, 3 * sizeof(float), 0, false, 0},
+					{shr_shader->get_attribute("position"), 3, gl::FLOAT, 6 * sizeof(float), 0, false, 0},
+					{shr_shader->get_attribute("color"), 3, gl::FLOAT, 6 * sizeof(float), 3 * sizeof(float), false, 0},
 			};
 			// the loaded texture should never change
 			spdlog::debug("loaded reticle shader");

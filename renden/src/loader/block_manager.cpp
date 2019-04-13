@@ -45,11 +45,11 @@ void block_manager::create_block_primitives(const std::string &block_def_conf) {
         unsigned int id = block_def["id"];
         std::string name = block_def["name"];
         std::vector<std::string> tex_names = block_def["textures"];
-        std::array<float, 36 * 3> str = block_def["str"];
+        std::array<float, 4*6 * 3> str = block_def["str"];
         bool is_opaque = block_def["opaque"];
 
         // assign proper r-layer for texture
-        for (int i = 0; i < 36; i++) {
+        for (int i = 0; i < 4*6; i++) {
             str[i * 3 + 2] = texture_name_to_layer[tex_names[(int) str[i * 3 + 2]]];
         }
 
@@ -71,7 +71,6 @@ std::shared_ptr<block_primitive> block_manager::get_block_by_name(const std::str
 std::shared_ptr<block_primitive> block_manager::get_block_by_id(unsigned int id) {
     return block_id_to_primitive[id];
 }
-
 
 std::weak_ptr<block_manager> world::entities::blocks::db;
 

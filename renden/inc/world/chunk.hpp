@@ -26,7 +26,7 @@ class chunk {
 public:
 
 
-	chunk::chunk() : mesh(std::make_unique<gl::mesh>(gl::TRIANGLES, shaders::block::attribs)) {
+	chunk::chunk() : mesh(std::make_unique<gl::mesh>(gl::POINTS, shaders::block::attribs)) {
 		//this->update_mesh();
 		cached_block_mgr = world::entities::blocks::db.lock();
 	}

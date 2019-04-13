@@ -20,7 +20,8 @@ namespace gl {
         TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
         LINE_STRIP = GL_LINE_STRIP,
         QUADS = GL_QUADS,
-		LINES = GL_LINES
+		LINES = GL_LINES,
+		POINTS = GL_POINTS
     };
 
     class mesh {

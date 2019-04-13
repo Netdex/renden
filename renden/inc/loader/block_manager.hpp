@@ -36,6 +36,7 @@ public:
     std::shared_ptr<block_primitive> get_block_by_name(const std::string &name);
 
     std::shared_ptr<block_primitive> get_block_by_id(unsigned int id);
+
 };
 
 namespace world {

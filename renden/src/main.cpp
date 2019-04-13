@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(debug_callback, nullptr);
 
-	glFrontFace(GL_CCW);
+	glFrontFace(GL_CW);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glLineWidth(10.f);
+	glLineWidth(10.f);
 
 	camera cam(mWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -127,6 +127,7 @@ int main(int argc, char *argv[]) {
 		auto block_shader = shaders::block::shader.lock();
 		auto tenbox_shader = shaders::tenbox::shader.lock();
 		auto reticle_shader = shaders::reticle::shader.lock();
+
 
 		reticle reticle;
 

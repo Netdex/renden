@@ -25,11 +25,11 @@ extern const int BLOCK_FACE_TO_IDX[];
 extern const glm::ivec3 FACE_IDX_TO_OFFSET[];
 
 class block_primitive {
-    std::array<float, 36*3> uv;
 public:
+	std::array<float, 4*6 * 3> uv;
     bool is_opaque;
 
-    explicit block_primitive(std::array<float, 36*3> uv, bool is_opaque);
+    explicit block_primitive(std::array<float, 4*6 * 3> uv, bool is_opaque);
 
     size_t append_vertex_list(std::vector<float> &vlist, glm::ivec3 position, block_face_set faces);
 
