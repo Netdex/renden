@@ -10,9 +10,9 @@
 #include <optional>
 
 class reticle {
-	std::unique_ptr<gl::mesh> select_mesh;
-	std::unique_ptr<gl::mesh> reticle_mesh;
-	std::unique_ptr<gl::mesh> dir_mesh;
+	std::unique_ptr<gl::mesh<>> select_mesh;
+	std::unique_ptr<gl::mesh<>> reticle_mesh;
+	std::unique_ptr<gl::mesh<>> dir_mesh;
 	
 public:
 	reticle();

@@ -77,7 +77,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 int main(int argc, char *argv[]) {
 	spdlog::set_level(spdlog::level::debug);
 
-	// Load GLFW and Create a Window
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -88,13 +87,11 @@ int main(int argc, char *argv[]) {
 	auto mWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGL", nullptr, nullptr);
 	glfwSetMouseButtonCallback(mWindow, mouse_button_callback);
 
-	// Check for Valid Context
 	if (mWindow == nullptr) {
 		fprintf(stderr, "Failed to Create OpenGL Context");
 		return EXIT_FAILURE;
 	}
 
-	// Create Context and Load OpenGL Functions
 	glfwMakeContextCurrent(mWindow);
 	glfwSwapInterval(1);
 	glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -114,7 +111,7 @@ int main(int argc, char *argv[]) {
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glLineWidth(10.f);
+//	glLineWidth(10.f);
 
 	camera cam(mWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -128,16 +125,14 @@ int main(int argc, char *argv[]) {
 		auto tenbox_shader = shaders::tenbox::shader.lock();
 		auto reticle_shader = shaders::reticle::shader.lock();
 
-
 		reticle reticle;
 
-		const int scz = 16;
-		const int scx = 16;
-		// temporary for testing
+		const int scz = 8;
+		const int scx = 8;
 
 		for (int cz = 0; cz < scz; cz++) {
 			for (int cx = 0; cx < scx; cx++) {
-				auto cnk = chunks->get_chunk_at(cx, cz);
+				auto cnk = chunks->get_chunk_at(cx-4, cz-4);
 				for (int i = 0; i < 5; i++)
 					*cnk->get_block_ref_at(8, i + 3 + 64, 8) = block(17);
 				for (int y = 0; y < 3 + 64; y++)
@@ -161,9 +156,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-
 		float lastTick = (float)glfwGetTime();
-		// Rendering Loop
 		while (glfwWindowShouldClose(mWindow) == false) {
 			if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 				glfwSetWindowShouldClose(mWindow, true);
@@ -176,21 +169,20 @@ int main(int argc, char *argv[]) {
 			target = cam.cast_target(*chunks, 20);
 			chunks->update_all_meshes();
 
-			// Background Fill Color
 			glClearColor(1.f, 1.f, 1.f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			block_shader->activate();
+//			block_shader->bind("now", now);
 			block_shader->bind("view", cam.view);
 			block_shader->bind("proj", cam.proj);
+//			block_shader->bind("camera_pos", cam.position);
 			chunks->render(*block_shader);
 
 			reticle_shader->activate();
-			//glDepthFunc(GL_LEQUAL);
 			reticle.draw(*reticle_shader, cam.view, cam.proj,
-				cam.position, cam.get_direction(), 
+				cam.position, cam.get_direction(),
 				target ? std::optional<glm::ivec3>(target->first) : std::nullopt);
-			//glDepthFunc(GL_LESS);
 
 
 			glDepthFunc(GL_LEQUAL);
@@ -200,13 +192,6 @@ int main(int argc, char *argv[]) {
 			shaders::tenbox::tenbox->draw(*tenbox_shader);
 			glDepthFunc(GL_LESS);
 
-			//        for (int z = 0; z < 1; z++) {
-			//            for (int x = 0; x < 1; x++) {
-			//glm::translate(glm::mat4(1.f), glm::vec3(x, sin((x * z) / 100.f + now) * 10, z))
-
-			//        }
-
-						// Flip Buffers and Draw
 			glfwSwapBuffers(mWindow);
 			glfwPollEvents();
 		}

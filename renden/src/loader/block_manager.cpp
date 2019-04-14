@@ -33,7 +33,7 @@ void block_manager::load_textures(const std::string &block_tex_conf) {
     }
 
     textures = std::make_shared<gl::texture2d>(paths, width, height, gl::NEAREST, gl::CLAMP_EDGE, 0);
-	spdlog::debug("loaded {} textures", paths.size());
+    spdlog::debug("loaded {} textures", paths.size());
 }
 
 void block_manager::create_block_primitives(const std::string &block_def_conf) {
@@ -45,7 +45,7 @@ void block_manager::create_block_primitives(const std::string &block_def_conf) {
         unsigned int id = block_def["id"];
         std::string name = block_def["name"];
         std::vector<std::string> tex_names = block_def["textures"];
-        std::array<float, 4*6 * 3> str = block_def["str"];
+        std::array<float, 6* 4*3> str = block_def["str"];
         bool is_opaque = block_def["opaque"];
 
         // assign proper r-layer for texture
@@ -57,9 +57,8 @@ void block_manager::create_block_primitives(const std::string &block_def_conf) {
         block_id_to_primitive[id] = new_block;
         block_name_to_id[name] = id;
     }
-	spdlog::debug("loaded {} block definitions", j.size());
+    spdlog::debug("loaded {} block definitions", j.size());
 }
-
 
 
 std::shared_ptr<block_primitive> block_manager::get_block_by_name(const std::string &name) {
@@ -70,6 +69,19 @@ std::shared_ptr<block_primitive> block_manager::get_block_by_name(const std::str
 
 std::shared_ptr<block_primitive> block_manager::get_block_by_id(unsigned int id) {
     return block_id_to_primitive[id];
+}
+
+std::vector<float> block_manager::create_str_shader_data() {
+    std::vector<float> data;
+    for (int i = 0; i < MAXIMUM_BLOCKS; i++) {
+        auto block = get_block_by_id(i);
+        if (block) {
+            data.insert(data.end(), block->uv.begin(), block->uv.end());
+        } else {
+            data.insert(data.end(), 72, 0);
+        }
+    }
+    return data;
 }
 
 std::weak_ptr<block_manager> world::entities::blocks::db;

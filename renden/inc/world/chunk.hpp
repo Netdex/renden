@@ -16,7 +16,7 @@
 
 template<unsigned int W, unsigned int H>
 class chunk {
-	std::unique_ptr<gl::mesh> mesh;
+	std::unique_ptr<gl::mesh<GLbyte>> mesh;
 
 	std::shared_ptr<block_manager> cached_block_mgr;
 
@@ -26,7 +26,7 @@ class chunk {
 public:
 
 
-	chunk::chunk() : mesh(std::make_unique<gl::mesh>(gl::POINTS, shaders::block::attribs)) {
+	chunk::chunk() : mesh(std::make_unique<gl::mesh<GLbyte>>(gl::POINTS, shaders::block::attribs)) {
 		//this->update_mesh();
 		cached_block_mgr = world::entities::blocks::db.lock();
 	}
@@ -38,7 +38,7 @@ public:
 	}
 	void chunk::update_mesh() {
 		if (dirty) {
-			std::vector<float> vlist;
+		    bytebuf<> vlist;
 			for (unsigned int y = 0; y < H; y++) {
 				for (unsigned int z = 0; z < W; z++) {
 					for (unsigned int x = 0; x < W; x++) {
@@ -51,7 +51,8 @@ public:
 					}
 				}
 			}
-			mesh->buffer_vertex_data(vlist);
+//			fprintf(stderr, "%d\n", vlist.size());
+			mesh->buffer_vertex_data(vlist.data(), vlist.size());
 			spdlog::debug("regenerating chunk mesh");
 			dirty = false;
 		}

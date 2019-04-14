@@ -29,13 +29,13 @@ class block_manager {
 
     void create_block_primitives(const std::string &block_def_conf);
 
-
 public:
     block_manager(const std::string &block_tex_conf, const std::string &block_def_conf);
 
     std::shared_ptr<block_primitive> get_block_by_name(const std::string &name);
 
     std::shared_ptr<block_primitive> get_block_by_id(unsigned int id);
+    std::vector<float> create_str_shader_data();
 
 };
 

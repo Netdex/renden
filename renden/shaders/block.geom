@@ -34,33 +34,26 @@ vec3 CUBE_VERTICES[] = {
 };
 
 vec3 CUBE_NORMALS[] = {
-	// xy -z
-	{0.0f, 0.0f, -1.0f},
-	// xy +z
-	{0.0f, 0.0f, 1.0f},
-	// yz -x
-	{-1.0f, 0.0f, 0.0f},
-	// yz +x
-	{1.0f, 0.0f, 0.0f},
-	// xz -y
-	{0.0f, -1.0f, 0.0f},
-	// xz +y
-	{0.0f, 1.0f, 0.0f},
+	{0.0f, 0.0f, -1.0f},    // xy -z
+	{0.0f, 0.0f, 1.0f},	    // xy +z
+	{-1.0f, 0.0f, 0.0f},	// yz -x
+	{1.0f, 0.0f, 0.0f},	    // yz +x
+	{0.0f, -1.0f, 0.0f},	// xz -y
+	{0.0f, 1.0f, 0.0f},	    // xz +y
 };
 
-// reduce to 4 in all files
 uniform mat4 chunk;
-
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
+uniform float now;
 
 layout (points) in;
-layout (triangle_strip, max_vertices=6) out;
+layout (triangle_strip, max_vertices=4) out;
 
 in VS_OUT {
 	vec3 texcoords[4];
-	float face;
+	int face;
 } gs_in[];
 
 out vec3 texcoord;
@@ -72,20 +65,14 @@ vec4 transform(vec4 v){
 }
 
 void main() {
-    normal = CUBE_NORMALS[int(gs_in[0].face)];
+    normal = CUBE_NORMALS[gs_in[0].face];
 
 	for(int f = 0; f < 4; f++){
-		vec4 corner = gl_in[0].gl_Position + vec4(CUBE_VERTICES[int(gs_in[0].face)*4+f], 0);
+		vec4 corner = gl_in[0].gl_Position + vec4(CUBE_VERTICES[gs_in[0].face*4+f], 0);
 		gl_Position = transform(corner);
 		texcoord = gs_in[0].texcoords[f];
+		frag_pos = vec3(model * chunk * corner);
 		EmitVertex();
 	}
-//	for(int i = 0; i < 3; i++){
-//		gl_Position = gl_in[i].gl_Position;
-//		texcoord = gs_in[i].texcoord;
-//		frag_pos = gs_in[i].frag_pos;
-//		normal = normalize(cross(vec3(gs_in[0].frag_pos - gs_in[2].frag_pos), 
-//		vec3(gs_in[1].frag_pos - gs_in[0].frag_pos)));
-//		EmitVertex();
-//	}
 }
+

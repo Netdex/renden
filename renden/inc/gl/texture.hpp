@@ -41,6 +41,16 @@ namespace gl {
         SCALE_DOWN = GL_TEXTURE_MIN_FILTER
     };
 
+    class texture1d {
+        GLuint id;
+    public:
+        GLuint tex_id;
+
+        texture1d(const texture1d *o) = delete;
+
+
+    };
+
     class texture2d {
         GLuint id;
     public:

@@ -107,23 +107,32 @@ namespace gl {
         }
 
         // Wrap Calls to glUniform
-        void bind(GLint location, float value) const{ glUniform1f(location, value); }
+        void bind(GLint location, float value, size_t size) const{ glUniform1f(location, value); }
 
-        void bind(GLint location, glm::vec2 value) const{ glUniform2f(location, value.x, value.y); }
+        void bind(GLint location, glm::vec2 value, size_t size) const{ glUniform2f(location, value.x, value.y); }
 
-        void bind(GLint location, glm::vec3 value) const{ glUniform3f(location, value.x, value.y, value.z); }
+        void bind(GLint location, glm::vec3 value, size_t size) const{ glUniform3f(location, value.x, value.y, value.z); }
 
-        void bind(GLint location, glm::vec4 value) const{ glUniform4f(location, value.x, value.y, value.z, value.w); }
+        void bind(GLint location, glm::vec4 value, size_t size) const{ glUniform4f(location, value.x, value.y, value.z, value.w); }
 
-        void bind(GLint location, glm::mat4 const &matrix) const{
+        void bind(GLint location, glm::mat4 const &matrix, size_t size) const{
             glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
         }
 
+        void bind(GLint location, float *data, size_t size) const {
+            glUniform1fv(location, size, data);
+        }
+
         template<typename T>
-        void bind(std::string const &name, T &&value) const {
+        void bind(std::string const &name, T &&value, size_t size = 1) const {
             GLint location = glGetUniformLocation(mProgram, name.c_str());
             if (location == -1) fprintf(stderr, "Missing Uniform: %s\n", name.c_str());
-            else bind(location, std::forward<T>(value));
+            else {
+
+                bind(location, std::forward<T>(value), size);
+
+            }
         }
+
     };
 }

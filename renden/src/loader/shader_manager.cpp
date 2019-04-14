@@ -19,14 +19,14 @@ namespace shaders {
             shader = shr_shader;
             shr_shader->attach("block.vert").attach("block.geom").attach("block.frag").link();
 
-			unsigned int total = (3 + 3 * 4) * sizeof(float) + sizeof(int);
+			size_t total = (3 + 1) * sizeof(int) + (3 * 4) * sizeof(float);
             attribs = std::vector<gl::varray_attribute>{
-					{0,		3, gl::FLOAT,	total, 0,								false, 0},
-					{1,		1, gl::FLOAT,		total, 3 * sizeof(float),				false, 0},
-					{2,		3, gl::FLOAT,	total, 3 * sizeof(float) + sizeof(int),	false, 0},
-					{2+1,	3, gl::FLOAT,	total, 6 * sizeof(float) + sizeof(int),	false, 0},
-					{2+2,	3, gl::FLOAT,	total, 9 * sizeof(float) + sizeof(int),	false, 0},
-					{2+3,	3, gl::FLOAT,	total, 12 * sizeof(float) + sizeof(int),false, 0},
+					{0,		3, gl::INT,	    total, 0,				                        false, 0},
+					{1,		1, gl::INT,	    total, 3 * sizeof(int),                         false, 0},
+					{2,		3, gl::FLOAT,	total, 4 * sizeof(int),                         false, 0},
+					{2+1,	3, gl::FLOAT,	total, 4 * sizeof(int) + 3 * sizeof(float),   false, 0},
+					{2+2,	3, gl::FLOAT,	total, 4 * sizeof(int) + 6 * sizeof(float),   false, 0},
+					{2+3,	3, gl::FLOAT,	total, 4 * sizeof(int) + 9 * sizeof(float),   false, 0},
             };
             // the loaded texture should never change
             shr_shader->bind("tex", 0);

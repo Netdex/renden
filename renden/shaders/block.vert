@@ -6,14 +6,14 @@
 //uniform mat4 view;
 //uniform mat4 proj;
 
-layout(location = 0) in vec3 position;
-layout(location = 1) in float face;
-layout(location = 2) in vec3 texcoords[4];
+layout(location = 0) in lowp ivec3 position;
+layout(location = 1) in lowp int face;
+layout(location = 2) in lowp vec3 texcoords[4];
 
 out VS_OUT {
 //	vec3 frag_pos;
 	vec3 texcoords[4];
-	float face;
+	int face;
 } vs_out;
 
 void main()

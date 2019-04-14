@@ -11,52 +11,52 @@ static const std::vector<float> reticle_points{
 static const GLfloat CUBE_VERTICES[] = {
 	// xy -z
 	-0.5f, -0.5f, -0.5f,	  1,1,1,
-	0.5f, 0.5f, -0.5f,		  1,1,1,
 	0.5f, -0.5f, -0.5f,		  1,1,1,
 	0.5f, 0.5f, -0.5f,		  1,1,1,
-	-0.5f, -0.5f, -0.5f,	  1,1,1,
-	-0.5f, 0.5f, -0.5f,		  1,1,1,
-	// xy +z				  
-	-0.5f, -0.5f, 0.5f,		  1,1,1,
-	0.5f, -0.5f, 0.5f,		  1,1,1,
-	0.5f, 0.5f, 0.5f,		  1,1,1,
-	0.5f, 0.5f, 0.5f,		  1,1,1,
-	-0.5f, 0.5f, 0.5f,		  1,1,1,
-	-0.5f, -0.5f, 0.5f,		  1,1,1,
-	// yz -x				  
-	-0.5f, 0.5f, 0.5f,		  1,1,1,
-	-0.5f, 0.5f, -0.5f,		  1,1,1,
-	-0.5f, -0.5f, -0.5f,	  1,1,1,
-	-0.5f, -0.5f, -0.5f,	  1,1,1,
-	-0.5f, -0.5f, 0.5f,		  1,1,1,
-	-0.5f, 0.5f, 0.5f,		  1,1,1,
-	// yz +x				  
-	0.5f, 0.5f, 0.5f,		  1,1,1,
-	0.5f, -0.5f, -0.5f,		  1,1,1,
 	0.5f, 0.5f, -0.5f,		  1,1,1,
-	0.5f, -0.5f, -0.5f,		  1,1,1,
-	0.5f, 0.5f, 0.5f,		  1,1,1,
-	0.5f, -0.5f, 0.5f,		  1,1,1,
-	// xz -y				 
-	-0.5f, -0.5f, -0.5f,	  1,1,1,
-	0.5f, -0.5f, -0.5f,		  1,1,1,
-	0.5f, -0.5f, 0.5f,		  1,1,1,
-	0.5f, -0.5f, 0.5f,		  1,1,1,
+    -0.5f, 0.5f, -0.5f,		  1,1,1,
+    -0.5f, -0.5f, -0.5f,	  1,1,1,
+	// xy +z
 	-0.5f, -0.5f, 0.5f,		  1,1,1,
-	-0.5f, -0.5f, -0.5f,	  1,1,1,
-	// xz +y				 
-	-0.5f, 0.5f, -0.5f,		  1,1,1,
+    0.5f, 0.5f, 0.5f,		  1,1,1,
+    0.5f, -0.5f, 0.5f,		  1,1,1,
 	0.5f, 0.5f, 0.5f,		  1,1,1,
-	0.5f, 0.5f, -0.5f,		  1,1,1,
-	0.5f, 0.5f, 0.5f,		  1,1,1,
-	-0.5f, 0.5f, -0.5f,		  1,1,1,
+    -0.5f, -0.5f, 0.5f,		  1,1,1,
+    -0.5f, 0.5f, 0.5f,		  1,1,1,
+	// yz -x
 	-0.5f, 0.5f, 0.5f,		  1,1,1,
-};							  
+    -0.5f, -0.5f, -0.5f,	  1,1,1,
+    -0.5f, 0.5f, -0.5f,		  1,1,1,
+	-0.5f, -0.5f, -0.5f,	  1,1,1,
+    -0.5f, 0.5f, 0.5f,		  1,1,1,
+    -0.5f, -0.5f, 0.5f,		  1,1,1,
+	// yz +x
+	0.5f, 0.5f, 0.5f,		  1,1,1,
+    0.5f, 0.5f, -0.5f,		  1,1,1,
+    0.5f, -0.5f, -0.5f,		  1,1,1,
+	0.5f, -0.5f, -0.5f,		  1,1,1,
+    0.5f, -0.5f, 0.5f,		  1,1,1,
+    0.5f, 0.5f, 0.5f,		  1,1,1,
+	// xz -y
+	-0.5f, -0.5f, -0.5f,	  1,1,1,
+    0.5f, -0.5f, 0.5f,		  1,1,1,
+    0.5f, -0.5f, -0.5f,		  1,1,1,
+	0.5f, -0.5f, 0.5f,		  1,1,1,
+    -0.5f, -0.5f, -0.5f,	  1,1,1,
+    -0.5f, -0.5f, 0.5f,		  1,1,1,
+	// xz +y
+	-0.5f, 0.5f, -0.5f,		  1,1,1,
+    0.5f, 0.5f, -0.5f,		  1,1,1,
+    0.5f, 0.5f, 0.5f,		  1,1,1,
+	0.5f, 0.5f, 0.5f,		  1,1,1,
+    -0.5f, 0.5f, 0.5f,		  1,1,1,
+    -0.5f, 0.5f, -0.5f,		  1,1,1,
+};
 
 reticle::reticle() :
-	select_mesh(std::make_unique<gl::mesh>(CUBE_VERTICES, sizeof(CUBE_VERTICES), gl::TRIANGLES, &shaders::reticle::attribs[0], 2)),
-	reticle_mesh(std::make_unique<gl::mesh>(reticle_points, gl::LINES, shaders::reticle::attribs)),
-	dir_mesh(std::make_unique<gl::mesh>(gl::LINES, shaders::reticle::attribs))
+	select_mesh(std::make_unique<gl::mesh<>>(CUBE_VERTICES, sizeof(CUBE_VERTICES), gl::TRIANGLES, &shaders::reticle::attribs[0], 2)),
+	reticle_mesh(std::make_unique<gl::mesh<>>(reticle_points, gl::LINES, shaders::reticle::attribs)),
+	dir_mesh(std::make_unique<gl::mesh<>>(gl::LINES, shaders::reticle::attribs))
 {
 }
 

@@ -57,9 +57,30 @@ namespace gl {
 
         void set_attrib(GLuint location, size_t size, varray_attribute_type type,
                         unsigned int stride, unsigned int offset, bool normalized = false, GLuint divisor = 0) {
-            glVertexAttribPointer(location, static_cast<GLint>(size),
-                                  static_cast<GLenum>(type), static_cast<GLboolean>(normalized),
-                                  static_cast<GLsizei>(stride), reinterpret_cast<const GLvoid *>(offset));
+            switch(type){
+                case gl::INT:
+                case gl::UINT:
+                case gl::BYTE:
+                case gl::UBYTE:
+                case gl::SHORT:
+                case gl::USHORT:
+                    glVertexAttribIPointer(location, static_cast<GLint>(size),
+                                          static_cast<GLenum>(type),
+                                          static_cast<GLsizei>(stride), reinterpret_cast<const GLvoid *>(offset));
+                    break;
+                case gl::HFLOAT:
+                case gl::FLOAT:
+                    glVertexAttribPointer(location, static_cast<GLint>(size),
+                                          static_cast<GLenum>(type), static_cast<GLboolean>(normalized),
+                                          static_cast<GLsizei>(stride), reinterpret_cast<const GLvoid *>(offset));
+                    break;
+                case gl::DOUBLE:
+                    glVertexAttribLPointer(location, static_cast<GLint>(size),
+                                           static_cast<GLenum>(type),
+                                           static_cast<GLsizei>(stride), reinterpret_cast<const GLvoid *>(offset));
+                    break;
+            }
+
             glEnableVertexAttribArray(location);
             glVertexAttribDivisor(location, divisor);
         }

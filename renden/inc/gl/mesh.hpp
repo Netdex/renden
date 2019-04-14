@@ -20,15 +20,17 @@ namespace gl {
         TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
         LINE_STRIP = GL_LINE_STRIP,
         QUADS = GL_QUADS,
-		LINES = GL_LINES,
-		POINTS = GL_POINTS
+        LINES = GL_LINES,
+        POINTS = GL_POINTS
     };
 
+    template <typename T = float>
     class mesh {
         std::shared_ptr<gl::varray> vao;
-        std::vector<std::shared_ptr<gl::buffer<float>>> vbo;
+        std::vector<std::shared_ptr<gl::buffer<T>>> vbo;
         std::shared_ptr<gl::buffer<GLuint>> ebo;
 
+        size_t attrib_0_size = 0;
     public:
         glm::mat4 model = glm::mat4(1.f);
 
@@ -36,12 +38,13 @@ namespace gl {
 
         mesh(const mesh &o) = delete;
 
-        mesh(const std::vector<std::vector<float>> &vertices, mesh_draw_mode draw_mode,
+        mesh(const std::vector<std::vector<T>> &vertices, mesh_draw_mode draw_mode,
              const std::vector<std::vector<varray_attribute>> &attribs)
-                : vao(std::make_shared<gl::varray>()), draw_mode(draw_mode) {
+                : vao(std::make_shared<gl::varray>()), draw_mode(draw_mode),
+                  attrib_0_size(attribs[0][0].stride) {
             assert(attribs.size() == vertices.size());
             for (int i = 0; i < vertices.size(); i++) {
-                vbo.push_back(std::make_shared<gl::buffer<float>>(vertices[i]));
+                vbo.push_back(std::make_shared<gl::buffer<T>>(vertices[i]));
                 for (auto a : attribs[i]) {
                     vao->set_attrib(a.location, a.size, a.type, a.stride, a.offset, a.normalized);
                     glVertexAttribDivisor(a.location, a.divisor);
@@ -50,14 +53,15 @@ namespace gl {
             this->unbind();
         }
 
-        mesh(const float *vertices, size_t vert_size, const GLuint *elements, size_t elem_size,
+        mesh(const T *vertices, size_t vert_size, const GLuint *elements, size_t elem_size,
              mesh_draw_mode draw_mode,
              const varray_attribute *attributes, size_t attrib_count)
                 : vao(std::make_shared<gl::varray>()),
-                  vbo({std::make_shared<gl::buffer<float>>(vertices, vert_size)}),
+                  vbo({std::make_shared<gl::buffer<T>>(vertices, vert_size)}),
                   ebo(std::make_shared<gl::buffer<GLuint>>(elements,
                                                            elem_size)),
-                  draw_mode(draw_mode) {
+                  draw_mode(draw_mode),
+                  attrib_0_size(attributes[0].stride){
 
             for (int i = 0; i < attrib_count; i++) {
                 const varray_attribute &a = attributes[i];
@@ -68,17 +72,13 @@ namespace gl {
             this->unbind();
         }
 
-        mesh(const std::vector<float> &vertices, const std::vector<GLuint> &elements,
-             mesh_draw_mode draw_mode, const std::vector<varray_attribute> &attributes)
-                : mesh(&vertices[0], vertices.size() * sizeof(float), &elements[0], elements.size() * sizeof(GLuint),
-                       draw_mode, &attributes[0], attributes.size()) {}
-
-        mesh(const float *vertices, size_t vert_size,
+        mesh(const T *vertices, size_t vert_size,
              mesh_draw_mode draw_mode,
              const varray_attribute *attributes, size_t attrib_count)
                 : vao(std::make_shared<gl::varray>()),
-                  vbo({std::make_shared<gl::buffer<float>>(vertices, vert_size)}),
-                  draw_mode(draw_mode) {
+                  vbo({std::make_shared<gl::buffer<T>>(vertices, vert_size)}),
+                  draw_mode(draw_mode),
+                  attrib_0_size(attributes[0].stride){
             for (int i = 0; i < attrib_count; i++) {
                 const varray_attribute &a = attributes[i];
                 vao->set_attrib(a.location, a.size, a.type, a.stride, a.offset, a.normalized);
@@ -88,9 +88,14 @@ namespace gl {
             this->unbind();
         }
 
-        mesh(const std::vector<float> &vertices,
+        mesh(const std::vector<T> &vertices, const std::vector<GLuint> &elements,
              mesh_draw_mode draw_mode, const std::vector<varray_attribute> &attributes)
-                : mesh(&vertices[0], vertices.size() * sizeof(float),
+                : mesh(&vertices[0], vertices.size() * sizeof(T), &elements[0], elements.size() * sizeof(GLuint),
+                       draw_mode, &attributes[0], attributes.size()) {}
+
+        mesh(const std::vector<T> &vertices,
+             mesh_draw_mode draw_mode, const std::vector<varray_attribute> &attributes)
+                : mesh(&vertices[0], vertices.size() * sizeof(T),
                        draw_mode, &attributes[0], attributes.size()) {}
 
         mesh(mesh_draw_mode draw_mode, const std::vector<varray_attribute> &attributes)
@@ -121,7 +126,9 @@ namespace gl {
             assert(vbo.size() > 0);
             this->bind();
             shader.bind("model", model);
-            glDrawArrays(static_cast<GLenum>(draw_mode), 0, static_cast<GLsizei>(vbo[0]->get_elements()));
+            // TODO this is a deplorable hack
+            size_t vertex_count = vbo[0]->get_size() / attrib_0_size;
+            glDrawArrays(static_cast<GLenum>(draw_mode), 0, vertex_count);
             this->unbind();
         }
 
@@ -129,14 +136,14 @@ namespace gl {
             // TODO
         }
 
-        void buffer_vertex_data(const float *data, size_t size) {
+        void buffer_vertex_data(const T *data, size_t size) {
             assert(vbo.size() > 0);
 
             this->vbo[0]->allocate(data, size);
         }
 
-        void buffer_vertex_data(const std::vector<float> &data) {
-            this->buffer_vertex_data(data.data(), data.size() * sizeof(float));
+        void buffer_vertex_data(const std::vector<T> &data) {
+            this->buffer_vertex_data(data.data(), data.size() * sizeof(T));
         }
     };
 }

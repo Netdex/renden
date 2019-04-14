@@ -9,6 +9,8 @@
 #include <vector>
 #include <glm/vec3.hpp>
 #include <array>
+#include <glad/glad.h>
+#include <util/bytebuffer.hpp>
 
 enum block_face : int {
     NEG_Z = 1<<0,
@@ -26,12 +28,12 @@ extern const glm::ivec3 FACE_IDX_TO_OFFSET[];
 
 class block_primitive {
 public:
-	std::array<float, 4*6 * 3> uv;
+	std::array<float, 6 * 4*3> uv;
     bool is_opaque;
 
-    explicit block_primitive(std::array<float, 4*6 * 3> uv, bool is_opaque);
+    explicit block_primitive(std::array<float, 6 * 4*3> uv, bool is_opaque);
 
-    size_t append_vertex_list(std::vector<float> &vlist, glm::ivec3 position, block_face_set faces);
+    void append_vertex_list(bytebuf<> &vlist, glm::ivec3 position, block_face_set faces);
 
 };
 

@@ -54,7 +54,7 @@ const std::vector<float> SKYBOX_VERTICES{
 
 skybox::skybox(const std::vector<std::string> &paths)
         : texture(std::make_shared<gl::cubemap>(paths, gl::LINEAR, gl::CLAMP_EDGE, 0)),
-          mesh(std::make_shared<gl::mesh>(SKYBOX_VERTICES, gl::TRIANGLES, shaders::tenbox::attribs)){
+          mesh(std::make_shared<gl::mesh<>>(SKYBOX_VERTICES, gl::TRIANGLES, shaders::tenbox::attribs)){
 
 }
 

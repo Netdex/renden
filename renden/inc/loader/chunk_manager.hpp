@@ -46,8 +46,8 @@ public:
 
 	glm::ivec2 block_pos_to_chunk_pos(glm::ivec3 pos) {
 		return glm::ivec2(
-			(pos.x < 0 ? -1 : 0) + pos.x / int(W), 
-			(pos.z < 0 ? -1 : 0) + pos.z / int(W));
+			(pos.x < 0 ? -1 : 0) + (pos.x + (pos.x < 0 ? 1 : 0)) / int(W),
+			(pos.z < 0 ? -1 : 0) + (pos.z + (pos.z < 0 ? 1 : 0)) / int(W));
 	}
 
 	std::optional<block> get_block_at(glm::ivec3 world_pos, bool create_if_not_exists = false) {
