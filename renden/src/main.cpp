@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	auto mWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenGL", nullptr, nullptr);
+	auto mWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "renden", nullptr, nullptr);
 	glfwSetMouseButtonCallback(mWindow, mouse_button_callback);
 
 	if (mWindow == nullptr) {

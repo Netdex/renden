@@ -26,17 +26,17 @@ class chunk {
 public:
 
 
-	chunk::chunk() : mesh(std::make_unique<gl::mesh<GLbyte>>(gl::POINTS, shaders::block::attribs)) {
+	chunk() : mesh(std::make_unique<gl::mesh<GLbyte>>(gl::POINTS, shaders::block::attribs)) {
 		//this->update_mesh();
 		cached_block_mgr = world::entities::blocks::db.lock();
 	}
 
-	void chunk::draw(const gl::shader &shader, const glm::mat4 &chunk) {
+	void draw(const gl::shader &shader, const glm::mat4 &chunk) {
 		// MUST be a block shader
 		shader.bind("chunk", chunk);
 		mesh->draw(shader);
 	}
-	void chunk::update_mesh() {
+	void update_mesh() {
 		if (dirty) {
 		    bytebuf<> vlist;
 			for (unsigned int y = 0; y < H; y++) {
@@ -58,13 +58,13 @@ public:
 		}
 	}
 
-	std::optional<block> chunk::get_block_at(unsigned int x, unsigned int y, unsigned int z) {
+	std::optional<block> get_block_at(unsigned int x, unsigned int y, unsigned int z) {
 		if (x >= 0 && x < W && y >= 0 && y < H && z >= 0 && z < W)
 			return data[y][x][z];
 		return {};
 	}
 
-	block* chunk::get_block_ref_at(unsigned int x, unsigned int y, unsigned int z) {
+	block* get_block_ref_at(unsigned int x, unsigned int y, unsigned int z) {
 		if (x >= 0 && x < W && y >= 0 && y < H && z >= 0 && z < W) {
 			dirty = true;
 			return &data[y][x][z];
@@ -72,7 +72,7 @@ public:
 		return nullptr;
 	}
 private:
-	bool chunk::face_occluded(glm::ivec3 position, block_face face) {
+	bool face_occluded(glm::ivec3 position, block_face face) {
 		assert(position.x >= 0 && position.x < W
 			&& position.z >= 0 && position.z < W
 			&& position.y >= 0 && position.y < H);
@@ -91,7 +91,7 @@ private:
 		return offset_block && offset_block->is_opaque;
 	}
 
-	block_face_set chunk::visible_faces(glm::ivec3 position) {
+	block_face_set visible_faces(glm::ivec3 position) {
 		block_face_set mask = 0;
 		for (int i = 0; i < 6; i++) {
 			block_face face = FACE_IDX_TO_BLOCK_FACE[i];
