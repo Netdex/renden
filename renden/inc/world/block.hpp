@@ -7,13 +7,19 @@
 
 
 class block {
+    unsigned char power_state;
+
 public:
-    unsigned int id;
+    unsigned char id;
 
-    block() : id(0) {}
+    explicit block(unsigned char id = 0, unsigned char power_state = 0)
+            : id{id}, power_state{power_state} {}
 
-    block(unsigned int id) : id(id) {}
-    // more attributes TBD...
+    unsigned char get_power_state();
+    void set_passive_power_state(unsigned char power_state);
+
+    bool operator==(const block &o);
+    bool operator!=(const block &o);
 };
 
 

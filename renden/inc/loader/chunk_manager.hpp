@@ -18,9 +18,9 @@
 template<unsigned int W, unsigned int H>
 class chunk_manager {
 
+public:
 	std::map<std::pair<int, int>, std::shared_ptr<chunk<W, H>>> chunks;
 
-public:
 	chunk_manager() {}
 
 	std::shared_ptr<chunk<W, H>> get_chunk_at(int x, int z) {
@@ -50,6 +50,10 @@ public:
 			(pos.z < 0 ? -1 : 0) + (pos.z + (pos.z < 0 ? 1 : 0)) / int(W));
 	}
 
+	glm::ivec3 chunk_pos_to_block_pos(std::pair<int,int> chunk_pos, glm::ivec3 loc){
+	    return glm::ivec3(chunk_pos.first * W + loc.x, loc.y, chunk_pos.second * W + loc.z);
+	}
+
 	std::optional<block> get_block_at(glm::ivec3 world_pos, bool create_if_not_exists = false) {
 		glm::vec2 chunk_pos = block_pos_to_chunk_pos(world_pos);
 		if (!create_if_not_exists && !chunk_exists(chunk_pos.x, chunk_pos.y))
@@ -59,11 +63,12 @@ public:
 		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_at(loc_x, world_pos.y, loc_z);
 	}
 
-	block* get_block_ref_at(glm::ivec3 world_pos, bool create_if_not_exists = false) {
+	std::optional<std::reference_wrapper<block>> get_block_ref_at(glm::ivec3 world_pos,
+			bool create_if_not_exists = false, bool taint = true) {
 
 		glm::ivec2 chunk_pos = block_pos_to_chunk_pos(world_pos);
 		if (!create_if_not_exists && !chunk_exists(chunk_pos.x, chunk_pos.y))
-			return nullptr;
+			return {};
 		unsigned int loc_x = world_pos.x % W;
 		unsigned int loc_z = world_pos.z % W;
 
@@ -71,7 +76,7 @@ public:
 			world_pos.x, world_pos.y, world_pos.z,
 			chunk_pos.x, chunk_pos.y, loc_x, world_pos.y, loc_z);
 
-		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_ref_at(loc_x, world_pos.y, loc_z);
+		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_ref_at(loc_x, world_pos.y, loc_z, taint);
 	}
 
 	void update_all_meshes() {

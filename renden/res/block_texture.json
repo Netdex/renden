@@ -14,6 +14,9 @@
     "leaves": "leaves_oak.png",
     "crafting_table_top": "crafting_table_top.png",
     "crafting_table_side": "crafting_table_side.png",
-    "crafting_table_front": "crafting_table_front.png"
+    "crafting_table_front": "crafting_table_front.png",
+    "conduit": "wool_colored_gray.png",
+    "powered_conduit": "wool_colored_white.png",
+    "power_source": "wool_colored_lime.png"
   }
 }

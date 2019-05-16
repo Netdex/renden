@@ -13,12 +13,12 @@
 #include <util/bytebuffer.hpp>
 
 enum block_face : int {
-    NEG_Z = 1<<0,
-    POS_Z = 1<<1,
-    NEG_X = 1<<2,
-    POS_X = 1<<3,
-    NEG_Y = 1<<4,
-    POS_Y = 1<<5
+    NEG_Z = 1 << 0,
+    POS_Z = 1 << 1,
+    NEG_X = 1 << 2,
+    POS_X = 1 << 3,
+    NEG_Y = 1 << 4,
+    POS_Y = 1 << 5
 };
 typedef int block_face_set;
 
@@ -28,10 +28,19 @@ extern const glm::ivec3 FACE_IDX_TO_OFFSET[];
 
 class block_primitive {
 public:
-	std::array<float, 6 * 4*3> uv;
+    std::array<float, 6 * 4 * 3> uv;
     bool is_opaque;
+    bool is_power_source;
+    bool is_conduit;
 
-    explicit block_primitive(std::array<float, 6 * 4*3> uv, bool is_opaque);
+    explicit block_primitive(std::array<float, 6 * 4 * 3> uv,
+                             bool is_opaque = false,
+                             bool is_power_source = false,
+                             bool is_conduit = false)
+            : uv{uv},
+              is_opaque{is_opaque},
+              is_power_source{is_power_source},
+              is_conduit{is_conduit} {}
 
     void append_vertex_list(bytebuf<> &vlist, glm::ivec3 position, block_face_set faces);
 

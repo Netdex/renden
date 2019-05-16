@@ -11,14 +11,14 @@ add_subdirectory(vendor/glfw)
 option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
 option(ASSIMP_BUILD_SAMPLES OFF)
 option(ASSIMP_BUILD_TESTS OFF)
-add_subdirectory(vendor/assimp)
+#add_subdirectory(vendor/assimp)
 
 option(BUILD_BULLET2_DEMOS OFF)
 option(BUILD_CPU_DEMOS OFF)
 option(BUILD_EXTRAS OFF)
 option(BUILD_OPENGL3_DEMOS OFF)
 option(BUILD_UNIT_TESTS OFF)
-add_subdirectory(vendor/bullet)
+#add_subdirectory(vendor/bullet)
 
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(vendor/json)
@@ -72,9 +72,9 @@ add_definitions(-DGLFW_INCLUDE_NONE
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
                                ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
                                ${VENDORS_SOURCES})
-target_link_libraries(${PROJECT_NAME} PUBLIC assimp glfw
-                      ${GLFW_LIBRARIES} ${GLAD_LIBRARIES}
-                      BulletDynamics BulletCollision LinearMath)
+target_link_libraries(${PROJECT_NAME} PUBLIC  glfw
+                      ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
+#target_link_libraries(${PROJECT_NAME} PUBLIC assimp BulletDynamics BulletCollision LinearMath)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

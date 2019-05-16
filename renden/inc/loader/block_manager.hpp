@@ -12,6 +12,7 @@
 #include <memory>
 #include <primitive/block_primitive.hpp>
 #include <gl/buffer.hpp>
+#include <optional>
 
 static const int MAXIMUM_BLOCKS = 256;
 
@@ -35,8 +36,8 @@ public:
     std::shared_ptr<block_primitive> get_block_by_name(const std::string &name);
 
     std::shared_ptr<block_primitive> get_block_by_id(unsigned int id);
-    std::vector<float> create_str_shader_data();
 
+    std::optional<unsigned int> get_block_id_by_name(const std::string &name);
 };
 
 namespace world {

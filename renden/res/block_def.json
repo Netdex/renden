@@ -3,6 +3,8 @@
     "id": 1,
     "name": "stone",
     "opaque": true,
+    "is_conduit": false,
+    "is_power_source": false,
     "textures": [
       "stone"
     ],
@@ -19,6 +21,8 @@
     "id": 2,
     "name": "grass",
     "opaque": true,
+    "is_conduit": false,
+    "is_power_source": false,
     "textures": [
       "grass_side",
       "grass_top",
@@ -37,6 +41,8 @@
     "id": 3,
     "name": "dirt",
     "opaque": true,
+    "is_conduit": false,
+    "is_power_source": false,
     "textures": [
       "dirt"
     ],
@@ -53,6 +59,8 @@
     "id": 4,
     "name": "cobblestone",
     "opaque": true,
+    "is_conduit": false,
+    "is_power_source": false,
     "textures": [
       "cobblestone"
     ],
@@ -69,6 +77,8 @@
     "id": 5,
     "name": "planks",
     "opaque": true,
+    "is_conduit": false,
+    "is_power_source": false,
     "textures": [
       "planks"
     ],
@@ -85,6 +95,8 @@
     "id": 17,
     "name": "wood",
     "opaque": true,
+    "is_conduit": false,
+    "is_power_source": false,
     "textures": [
       "wood_side",
       "wood_top"
@@ -102,6 +114,8 @@
     "id": 18,
     "name": "leaves",
     "opaque": false,
+    "is_conduit": false,
+    "is_power_source": false,
     "textures": [
       "leaves"
     ],
@@ -118,6 +132,8 @@
     "id": 40,
     "name": "crafting_table",
     "opaque": true,
+    "is_conduit": false,
+    "is_power_source": false,
     "textures": [
       "crafting_table_side",
       "crafting_table_top",
@@ -130,6 +146,60 @@
       0,1,0, 1,1,0, 0,0,0, 1,0,0,
       1,1,1, 1,0,1, 0,1,1, 0,0,1,
       0,1,1, 0,0,1, 1,1,1, 1,0,1
+    ]
+  },
+  {
+    "id": 6,
+    "name": "conduit",
+    "opaque": true,
+    "is_conduit": true,
+    "is_power_source": false,
+    "textures": [
+      "conduit"
+    ],
+    "str": [
+      0,1,0, 0,0,0, 1,1,0, 1,0,0,
+      1,1,0, 1,0,0, 0,1,0, 0,0,0,
+      0,1,0, 0,0,0, 1,1,0, 1,0,0,
+      1,1,0, 1,0,0, 0,1,0, 0,0,0,
+      1,1,0, 1,0,0, 0,1,0, 0,0,0,
+      0,1,0, 0,0,0, 1,1,0, 1,0,0
+    ]
+  },
+  {
+    "id": 7,
+    "name": "powered_conduit",
+    "opaque": true,
+    "is_conduit": true,
+    "is_power_source": false,
+    "textures": [
+      "powered_conduit"
+    ],
+    "str": [
+      0,1,0, 0,0,0, 1,1,0, 1,0,0,
+      1,1,0, 1,0,0, 0,1,0, 0,0,0,
+      0,1,0, 0,0,0, 1,1,0, 1,0,0,
+      1,1,0, 1,0,0, 0,1,0, 0,0,0,
+      1,1,0, 1,0,0, 0,1,0, 0,0,0,
+      0,1,0, 0,0,0, 1,1,0, 1,0,0
+    ]
+  },
+  {
+    "id": 8,
+    "name": "power_source",
+    "opaque": true,
+    "is_conduit": false,
+    "is_power_source": true,
+    "textures": [
+      "power_source"
+    ],
+    "str": [
+      0,1,0, 0,0,0, 1,1,0, 1,0,0,
+      1,1,0, 1,0,0, 0,1,0, 0,0,0,
+      0,1,0, 0,0,0, 1,1,0, 1,0,0,
+      1,1,0, 1,0,0, 0,1,0, 0,0,0,
+      1,1,0, 1,0,0, 0,1,0, 0,0,0,
+      0,1,0, 0,0,0, 1,1,0, 1,0,0
     ]
   }
 ]

@@ -64,12 +64,13 @@ public:
 		return {};
 	}
 
-	block* get_block_ref_at(unsigned int x, unsigned int y, unsigned int z) {
+	std::optional<std::reference_wrapper<block>> get_block_ref_at(unsigned int x, unsigned int y, unsigned int z,
+			bool taint = true) {
 		if (x >= 0 && x < W && y >= 0 && y < H && z >= 0 && z < W) {
-			dirty = true;
-			return &data[y][x][z];
+			dirty |= taint;
+			return data[y][x][z];
 		}
-		return nullptr;
+		return {};
 	}
 private:
 	bool face_occluded(glm::ivec3 position, block_face face) {
