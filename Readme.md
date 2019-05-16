@@ -3,15 +3,15 @@
 
 ![](https://i.imgur.com/1igdT3w.jpg)
 
-Maybe this isn't the right skybox for a voxel game.
-
 ## What
-renden will be a 3D digital systems simulation environment for hands-on prototyping of digital circuits.
+renden is a 3D voxel engine designed to be a digital systems simulation environment for hands-on prototyping of digital circuits.
 
 ## Building
 ```
+git clone --recurse-submodules https://github.com/netdex/renden.git
+cd renden
 mkdir build
 cd build
 cmake ../
 ```
-Should work fine under Linux and Windows.
+Compilation tested under Linux and Windows. Graphical functionality tested under a GTX 1050 Ti and an RX 580.
