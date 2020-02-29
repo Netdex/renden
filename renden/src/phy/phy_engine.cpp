@@ -21,6 +21,8 @@ phy_engine::~phy_engine() {
 }
 
 void phy_engine::tick() {
+    using namespace world::block;
+
     auto chunk_mgr = world::chunk::db.lock();
     auto block_mgr = world::entities::blocks::db.lock();
 
@@ -51,9 +53,10 @@ void phy_engine::tick() {
                             unsigned char max_neighbor_pstate = 0;
                             for (int i = 0; i < 6; i++) {
                                 glm::ivec3 offset = FACE_IDX_TO_OFFSET[i];
-                                auto neighbor = chunk_mgr->get_block_at(
-                                        chunk_mgr->chunk_pos_to_block_pos(loc, glm::ivec3{x,y,z}+offset));
+//                                auto neighbor = chunk_mgr->get_block_at(
+//                                        chunk_mgr->chunk_pos_to_block_pos(loc, glm::ivec3{x,y,z}+offset));
 //                                auto neighbor = cnk->get_block_at(x + offset.x, y + offset.y, z + offset.z);
+                                std::optional<decltype(block)> neighbor = {};
                                 if (neighbor /*&& block_mgr->get_block_by_id(neighbor->id)->is_conduit*/) {
                                     max_neighbor_pstate = std::max(max_neighbor_pstate, neighbor->get_power_state());
                                 }

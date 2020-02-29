@@ -24,13 +24,13 @@ namespace gl {
         POINTS = GL_POINTS
     };
 
-    template <typename T = float>
+    template<typename T = float>
     class mesh {
         std::shared_ptr<gl::varray> vao;
         std::vector<std::shared_ptr<gl::buffer<T>>> vbo;
         std::shared_ptr<gl::buffer<GLuint>> ebo;
 
-        size_t attrib_0_size = 0;
+        size_t attrib_0_size;
     public:
         glm::mat4 model = glm::mat4(1.f);
 
@@ -60,10 +60,10 @@ namespace gl {
                   vbo({std::make_shared<gl::buffer<T>>(vertices, vert_size)}),
                   ebo(std::make_shared<gl::buffer<GLuint>>(elements,
                                                            elem_size)),
-                  draw_mode(draw_mode),
-                  attrib_0_size(attributes[0].stride){
+                  attrib_0_size(attributes[0].stride),
+                  draw_mode(draw_mode) {
 
-            for (int i = 0; i < attrib_count; i++) {
+            for (unsigned i = 0; i < attrib_count; i++) {
                 const varray_attribute &a = attributes[i];
                 vao->set_attrib(a.location, a.size, a.type, a.stride, a.offset, a.normalized);
                 glVertexAttribDivisor(a.location, a.divisor);
@@ -77,9 +77,9 @@ namespace gl {
              const varray_attribute *attributes, size_t attrib_count)
                 : vao(std::make_shared<gl::varray>()),
                   vbo({std::make_shared<gl::buffer<T>>(vertices, vert_size)}),
-                  draw_mode(draw_mode),
-                  attrib_0_size(attributes[0].stride){
-            for (int i = 0; i < attrib_count; i++) {
+                  attrib_0_size(attributes[0].stride),
+                  draw_mode(draw_mode) {
+            for (unsigned int i = 0; i < attrib_count; i++) {
                 const varray_attribute &a = attributes[i];
                 vao->set_attrib(a.location, a.size, a.type, a.stride, a.offset, a.normalized);
                 glVertexAttribDivisor(a.location, a.divisor);

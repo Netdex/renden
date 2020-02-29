@@ -17,7 +17,7 @@
 
 
 // Define Some Constants
-const int WINDOW_WIDTH = 1280;
-const int WINDOW_HEIGHT = 800;
+const int WINDOW_WIDTH = 2560;
+const int WINDOW_HEIGHT = 1440;
 
 #endif //~ Glitter Header

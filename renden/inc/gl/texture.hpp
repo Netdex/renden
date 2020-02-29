@@ -68,7 +68,7 @@ namespace gl {
 
             glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width, height, static_cast<GLsizei>(count));
 
-            for (int i = 0; i < count; i++) {
+            for (unsigned i = 0; i < count; i++) {
                 const std::string &path = paths[i];
                 int w, h, bpp;
                 unsigned char *imgbuf = stbi_load(path.c_str(), &w, &h, &bpp, 4);

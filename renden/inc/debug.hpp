@@ -2,77 +2,85 @@
 #ifndef RENDEN_DEBUG_HPP
 #define RENDEN_DEBUG_HPP
 
+#include <sstream>
+
 #include "glitter.hpp"
 
 void APIENTRY debug_callback(GLenum source, GLenum type, GLuint id,
-	GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
-	printf("[");
+	GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+	std::stringstream output;
+	output << "OGL:";
+
 	switch (severity) {
 	case GL_DEBUG_SEVERITY_HIGH:
-		printf("High");
+		output << "H";
 		break;
 	case GL_DEBUG_SEVERITY_MEDIUM:
-		printf("Medium");
+		output << "M";
 		break;
 	case GL_DEBUG_SEVERITY_LOW:
-		printf("Low");
+		output << "L";
 		break;
 	case GL_DEBUG_SEVERITY_NOTIFICATION:
-		printf("Notification");
+		output << "N";
 		break;
+	default: break;
 	}
-	printf("] ");
+	output << ":";
 
 	switch (type) {
 	case GL_DEBUG_TYPE_ERROR:
-		printf("Error");
+		output << "Error";
 		break;
 	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-		printf("Deprecated Behaviour");
+		output << "Deprecated Behaviour";
 		break;
 	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-		printf("Undefined Behaviour");
+		output << "Undefined Behaviour";
 		break;
 	case GL_DEBUG_TYPE_PORTABILITY:
-		printf("Portability");
+		output << "Portability";
 		break;
 	case GL_DEBUG_TYPE_PERFORMANCE:
-		printf("Performance");
+		output << "Performance";
 		break;
 	case GL_DEBUG_TYPE_MARKER:
-		printf("Marker");
+		output << "Marker";
 		break;
 	case GL_DEBUG_TYPE_PUSH_GROUP:
-		printf("Push Group");
+		output << "Push Group";
 		break;
 	case GL_DEBUG_TYPE_POP_GROUP:
-		printf("Pop Group");
+		output << "Pop Group";
 		break;
 	case GL_DEBUG_TYPE_OTHER:
-		printf("Other");
+		output << "Other";
 		break;
+	default: break;
 	}
-	printf(" - ");
+	output << ":";
 	switch (source) {
 	case GL_DEBUG_SOURCE_API:
-		printf("API");
+		output << "API";
 		break;
 	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-		printf("Window System");
+		output << "Window System";
 		break;
 	case GL_DEBUG_SOURCE_SHADER_COMPILER:
-		printf("Shader Compiler");
+		output << "Shader Compiler";
 		break;
 	case GL_DEBUG_SOURCE_THIRD_PARTY:
-		printf("Third Party");
+		output << "Third Party";
 		break;
 	case GL_DEBUG_SOURCE_APPLICATION:
-		printf("Application");
+		output << "Application";
 		break;
 	case GL_DEBUG_SOURCE_OTHER:
-		printf("Other");
+		output << "Other";
 		break;
+	default: break;
 	}
-	printf(": %s\n", message);
+	output << " - " << message;
+	spdlog::trace(output.str());
 }
 #endif

@@ -36,12 +36,12 @@ namespace gl {
         }
 
         // Public Member Functions
-        shader &activate(){
+        shader &activate() {
             glUseProgram(mProgram);
             return *this;
         }
 
-        shader &attach(std::string const &filename){
+        shader &attach(std::string const &filename) {
             // Load GLSL Shader Source from File
             std::string path = PROJECT_SOURCE_DIR "/renden/shaders/";
 //    std::string path = "../../renden/shaders/";
@@ -70,7 +70,7 @@ namespace gl {
             return *this;
         }
 
-        GLuint create(std::string const &filename){
+        GLuint create(std::string const &filename) {
             auto index = filename.rfind(".");
             auto ext = filename.substr(index + 1);
             if (ext == "comp") return glCreateShader(GL_COMPUTE_SHADER);
@@ -83,7 +83,7 @@ namespace gl {
 
         GLuint get() { return mProgram; }
 
-        shader &link(){
+        shader &link() {
             glLinkProgram(mProgram);
             glGetProgramiv(mProgram, GL_LINK_STATUS, &mStatus);
             if (mStatus == false) {
@@ -96,41 +96,48 @@ namespace gl {
             return *this;
         }
 
-        GLint get_uniform(std::string const &name){
+        GLint get_uniform(std::string const &name) {
             return glGetUniformLocation(mProgram, name.c_str());
         }
 
-        GLuint get_attribute(std::string const &name) const{
+        GLuint get_attribute(std::string const &name) const {
             GLint attribute_location = glGetAttribLocation(mProgram, name.c_str());
             assert(attribute_location >= 0);
             return static_cast<GLuint>(attribute_location);
         }
 
         // Wrap Calls to glUniform
-        void bind(GLint location, float value, size_t size) const{ glUniform1f(location, value); }
+        void bind(GLint location, float value) const { glUniform1f(location, value); }
 
-        void bind(GLint location, glm::vec2 value, size_t size) const{ glUniform2f(location, value.x, value.y); }
+        void bind(GLint location, glm::vec2 value) const { glUniform2f(location, value.x, value.y); }
 
-        void bind(GLint location, glm::vec3 value, size_t size) const{ glUniform3f(location, value.x, value.y, value.z); }
+        void bind(GLint location, glm::vec3 value) const { glUniform3f(location, value.x, value.y, value.z); }
 
-        void bind(GLint location, glm::vec4 value, size_t size) const{ glUniform4f(location, value.x, value.y, value.z, value.w); }
+        void bind(GLint location, glm::vec4 value) const { glUniform4f(location, value.x, value.y, value.z, value.w); }
 
-        void bind(GLint location, glm::mat4 const &matrix, size_t size) const{
+        void bind(GLint location, glm::mat4 const &matrix) const {
             glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
         }
 
         void bind(GLint location, float *data, size_t size) const {
-            glUniform1fv(location, size, data);
+            glUniform1fv(location, static_cast<GLsizei>(size), data);
         }
 
         template<typename T>
-        void bind(std::string const &name, T &&value, size_t size = 1) const {
+        void bind(std::string const &name, T &&value, size_t size) const {
             GLint location = glGetUniformLocation(mProgram, name.c_str());
             if (location == -1) fprintf(stderr, "Missing Uniform: %s\n", name.c_str());
             else {
-
                 bind(location, std::forward<T>(value), size);
+            }
+        }
 
+        template<typename T>
+        void bind(std::string const &name, T &&value) const {
+            GLint location = glGetUniformLocation(mProgram, name.c_str());
+            if (location == -1) fprintf(stderr, "Missing Uniform: %s\n", name.c_str());
+            else {
+                bind(location, std::forward<T>(value));
             }
         }
 

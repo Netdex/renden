@@ -89,7 +89,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 }
 
 int main(int argc, char *argv[]) {
-    spdlog::set_level(spdlog::level::debug);
+    spdlog::set_level(spdlog::level::trace);
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
         auto tenbox_shader = shaders::tenbox::shader.lock();
         auto reticle_shader = shaders::reticle::shader.lock();
 
-        phy_engine phy;
+        //phy_engine phy;
 
         reticle reticle;
 

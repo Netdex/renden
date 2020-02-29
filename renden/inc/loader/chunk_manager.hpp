@@ -15,7 +15,7 @@
 
 #include <world/chunk.hpp>
 
-template<unsigned int W, unsigned int H>
+template<int W, int H>
 class chunk_manager {
 
 public:
@@ -37,7 +37,7 @@ public:
 		return chunks.find(std::make_pair(x, z)) != chunks.end();
 	}
 
-	void render(const gl::shader &block) {
+	void render(const gl::shader& block) {
 		for (auto cnk : chunks) {
 			cnk.second->draw(block, glm::translate(glm::mat4(1.f),
 				glm::vec3(cnk.first.first * int(W), 0, cnk.first.second * int(W))));
@@ -46,37 +46,42 @@ public:
 
 	glm::ivec2 block_pos_to_chunk_pos(glm::ivec3 pos) {
 		return glm::ivec2(
-			(pos.x < 0 ? -1 : 0) + (pos.x + (pos.x < 0 ? 1 : 0)) / int(W),
-			(pos.z < 0 ? -1 : 0) + (pos.z + (pos.z < 0 ? 1 : 0)) / int(W));
+			int(floorf(float(pos.x) / W)),
+			int(floorf(float(pos.z) / W)));
 	}
 
-	glm::ivec3 chunk_pos_to_block_pos(std::pair<int,int> chunk_pos, glm::ivec3 loc){
-	    return glm::ivec3(chunk_pos.first * W + loc.x, loc.y, chunk_pos.second * W + loc.z);
+	glm::ivec3 chunk_pos_to_block_pos(std::pair<int, int> chunk_pos, glm::ivec3 loc) {
+		return glm::ivec3(chunk_pos.first * W + loc.x, loc.y, chunk_pos.second * W + loc.z);
+	}
+
+	glm::ivec3 block_pos_to_loc_pos(glm::ivec3 pos)
+	{
+		// took me a few times to get this right
+		return { (pos.x % W + W) % W, pos.y, (pos.z % W + W) % W };
 	}
 
 	std::optional<block> get_block_at(glm::ivec3 world_pos, bool create_if_not_exists = false) {
-		glm::vec2 chunk_pos = block_pos_to_chunk_pos(world_pos);
+		glm::ivec2 chunk_pos = block_pos_to_chunk_pos(world_pos);
 		if (!create_if_not_exists && !chunk_exists(chunk_pos.x, chunk_pos.y))
 			return std::nullopt;
-		unsigned int loc_x = world_pos.x % W;
-		unsigned int loc_z = world_pos.z % W;
-		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_at(loc_x, world_pos.y, loc_z);
+
+		glm::ivec3 loc_pos = block_pos_to_loc_pos(world_pos);
+		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_at(loc_pos.x, loc_pos.y, loc_pos.z);
 	}
 
 	std::optional<std::reference_wrapper<block>> get_block_ref_at(glm::ivec3 world_pos,
-			bool create_if_not_exists = false, bool taint = true) {
+		bool create_if_not_exists = false, bool taint = true) {
 
 		glm::ivec2 chunk_pos = block_pos_to_chunk_pos(world_pos);
 		if (!create_if_not_exists && !chunk_exists(chunk_pos.x, chunk_pos.y))
 			return {};
-		unsigned int loc_x = world_pos.x % W;
-		unsigned int loc_z = world_pos.z % W;
+		glm::ivec3 loc_pos = block_pos_to_loc_pos(world_pos);
 
-		spdlog::debug("block ref: ({},{},{}) -> ({},{}) ({},{},{})", 
+		spdlog::debug("block ref: ({},{},{}) -> ({},{}) ({},{},{})",
 			world_pos.x, world_pos.y, world_pos.z,
-			chunk_pos.x, chunk_pos.y, loc_x, world_pos.y, loc_z);
+			chunk_pos.x, chunk_pos.y, loc_pos.x, loc_pos.y, loc_pos.z);
 
-		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_ref_at(loc_x, world_pos.y, loc_z, taint);
+		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_ref_at(loc_pos.x, loc_pos.y, loc_pos.z, taint);
 	}
 
 	void update_all_meshes() {

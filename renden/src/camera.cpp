@@ -95,9 +95,9 @@ std::optional<std::pair<glm::ivec3, glm::ivec3>> camera::cast_target(world::chun
 	float t_max_z = (step_z > 0 ? ceilf(u.z - 0.5f) + 0.5f - u.z 
 		: u.z - floorf(u.z + 0.5f) + 0.5f) / fabs(v.z);
 
-	float t_delta_x = step_x / v.x;
-	float t_delta_y = step_y / v.y;
-	float t_delta_z = step_z / v.z;
+	float t_delta_x = float(step_x) / v.x;
+	float t_delta_y = float(step_y) / v.y;
+	float t_delta_z = float(step_z) / v.z;
 
 	glm::ivec3 norm;
 

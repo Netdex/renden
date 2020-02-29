@@ -14,43 +14,43 @@ static const GLfloat CUBE_VERTICES[] = {
 	0.5f, -0.5f, -0.5f,		  1,1,1,
 	0.5f, 0.5f, -0.5f,		  1,1,1,
 	0.5f, 0.5f, -0.5f,		  1,1,1,
-    -0.5f, 0.5f, -0.5f,		  1,1,1,
-    -0.5f, -0.5f, -0.5f,	  1,1,1,
+	-0.5f, 0.5f, -0.5f,		  1,1,1,
+	-0.5f, -0.5f, -0.5f,	  1,1,1,
 	// xy +z
 	-0.5f, -0.5f, 0.5f,		  1,1,1,
-    0.5f, 0.5f, 0.5f,		  1,1,1,
-    0.5f, -0.5f, 0.5f,		  1,1,1,
 	0.5f, 0.5f, 0.5f,		  1,1,1,
-    -0.5f, -0.5f, 0.5f,		  1,1,1,
-    -0.5f, 0.5f, 0.5f,		  1,1,1,
+	0.5f, -0.5f, 0.5f,		  1,1,1,
+	0.5f, 0.5f, 0.5f,		  1,1,1,
+	-0.5f, -0.5f, 0.5f,		  1,1,1,
+	-0.5f, 0.5f, 0.5f,		  1,1,1,
 	// yz -x
 	-0.5f, 0.5f, 0.5f,		  1,1,1,
-    -0.5f, -0.5f, -0.5f,	  1,1,1,
-    -0.5f, 0.5f, -0.5f,		  1,1,1,
 	-0.5f, -0.5f, -0.5f,	  1,1,1,
-    -0.5f, 0.5f, 0.5f,		  1,1,1,
-    -0.5f, -0.5f, 0.5f,		  1,1,1,
+	-0.5f, 0.5f, -0.5f,		  1,1,1,
+	-0.5f, -0.5f, -0.5f,	  1,1,1,
+	-0.5f, 0.5f, 0.5f,		  1,1,1,
+	-0.5f, -0.5f, 0.5f,		  1,1,1,
 	// yz +x
 	0.5f, 0.5f, 0.5f,		  1,1,1,
-    0.5f, 0.5f, -0.5f,		  1,1,1,
-    0.5f, -0.5f, -0.5f,		  1,1,1,
+	0.5f, 0.5f, -0.5f,		  1,1,1,
 	0.5f, -0.5f, -0.5f,		  1,1,1,
-    0.5f, -0.5f, 0.5f,		  1,1,1,
-    0.5f, 0.5f, 0.5f,		  1,1,1,
+	0.5f, -0.5f, -0.5f,		  1,1,1,
+	0.5f, -0.5f, 0.5f,		  1,1,1,
+	0.5f, 0.5f, 0.5f,		  1,1,1,
 	// xz -y
 	-0.5f, -0.5f, -0.5f,	  1,1,1,
-    0.5f, -0.5f, 0.5f,		  1,1,1,
-    0.5f, -0.5f, -0.5f,		  1,1,1,
 	0.5f, -0.5f, 0.5f,		  1,1,1,
-    -0.5f, -0.5f, -0.5f,	  1,1,1,
-    -0.5f, -0.5f, 0.5f,		  1,1,1,
+	0.5f, -0.5f, -0.5f,		  1,1,1,
+	0.5f, -0.5f, 0.5f,		  1,1,1,
+	-0.5f, -0.5f, -0.5f,	  1,1,1,
+	-0.5f, -0.5f, 0.5f,		  1,1,1,
 	// xz +y
 	-0.5f, 0.5f, -0.5f,		  1,1,1,
-    0.5f, 0.5f, -0.5f,		  1,1,1,
-    0.5f, 0.5f, 0.5f,		  1,1,1,
+	0.5f, 0.5f, -0.5f,		  1,1,1,
 	0.5f, 0.5f, 0.5f,		  1,1,1,
-    -0.5f, 0.5f, 0.5f,		  1,1,1,
-    -0.5f, 0.5f, -0.5f,		  1,1,1,
+	0.5f, 0.5f, 0.5f,		  1,1,1,
+	-0.5f, 0.5f, 0.5f,		  1,1,1,
+	-0.5f, 0.5f, -0.5f,		  1,1,1,
 };
 
 reticle::reticle() :
@@ -61,26 +61,29 @@ reticle::reticle() :
 }
 
 void reticle::draw(const gl::shader& shader,
-	const glm::mat4 &view, const glm::mat4 &proj,
+	const glm::mat4& view, const glm::mat4& proj,
 	const glm::vec3 pos, const glm::vec3 dir,
-	const std::optional<glm::ivec3> &target)
+	const std::optional<glm::ivec3>& target)
 {
 	shader.bind("model", glm::mat4(1.f));
 	shader.bind("proj", proj);
 	shader.bind("view", view);
 	if (target) {
-		select_mesh->model = glm::translate(glm::mat4(1.f), glm::vec3(*target));
+		// Scale the block ghost to be slightly larger than a block, so that there isn't z-fighting. Sorry.
+		const glm::vec3 magdir = glm::abs(glm::vec3{ *target } - pos);
+		select_mesh->model = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(*target)),
+			glm::vec3(1.f) + 0.1f);
 
-		GLint polyMode;
-		glGetIntegerv(GL_POLYGON_MODE, &polyMode);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//GLint polyMode;
+		//glGetIntegerv(GL_POLYGON_MODE, &polyMode);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		select_mesh->draw(shader);
-		glPolygonMode(GL_FRONT_AND_BACK, polyMode);
+		//glPolygonMode(GL_FRONT_AND_BACK, polyMode);
 	}
 
-	glm::vec3 o = pos + glm::normalize(dir)*0.5f;
+	glm::vec3 o = pos + glm::normalize(dir) * 0.5f;
 	glm::vec3 axis[] = {
-		o,						glm::vec3(1,0,0), 
+		o,						glm::vec3(1,0,0),
 		o + glm::vec3(1,0,0),	glm::vec3(1,0,0),
 		o,						glm::vec3(0,1,0),
 		o + glm::vec3(0,1,0),	glm::vec3(0,1,0),
