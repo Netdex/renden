@@ -9,13 +9,14 @@
 #include <gl/texture.hpp>
 #include <gl/mesh.hpp>
 
-class skybox {
-    std::shared_ptr<gl::cubemap> texture;
-    std::shared_ptr<gl::mesh<>> mesh;
+class Skybox
+{
+	std::shared_ptr<gl::Cubemap> texture_;
+	std::shared_ptr<gl::Mesh<>> mesh_;
 public:
-    skybox(const std::vector<std::string> &paths);
+	Skybox(const std::vector<std::string>& paths);
 
-    void draw(const gl::shader &shader);
+	void Draw(const gl::Shader& shader) const;
 };
 
 

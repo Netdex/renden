@@ -1,113 +1,133 @@
-//
-// Created by netdex on 2/13/19.
-//
-
 #ifndef RENDEN_BUFFER_HPP
 #define RENDEN_BUFFER_HPP
 
-
-#include <glad/glad.h>
 #include <vector>
 
-namespace gl {
-    enum buffer_type : GLenum {
-        /* add as necessary */
-                VERTEX_BUFFER = GL_ARRAY_BUFFER,
-        ELEMENT_BUFFER = GL_ELEMENT_ARRAY_BUFFER
-    };
-    enum buffer_usage : GLenum {
-        /* add as necessary */
-                STATIC_DRAW = GL_STATIC_DRAW,
-                DYNAMIC_DRAW = GL_DYNAMIC_DRAW
-    };
+#include "glad/glad.h"
 
-    template<typename T>
-    class buffer {
-        GLuint id;
-        size_t cached_size = 0;
+namespace gl
+{
+enum BufferType : GLenum
+{
+	VERTEX_BUFFER = GL_ARRAY_BUFFER,
+	ELEMENT_BUFFER = GL_ELEMENT_ARRAY_BUFFER
+	// Add as necessary.
+};
 
-        buffer_type type;
-        buffer_usage usage;
-    public:
+enum BufferUsage : GLenum
+{
+	STATIC_DRAW = GL_STATIC_DRAW,
+	DYNAMIC_DRAW = GL_DYNAMIC_DRAW
+	// Add as necessary.
+};
 
-        buffer(buffer_type type, buffer_usage usage)
-                : type(type), usage(usage) {
-            glGenBuffers(1, &this->id);
-            this->bind();
-        }
 
-        buffer(buffer_type type, buffer_usage usage, const T *data, size_t size)
-                : type(type), usage(usage) {
-            glGenBuffers(1, &this->id);
-            this->allocate(data, size);
-            this->bind();
-        }
+/**
+ * \brief C++ wrapper around a general OpenGL buffer (either a vertex buffer or element buffer).
+ * \tparam T OpenGL type of the element the buffer is holding.
+ */
+template <typename T>
+class Buffer
+{
+	GLuint id_{};
+	size_t cached_size_ = 0;
 
-        explicit buffer(buffer_type type, buffer_usage usage, const std::vector<T> &data)
-                : buffer(type, usage, &data[0], data.size() * sizeof(data[0])) {}
+	BufferType type_;
+	BufferUsage usage;
+public:
 
-        buffer(const T *data, size_t size)
-                : buffer(VERTEX_BUFFER, STATIC_DRAW, data, size) {}
+	Buffer(BufferType type, BufferUsage usage)
+		: type_(type), usage(usage)
+	{
+		glGenBuffers(1, &this->id_);
+		this->Bind();
+	}
 
-        buffer(const std::vector<T> &data)
-                : buffer(VERTEX_BUFFER, STATIC_DRAW, data) {}
+	Buffer(BufferType type, BufferUsage usage, const T* data, size_t size)
+		: type_(type), usage(usage)
+	{
+		glGenBuffers(1, &this->id_);
+		this->Allocate(data, size);
+		this->Bind();
+	}
 
-        ~buffer() {
-            glDeleteBuffers(1, &id);
-        }
+	explicit Buffer(BufferType type, BufferUsage usage, const std::vector<T>& data) : Buffer(
+		type, usage, &data[0], data.size() * sizeof(data[0]))
+	{
+	}
 
-        buffer(const buffer &o) = delete;
+	Buffer(const T* data, size_t size)
+		: Buffer(VERTEX_BUFFER, STATIC_DRAW, data, size)
+	{
+	}
 
-        buffer operator=(const buffer &o) = delete;
+	explicit Buffer(const std::vector<T>& data)
+		: Buffer(VERTEX_BUFFER, STATIC_DRAW, data)
+	{
+	}
 
-        void bind() {
-            glBindBuffer(static_cast<GLenum>(type), this->id);
-        }
+	~Buffer()
+	{
+		glDeleteBuffers(1, &id_);
+	}
 
-        void unbind() {
-            glBindBuffer(static_cast<GLenum>(type), 0);
-        }
+	Buffer(const Buffer& o) = delete;
+	Buffer operator=(const Buffer& o) = delete;
 
-        size_t get_size() {
-            if (cached_size == 0) {
-                this->bind();
-                GLint size;
-                glGetBufferParameteriv(type, GL_BUFFER_SIZE, &size);
-                cached_size = size;
-                this->unbind();
-                return static_cast<size_t>(size);
-            } else {
-                return cached_size;
-            }
-        }
+	void Bind()
+	{
+		glBindBuffer(static_cast<GLenum>(type_), this->id_);
+	}
 
-        size_t get_elements() {
-            return this->get_size() / sizeof(T);
-        }
+	void Unbind() const
+	{
+		glBindBuffer(static_cast<GLenum>(type_), 0);
+	}
 
-        //T *map(/* access */);
+	size_t GetSize()
+	{
+		if (cached_size_ == 0)
+		{
+			this->Bind();
+			GLint size;
+			glGetBufferParameteriv(type_, GL_BUFFER_SIZE, &size);
+			cached_size_ = size;
+			this->Unbind();
+			return static_cast<size_t>(size);
+		}
+		return cached_size_;
+	}
 
-        void allocate(const T *data, size_t size) {
-			cached_size = 0;
-            this->bind();
-            glBufferData(static_cast<GLenum>(type),
-                         static_cast<GLsizeiptr>(size), static_cast<const GLvoid *>(data),
-                         static_cast<GLenum>(usage));
-            this->unbind();
-        }
+	size_t GetElementCount()
+	{
+		return this->GetSize() / sizeof(T);
+	}
 
-        void update(unsigned int offset, const T *data, size_t size) {
-            this->bind();
-            glBufferSubData(type, static_cast<GLintptr>(offset),
-                            static_cast<GLsizeiptr>(size), static_cast<const GLvoid *>(data));
-            this->unbind();
-        }
+	//T *map(/* access */);
 
-        void update(unsigned int offset, const std::vector<T> &data) {
-            this->update(offset, &data.begin(), data.size());
-        }
-    };
+	void Allocate(const T* data, size_t size)
+	{
+		cached_size_ = 0;
+		this->Bind();
+		glBufferData(static_cast<GLenum>(type_),
+		             static_cast<GLsizeiptr>(size), static_cast<const GLvoid*>(data),
+		             static_cast<GLenum>(usage));
+		this->Unbind();
+	}
+
+	void Update(unsigned int offset, const T* data, size_t size)
+	{
+		this->Bind();
+		glBufferSubData(type_, static_cast<GLintptr>(offset),
+		                static_cast<GLsizeiptr>(size), static_cast<const GLvoid*>(data));
+		this->Unbind();
+	}
+
+	void Update(unsigned int offset, const std::vector<T>& data)
+	{
+		this->Update(offset, &data.begin(), data.size());
+	}
+};
 }
-
 
 #endif //RENDEN_BUFFER_HPP

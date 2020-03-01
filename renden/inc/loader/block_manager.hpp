@@ -1,53 +1,44 @@
-//
-// Created by netdex on 2/17/19.
-//
-
 #ifndef RENDEN_BLOCK_TEXTURE_MANAGER_HPP
 #define RENDEN_BLOCK_TEXTURE_MANAGER_HPP
 
-
 #include <string>
 #include <unordered_map>
-#include <gl/texture.hpp>
 #include <memory>
-#include <primitive/block_primitive.hpp>
-#include <gl/buffer.hpp>
 #include <optional>
 
-static const int MAXIMUM_BLOCKS = 256;
+#include "gl/texture.hpp"
+#include "primitive/block_primitive.hpp"
 
-class block_manager {
-    // convert name of texture to index of 2D texture array
-    std::unordered_map<std::string, unsigned int> texture_name_to_layer;
-    std::shared_ptr<gl::texture2d> textures;
+constexpr int MAXIMUM_BLOCKS = 256;
 
-    // convert name of block to block primitive mesh
-    std::shared_ptr<block_primitive> block_id_to_primitive[MAXIMUM_BLOCKS];
-    std::unordered_map<std::string, unsigned int> block_name_to_id;
+class BlockManager
+{
+	// convert name of texture to index of 2D texture array
+	std::unordered_map<std::string, unsigned int> texture_name_to_layer_;
+	std::unique_ptr<gl::Texture2D> textures_;
 
+	// convert name of block to block primitive mesh
+	std::shared_ptr<BlockPrimitive> block_id_to_primitive_[MAXIMUM_BLOCKS];
+	std::unordered_map<std::string, unsigned int> block_name_to_id_;
 
-    void load_textures(const std::string &block_tex_conf);
+	void LoadTextures(const std::string& block_tex_conf);
 
-    void create_block_primitives(const std::string &block_def_conf);
+	void CreateBlockPrimitives(const std::string& block_def_conf);
 
 public:
-    block_manager(const std::string &block_tex_conf, const std::string &block_def_conf);
+	BlockManager(const std::string& block_tex_conf, const std::string& block_def_conf);
 
-    std::shared_ptr<block_primitive> get_block_by_name(const std::string &name);
+	std::shared_ptr<BlockPrimitive> GetBlockByName(const std::string& name);
 
-    std::shared_ptr<block_primitive> get_block_by_id(unsigned int id);
+	std::shared_ptr<BlockPrimitive> GetBlockById(unsigned int id);
 
-    std::optional<unsigned int> get_block_id_by_name(const std::string &name);
+	std::optional<unsigned int> GetBlockIdByName(const std::string& name);
 };
 
-namespace world {
-    namespace entities {
-        namespace blocks {
-            extern std::weak_ptr<block_manager> db;
-
-            std::shared_ptr<block_manager> load();
-        }
-    }
+namespace world::block
+{
+extern std::weak_ptr<BlockManager> db;
+std::shared_ptr<BlockManager> load();
 }
 
 #endif //RENDEN_BLOCK_TEXTURE_MANAGER_HPP

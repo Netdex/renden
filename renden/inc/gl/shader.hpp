@@ -1,145 +1,164 @@
 #pragma once
 
-// System Headers
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-// Standard Headers
 #include <memory>
 #include <string>
-#include <gl/varray.hpp>
 #include <fstream>
 
-// Define Namespace
+#include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
-namespace gl {
+#include <spdlog/spdlog.h>
 
-    class shader {
-        // Disable Copying and Assignment
-        shader(shader const &) = delete;
+namespace gl
+{
+class Shader
+{
+	GLuint program_;
+	GLint status_;
+	GLint length_;
 
-        shader &operator=(shader const &) = delete;
+public:
+	Shader() { program_ = glCreateProgram(); }
 
-        // Private Member Variables
-        GLuint mProgram;
-        GLint mStatus;
-        GLint mLength;
+	~Shader()
+	{
+		glDeleteProgram(program_);
+	}
 
-    public:
+	Shader(Shader const&) = delete;
 
-        // Implement Custom Constructor and Destructor
-        shader() { mProgram = glCreateProgram(); }
+	Shader& operator=(Shader const&) = delete;
 
-        ~shader() {
-            glDeleteProgram(mProgram);
-        }
+	// Public Member Functions
+	Shader& Activate()
+	{
+		glUseProgram(program_);
+		return *this;
+	}
 
-        // Public Member Functions
-        shader &activate() {
-            glUseProgram(mProgram);
-            return *this;
-        }
+	Shader& Attach(std::string const& filename)
+	{
+		// Load GLSL Shader Source from File
+		std::string path = PROJECT_SOURCE_DIR "/renden/shaders/";
+		//    std::string path = "../../renden/shaders/";
+		std::ifstream fd(path + filename);
+		const auto src = std::string(std::istreambuf_iterator<char>(fd),
+		                             (std::istreambuf_iterator<char>()));
 
-        shader &attach(std::string const &filename) {
-            // Load GLSL Shader Source from File
-            std::string path = PROJECT_SOURCE_DIR "/renden/shaders/";
-//    std::string path = "../../renden/shaders/";
-            std::ifstream fd(path + filename);
-            auto src = std::string(std::istreambuf_iterator<char>(fd),
-                                   (std::istreambuf_iterator<char>()));
+		// Create a Shader Object
+		const char* source = src.c_str();
+		const auto shader = Create(filename);
+		glShaderSource(shader, 1, &source, nullptr);
+		glCompileShader(shader);
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &status_);
 
-            // Create a Shader Object
-            const char *source = src.c_str();
-            auto shader = create(filename);
-            glShaderSource(shader, 1, &source, nullptr);
-            glCompileShader(shader);
-            glGetShaderiv(shader, GL_COMPILE_STATUS, &mStatus);
+		// Display the Build Log on Error
+		if (!static_cast<bool>(status_))
+		{
+			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length_);
+			const std::unique_ptr<char[]> buffer(new char[length_]);
+			glGetShaderInfoLog(shader, length_, nullptr, buffer.get());
+			spdlog::error("OGL:Shader - {}\n{}", filename.c_str(), buffer.get());
+		}
 
-            // Display the Build Log on Error
-            if (mStatus == false) {
-                glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &mLength);
-                std::unique_ptr<char[]> buffer(new char[mLength]);
-                glGetShaderInfoLog(shader, mLength, nullptr, buffer.get());
-                fprintf(stderr, "%s\n%s", filename.c_str(), buffer.get());
-            }
+		// Attach the Shader and Free Allocated Memory
+		glAttachShader(program_, shader);
+		glDeleteShader(shader);
+		return *this;
+	}
 
-            // Attach the Shader and Free Allocated Memory
-            glAttachShader(mProgram, shader);
-            glDeleteShader(shader);
-            return *this;
-        }
-
-        GLuint create(std::string const &filename) {
-            auto index = filename.rfind(".");
-            auto ext = filename.substr(index + 1);
-            if (ext == "comp") return glCreateShader(GL_COMPUTE_SHADER);
-            else if (ext == "frag") return glCreateShader(GL_FRAGMENT_SHADER);
-            else if (ext == "geom") return glCreateShader(GL_GEOMETRY_SHADER);
-            else if (ext == "vert") return glCreateShader(GL_VERTEX_SHADER);
-            else return false;
-        }
+	static GLuint Create(std::string const& filename)
+	{
+		const auto index = filename.rfind(".");
+		const auto ext = filename.substr(index + 1);
+		if (ext == "comp") return glCreateShader(GL_COMPUTE_SHADER);
+		if (ext == "frag") return glCreateShader(GL_FRAGMENT_SHADER);
+		if (ext == "geom") return glCreateShader(GL_GEOMETRY_SHADER);
+		if (ext == "vert") return glCreateShader(GL_VERTEX_SHADER);
+		return false;
+	}
 
 
-        GLuint get() { return mProgram; }
+	GLuint get() const { return program_; }
 
-        shader &link() {
-            glLinkProgram(mProgram);
-            glGetProgramiv(mProgram, GL_LINK_STATUS, &mStatus);
-            if (mStatus == false) {
-                glGetProgramiv(mProgram, GL_INFO_LOG_LENGTH, &mLength);
-                std::unique_ptr<char[]> buffer(new char[mLength]);
-                glGetProgramInfoLog(mProgram, mLength, nullptr, buffer.get());
-                fprintf(stderr, "%s", buffer.get());
-            }
-            assert(mStatus == true);
-            return *this;
-        }
+	Shader& Link()
+	{
+		glLinkProgram(program_);
+		glGetProgramiv(program_, GL_LINK_STATUS, &status_);
+		if (status_ == false)
+		{
+			glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &length_);
+			const std::unique_ptr<char[]> buffer(new char[length_]);
+			glGetProgramInfoLog(program_, length_, nullptr, buffer.get());
+			spdlog::error("OGL:Shader - {}", buffer.get());
+		}
+		assert(status_ == true);
+		return *this;
+	}
 
-        GLint get_uniform(std::string const &name) {
-            return glGetUniformLocation(mProgram, name.c_str());
-        }
+	GLint GetUniform(std::string const& name) const
+	{
+		return glGetUniformLocation(program_, name.c_str());
+	}
 
-        GLuint get_attribute(std::string const &name) const {
-            GLint attribute_location = glGetAttribLocation(mProgram, name.c_str());
-            assert(attribute_location >= 0);
-            return static_cast<GLuint>(attribute_location);
-        }
+	GLuint GetAttribute(std::string const& name) const
+	{
+		const GLint attribute_location = glGetAttribLocation(program_, name.c_str());
+		assert(attribute_location >= 0);
+		return static_cast<GLuint>(attribute_location);
+	}
 
-        // Wrap Calls to glUniform
-        void bind(GLint location, float value) const { glUniform1f(location, value); }
+	// Wrap Calls to glUniform
+	void Bind(GLint location, float value) const
+	{
+		glUniform1f(location, value);
+	}
 
-        void bind(GLint location, glm::vec2 value) const { glUniform2f(location, value.x, value.y); }
+	void Bind(GLint location, glm::vec2 value) const
+	{
+		glUniform2f(location, value.x, value.y);
+	}
 
-        void bind(GLint location, glm::vec3 value) const { glUniform3f(location, value.x, value.y, value.z); }
+	void Bind(GLint location, glm::vec3 value) const
+	{
+		glUniform3f(location, value.x, value.y, value.z);
+	}
 
-        void bind(GLint location, glm::vec4 value) const { glUniform4f(location, value.x, value.y, value.z, value.w); }
+	void Bind(GLint location, glm::vec4 value) const
+	{
+		glUniform4f(location, value.x, value.y, value.z, value.w);
+	}
 
-        void bind(GLint location, glm::mat4 const &matrix) const {
-            glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
-        }
+	void Bind(GLint location, glm::mat4 const& matrix) const
+	{
+		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(matrix));
+	}
 
-        void bind(GLint location, float *data, size_t size) const {
-            glUniform1fv(location, static_cast<GLsizei>(size), data);
-        }
+	void Bind(GLint location, float* data, size_t size) const
+	{
+		glUniform1fv(location, static_cast<GLsizei>(size), data);
+	}
 
-        template<typename T>
-        void bind(std::string const &name, T &&value, size_t size) const {
-            GLint location = glGetUniformLocation(mProgram, name.c_str());
-            if (location == -1) fprintf(stderr, "Missing Uniform: %s\n", name.c_str());
-            else {
-                bind(location, std::forward<T>(value), size);
-            }
-        }
+	template <typename T>
+	void Bind(std::string const& name, T&& value, size_t size) const
+	{
+		const GLint location = glGetUniformLocation(program_, name.c_str());
+		if (location == -1) spdlog::error("OGL:Shader - Missing Uniform: {}", name.c_str());
+		else
+		{
+			Bind(location, std::forward<T>(value), size);
+		}
+	}
 
-        template<typename T>
-        void bind(std::string const &name, T &&value) const {
-            GLint location = glGetUniformLocation(mProgram, name.c_str());
-            if (location == -1) fprintf(stderr, "Missing Uniform: %s\n", name.c_str());
-            else {
-                bind(location, std::forward<T>(value));
-            }
-        }
-
-    };
+	template <typename T>
+	void Bind(std::string const& name, T&& value) const
+	{
+		GLint location = glGetUniformLocation(program_, name.c_str());
+		if (location == -1) spdlog::error("OGL:Shader - Missing Uniform: {}", name.c_str());
+		else
+		{
+			Bind(location, std::forward<T>(value));
+		}
+	}
+};
 }

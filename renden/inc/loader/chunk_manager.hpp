@@ -1,105 +1,107 @@
-//
-// Created by netdex on 2/24/19.
-//
-
 #ifndef RENDEN_CHUNK_MANAGER_HPP
 #define RENDEN_CHUNK_MANAGER_HPP
 
-
-#include <unordered_map>
 #include <map>
 #include <optional>
 
 #include <glm/vec2.hpp>
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
-#include <world/chunk.hpp>
+#include "world/chunk.hpp"
 
-template<int W, int H>
-class chunk_manager {
+template <int W, int H>
+class ChunkManager
+{
+	std::map<std::pair<int, int>, std::shared_ptr<Chunk<W, H>>> chunks_;
 
 public:
-	std::map<std::pair<int, int>, std::shared_ptr<chunk<W, H>>> chunks;
+	ChunkManager() = default;
 
-	chunk_manager() {}
-
-	std::shared_ptr<chunk<W, H>> get_chunk_at(int x, int z) {
+	std::shared_ptr<Chunk<W, H>> GetChunkAt(int x, int z)
+	{
 		// if chunk does not exist, it will be default constructed
-		auto& ptr = chunks[std::make_pair(x, z)];
-		if (!ptr) {
+		auto& ptr = chunks_[std::make_pair(x, z)];
+		if (!ptr)
+		{
 			spdlog::debug("generated chunk ({},{}) due to first time access", x, z);
-			ptr = std::make_shared<chunk<W, H>>();
+			ptr = std::make_shared<Chunk<W, H>>();
 		}
 		return ptr;
 	}
 
-	bool chunk_exists(int x, int z) {
-		return chunks.find(std::make_pair(x, z)) != chunks.end();
+	bool ChunkExists(int x, int z)
+	{
+		return chunks_.find(std::make_pair(x, z)) != chunks_.end();
 	}
 
-	void render(const gl::shader& block) {
-		for (auto cnk : chunks) {
-			cnk.second->draw(block, glm::translate(glm::mat4(1.f),
-				glm::vec3(cnk.first.first * int(W), 0, cnk.first.second * int(W))));
+	void Render(const gl::Shader& block)
+	{
+		for (auto chunk : chunks_)
+		{
+			chunk.second->Draw(block, glm::translate(glm::mat4(1.f),
+			                                         glm::vec3(chunk.first.first * int(W), 0,
+			                                                   chunk.first.second * int(W))));
 		}
 	}
 
-	glm::ivec2 block_pos_to_chunk_pos(glm::ivec3 pos) {
-		return glm::ivec2(
-			int(floorf(float(pos.x) / W)),
-			int(floorf(float(pos.z) / W)));
+	static constexpr glm::ivec2 block_to_chunk_pos(glm::ivec3 pos)
+	{
+		return glm::ivec2(int(floorf(float(pos.x) / W)), int(floorf(float(pos.z) / W)));
 	}
 
-	glm::ivec3 chunk_pos_to_block_pos(std::pair<int, int> chunk_pos, glm::ivec3 loc) {
-		return glm::ivec3(chunk_pos.first * W + loc.x, loc.y, chunk_pos.second * W + loc.z);
+	static constexpr glm::ivec3 chunk_to_block_pos(glm::ivec2 chunk_pos, glm::ivec3 loc)
+	{
+		return glm::ivec3(chunk_pos.x * W + loc.x, loc.y, chunk_pos.y * W + loc.z);
 	}
 
-	glm::ivec3 block_pos_to_loc_pos(glm::ivec3 pos)
+	static constexpr glm::ivec3 block_to_loc_pos(glm::ivec3 pos)
 	{
 		// took me a few times to get this right
-		return { (pos.x % W + W) % W, pos.y, (pos.z % W + W) % W };
+		return {(pos.x % W + W) % W, pos.y, (pos.z % W + W) % W};
 	}
 
-	std::optional<block> get_block_at(glm::ivec3 world_pos, bool create_if_not_exists = false) {
-		glm::ivec2 chunk_pos = block_pos_to_chunk_pos(world_pos);
-		if (!create_if_not_exists && !chunk_exists(chunk_pos.x, chunk_pos.y))
+	std::optional<Block> GetBlockAt(glm::ivec3 world_pos, bool create_if_not_exists = false)
+	{
+		const glm::ivec2 chunk_pos = block_to_chunk_pos(world_pos);
+		if (!create_if_not_exists && !ChunkExists(chunk_pos.x, chunk_pos.y))
 			return std::nullopt;
 
-		glm::ivec3 loc_pos = block_pos_to_loc_pos(world_pos);
-		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_at(loc_pos.x, loc_pos.y, loc_pos.z);
+		glm::ivec3 loc_pos = block_to_loc_pos(world_pos);
+		return GetChunkAt(chunk_pos.x, chunk_pos.y)->GetBlockAt(loc_pos.x, loc_pos.y, loc_pos.z);
 	}
 
-	std::optional<std::reference_wrapper<block>> get_block_ref_at(glm::ivec3 world_pos,
-		bool create_if_not_exists = false, bool taint = true) {
-
-		glm::ivec2 chunk_pos = block_pos_to_chunk_pos(world_pos);
-		if (!create_if_not_exists && !chunk_exists(chunk_pos.x, chunk_pos.y))
-			return {};
-		glm::ivec3 loc_pos = block_pos_to_loc_pos(world_pos);
+	std::optional<std::reference_wrapper<Block>> GetBlockRefAt(glm::ivec3 world_pos,
+	                                                              bool create_if_not_exists = false, bool taint = true)
+	{
+		const glm::ivec2 chunk_pos = block_to_chunk_pos(world_pos);
+		if (!create_if_not_exists && !ChunkExists(chunk_pos.x, chunk_pos.y))
+			return std::nullopt;
+		glm::ivec3 loc_pos = block_to_loc_pos(world_pos);
 
 		spdlog::debug("block ref: ({},{},{}) -> ({},{}) ({},{},{})",
-			world_pos.x, world_pos.y, world_pos.z,
-			chunk_pos.x, chunk_pos.y, loc_pos.x, loc_pos.y, loc_pos.z);
+		              world_pos.x, world_pos.y, world_pos.z,
+		              chunk_pos.x, chunk_pos.y, loc_pos.x, loc_pos.y, loc_pos.z);
 
-		return get_chunk_at(chunk_pos.x, chunk_pos.y)->get_block_ref_at(loc_pos.x, loc_pos.y, loc_pos.z, taint);
+		return GetChunkAt(chunk_pos.x, chunk_pos.y)->GetBlockRefAt(loc_pos.x, loc_pos.y, loc_pos.z, taint);
 	}
 
-	void update_all_meshes() {
-		for (auto cnk : chunks) {
-			cnk.second->update_mesh();
-		}
+	void Update()
+	{
+		for (auto cnk : chunks_)
+			cnk.second->UpdateMesh();
 	}
 };
 
-namespace world::chunk {
-	const int CHUNK_W = 16;
-	const int CHUNK_H = 128;
+namespace world::chunk
+{
+const int CHUNK_W = 16;
+const int CHUNK_H = 128;
 
-	typedef chunk_manager<CHUNK_W, CHUNK_H> chunk_mgr_t;
+typedef ChunkManager<CHUNK_W, CHUNK_H> chunk_mgr_t;
 
-	extern std::weak_ptr<chunk_mgr_t> db;
+extern std::weak_ptr<chunk_mgr_t> db;
 
-	std::shared_ptr<chunk_mgr_t> load();
+std::shared_ptr<chunk_mgr_t> load();
 }
 
 #endif //RENDEN_CHUNK_MANAGER_HPP

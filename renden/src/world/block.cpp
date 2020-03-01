@@ -8,24 +8,27 @@
 
 #include "world/block.hpp"
 
-unsigned char block::get_power_state() {
-    auto block_db = world::entities::blocks::db.lock();
+unsigned char Block::GetPowerState() const
+{
+	auto block_db = world::block::db.lock();
 
-    auto block = block_db->get_block_by_id(this->id);
-    if(block && block->is_power_source)
-        return 16;
-    return power_state;
+	const auto block = block_db->GetBlockById(this->Id);
+	if (block && block->IsPowerSource)
+		return 16;
+	return power_state_;
 }
 
-void block::set_passive_power_state(unsigned char power_state) {
-    this->power_state = power_state;
+void Block::SetPassivePowerState(unsigned char power_state)
+{
+	this->power_state_ = power_state;
 }
 
-bool block::operator==(const block &o) {
-    return o.id == id && o.power_state == power_state;
+bool Block::operator==(const Block& o) const
+{
+	return o.Id == Id && o.power_state_ == power_state_;
 }
 
-bool block::operator!=(const block &o) {
-    return !operator==(o);
+bool Block::operator!=(const Block& o) const
+{
+	return !operator==(o);
 }
-

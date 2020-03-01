@@ -3,82 +3,82 @@
 
 #include "camera.hpp"
 
-camera::camera(GLFWwindow* window, float width, float height) : window(window), width(width), height(height)
+Camera::Camera(GLFWwindow* window, float width, float height) : window_(window), width_(width), height_(height)
 {
 }
 
-camera::~camera()
+Camera::~Camera()
 {
 }
 
-void camera::update(float deltaTime, bool focus)
+void Camera::Update(float deltaTime, bool focus)
 {
 	// calculate mouse movement
 	if (focus) {
 		double xpos, ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);
-		glfwSetCursorPos(window, width / 2, height / 2);
-		yaw += mouseSpeed * deltaTime * float(width / 2 - xpos);
-		pitch += mouseSpeed * deltaTime * float(height / 2 - ypos);
-		if (pitch > glm::pi<float>() / 2 - 0.01)
-			pitch = static_cast<float>(glm::pi<float>() / 2 - 0.01);
-		if (pitch < -glm::pi<float>() / 2 + 0.01)
-			pitch = static_cast<float>(-glm::pi<float>() / 2 + 0.01);
+		glfwGetCursorPos(window_, &xpos, &ypos);
+		glfwSetCursorPos(window_, width_ / 2, height_ / 2);
+		yaw_ += mouse_speed_ * deltaTime * float(width_ / 2 - xpos);
+		pitch_ += mouse_speed_ * deltaTime * float(height_ / 2 - ypos);
+		if (pitch_ > glm::pi<float>() / 2 - 0.01)
+			pitch_ = static_cast<float>(glm::pi<float>() / 2 - 0.01);
+		if (pitch_ < -glm::pi<float>() / 2 + 0.01)
+			pitch_ = static_cast<float>(-glm::pi<float>() / 2 + 0.01);
 	}
 
 	// calculate camera vectors
-	glm::vec3 direction = normalize(this->get_direction());
-	glm::vec3 right = normalize(cross(direction, up));
+	const glm::vec3 direction = normalize(this->GetDirection());
+	const glm::vec3 right = normalize(cross(direction, up_));
 
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-		speed = 100.0f;
+	if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+		speed_ = 100.0f;
 	}
 	else {
-		speed = 10.0f;
+		speed_ = 10.0f;
 	}
 
 	// handle input
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		position += direction * deltaTime * speed;
+	if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
+		Position += direction * deltaTime * speed_;
 	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		position -= direction * deltaTime * speed;
+	if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
+		Position -= direction * deltaTime * speed_;
 	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		position += right * deltaTime * speed;
+	if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
+		Position += right * deltaTime * speed_;
 	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		position -= right * deltaTime * speed;
+	if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
+		Position -= right * deltaTime * speed_;
 	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-		position -= glm::vec3(0, 1, 0) * deltaTime * speed;
+	if (glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+		Position -= glm::vec3(0, 1, 0) * deltaTime * speed_;
 	}
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-		position += glm::vec3(0, 1, 0) * deltaTime * speed;
+	if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS) {
+		Position += glm::vec3(0, 1, 0) * deltaTime * speed_;
 	}
-	if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS) {
-		if (fov > 0.01)
-			fov -= 0.01;
+	if (glfwGetKey(window_, GLFW_KEY_PAGE_UP) == GLFW_PRESS) {
+		if (fov_ > 0.01)
+			fov_ -= 0.01;
 	}
-	if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS) {
-		if (fov < glm::pi<float>() - 0.01)
-			fov += 0.01;
+	if (glfwGetKey(window_, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS) {
+		if (fov_ < glm::pi<float>() - 0.01)
+			fov_ += 0.01;
 	}
 
-	view = glm::lookAt(
-		position,
-		position + direction,
-		up
+	View = glm::lookAt(
+		Position,
+		Position + direction,
+		up_
 	);
-	proj = glm::perspective(fov, width / height, 0.01f, 1000.0f);
+	Proj = glm::perspective(fov_, width_ / height_, 0.01f, 1000.0f);
 }
 
-std::optional<std::pair<glm::ivec3, glm::ivec3>> camera::cast_target(world::chunk::chunk_mgr_t & cnk_mgr, int distance)
+std::optional<std::pair<glm::ivec3, glm::ivec3>> Camera::CastTarget(world::chunk::chunk_mgr_t & cnk_mgr, int distance) const
 {
 	assert(distance > 0);
 
-	glm::vec3 u = position;
-	glm::vec3 v = normalize(this->get_direction());
+	glm::vec3 u = Position;
+	glm::vec3 v = normalize(this->GetDirection());
 
 	int x = int(roundf(u.x));
 	int y = int(roundf(u.y));
@@ -127,17 +127,17 @@ std::optional<std::pair<glm::ivec3, glm::ivec3>> camera::cast_target(world::chun
 			}
 		}
 		glm::ivec3 pos = glm::ivec3(x, y, z);
-		std::optional<block> blk = cnk_mgr.get_block_at(pos);
-		if (blk && blk->id > 0) return std::make_pair(pos, norm);
+		std::optional<Block> blk = cnk_mgr.GetBlockAt(pos);
+		if (blk && blk->Id > 0) return std::make_pair(pos, norm);
 	}
 	return std::nullopt;
 }
 
-glm::vec3 camera::get_direction() const
+glm::vec3 Camera::GetDirection() const
 {
 	return glm::vec3(
-		std::cos(pitch) * std::sin(yaw),
-		std::sin(pitch),
-		std::cos(pitch) * std::cos(yaw)
+		std::cos(pitch_) * std::sin(yaw_),
+		std::sin(pitch_),
+		std::cos(pitch_) * std::cos(yaw_)
 	);
 }

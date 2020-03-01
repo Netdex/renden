@@ -1,53 +1,63 @@
-//
-// Created by netdex on 2/17/19.
-//
-
 #ifndef RENDEN_BLOCK_PRIMITIVE_HPP
 #define RENDEN_BLOCK_PRIMITIVE_HPP
 
-
-#include <vector>
-#include <glm/vec3.hpp>
 #include <array>
-#include <glad/glad.h>
-#include <util/bytebuffer.hpp>
+
+#include <glm/vec3.hpp>
+
+#include "util/bytebuffer.hpp"
 
 
+namespace world::block
+{
+enum BlockFace : int
+{
+	NEG_Z = 1 << 0,
+	POS_Z = 1 << 1,
+	NEG_X = 1 << 2,
+	POS_X = 1 << 3,
+	NEG_Y = 1 << 4,
+	POS_Y = 1 << 5
+};
 
-namespace world::block {
-    enum block_face : int {
-        NEG_Z = 1 << 0,
-        POS_Z = 1 << 1,
-        NEG_X = 1 << 2,
-        POS_X = 1 << 3,
-        NEG_Y = 1 << 4,
-        POS_Y = 1 << 5
-    };
-    typedef int block_face_set;
+typedef int BlockFaceSet;
 
-    extern const block_face FACE_IDX_TO_BLOCK_FACE[];
-    extern const int BLOCK_FACE_TO_IDX[];
-    extern const glm::ivec3 FACE_IDX_TO_OFFSET[];
+constexpr BlockFace kFaceToBlock[] = {NEG_Z, POS_Z, NEG_X, POS_X, NEG_Y, POS_Y};
+
+constexpr int kFaceToIndex[] = {
+	-1, 0, 1, -1, 2, -1, -1, -1,
+	3, -1, -1, -1, -1, -1, -1, -1,
+	4, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, 5
+}; // I hate this
+
+constexpr glm::ivec3 kFaceToOffset[] = {
+	glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1), glm::ivec3(-1, 0, 0),
+	glm::ivec3(1, 0, 0), glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0)
+};
+
 }
 
-class block_primitive {
+class BlockPrimitive
+{
 public:
-    std::array<float, 6 * 4 * 3> uv;
-    bool is_opaque;
-    bool is_power_source;
-    bool is_conduit;
+	std::array<float, 6 * 4 * 3> uv;
+	bool IsOpaque;
+	bool IsPowerSource;
+	bool IsConduit;
 
-    explicit block_primitive(std::array<float, 6 * 4 * 3> uv,
-                             bool is_opaque = false,
-                             bool is_power_source = false,
-                             bool is_conduit = false)
-            : uv{uv},
-              is_opaque{is_opaque},
-              is_power_source{is_power_source},
-              is_conduit{is_conduit} {}
+	explicit BlockPrimitive(std::array<float, 6 * 4 * 3> uv,
+	                         bool is_opaque = false,
+	                         bool is_power_source = false,
+	                         bool is_conduit = false)
+		: uv{uv},
+		  IsOpaque{is_opaque},
+		  IsPowerSource{is_power_source},
+		  IsConduit{is_conduit}
+	{
+	}
 
-    void append_vertex_list(bytebuf<> &vlist, glm::ivec3 position, world::block::block_face_set faces);
-
+	void AppendToVertexList(ByteBuffer<>& vlist, glm::ivec3 position, world::block::BlockFaceSet faces);
 };
 
 

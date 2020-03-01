@@ -2,25 +2,26 @@
 #define RENDEN_RETICLE_HPP
 
 #include <memory>
+#include <optional>
 
 #include "gl/mesh.hpp"
 #include "loader/shader_manager.hpp"
 #include "loader/block_manager.hpp"
 #include "primitive/block_primitive.hpp"
-#include <optional>
 
-class reticle {
-	std::unique_ptr<gl::mesh<>> select_mesh;
-	std::unique_ptr<gl::mesh<>> reticle_mesh;
-	std::unique_ptr<gl::mesh<>> dir_mesh;
-	
+class Reticle
+{
+	std::unique_ptr<gl::Mesh<>> select_mesh_;
+	std::unique_ptr<gl::Mesh<>> reticle_mesh_;
+	std::unique_ptr<gl::Mesh<>> dir_mesh_;
+
 public:
-	reticle();
+	Reticle();
 
-	void draw(const gl::shader& shader, 
-		const glm::mat4 &view, const glm::mat4 &proj,
-		const glm::vec3 pos, const glm::vec3 dir,
-		const std::optional<glm::ivec3> &target);
+	void Draw(const gl::Shader& shader,
+	          const glm::mat4& view, const glm::mat4& proj,
+	          const glm::vec3& pos, const glm::vec3& dir,
+	          const std::optional<glm::ivec3>& target) const;
 };
 
 #endif
