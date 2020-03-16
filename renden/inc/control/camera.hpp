@@ -7,8 +7,13 @@
 #include <glm/glm.hpp>
 #include <glm/ext/scalar_constants.hpp>
 
-#include "loader/chunk_manager.hpp"
+namespace world
+{
+	class World;
+}
 
+namespace control
+{
 class Camera
 {
 	GLFWwindow* window_ = nullptr;
@@ -32,9 +37,10 @@ public:
 	Camera& operator=(const Camera& o) = delete;
 
 	void Update(float deltaTime, bool focus);
-	std::optional<std::pair<glm::ivec3, glm::ivec3>> CastTarget(world::chunk::chunk_mgr_t& cnk_mgr, int distance) const;
+	std::optional<std::pair<glm::ivec3, glm::ivec3>> CastTarget(world::World& world, int distance) const;
 	glm::vec3 GetDirection() const;
 };
+}
 
 
 #endif //RENDEN_CAMERA_HPP

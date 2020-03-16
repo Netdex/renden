@@ -6,9 +6,9 @@
 //uniform mat4 view;
 //uniform mat4 proj;
 
-layout(location = 0) in lowp ivec3 position;
-layout(location = 1) in lowp int face;
-layout(location = 2) in lowp vec3 texcoords[4];
+in ivec3 position;
+in int face;
+in vec3 texcoords[4];
 
 out VS_OUT {
 //	vec3 frag_pos;

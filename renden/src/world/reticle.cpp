@@ -1,8 +1,15 @@
 #include "world/reticle.hpp"
 
-static const std::vector<float> reticle_points{
+#include <glad/glad.h>
+
+#include "loader/shader_program.hpp"
+#include "util/context.hpp"
+
+namespace world
+{
+static const GLfloat RETICLE_POINTS[] = {
 	-0.01, 0, 0, 1, 1, 1,
-	0.01, 0, 0, 0, 1, 1, 1,
+	0.01, 0, 0, 1, 1, 1,
 	0, -0.01, 0, 1, 1, 1,
 	0, 0.01, 0, 1, 1, 1,
 };
@@ -53,10 +60,10 @@ static const GLfloat CUBE_VERTICES[] = {
 };
 
 Reticle::Reticle() :
-	select_mesh_(std::make_unique<gl::Mesh<>>(CUBE_VERTICES, sizeof(CUBE_VERTICES), gl::TRIANGLES,
-	                                         &shaders::reticle::attribs[0], 2)),
-	reticle_mesh_(std::make_unique<gl::Mesh<>>(reticle_points, gl::LINES, shaders::reticle::attribs)),
-	dir_mesh_(std::make_unique<gl::Mesh<>>(gl::LINES, shaders::reticle::attribs))
+	select_mesh_(std::make_unique<gl::Mesh<>>(CUBE_VERTICES,
+	                                          Context<shader::ReticleShader>::Get().MeshAttributes, gl::TRIANGLES)),
+	reticle_mesh_(std::make_unique<gl::Mesh<>>(RETICLE_POINTS,Context<shader::ReticleShader>::Get().MeshAttributes, gl::LINES)),
+	dir_mesh_(std::make_unique<gl::Mesh<>>(Context<shader::ReticleShader>::Get().MeshAttributes, gl::LINES))
 {
 }
 
@@ -72,7 +79,7 @@ void Reticle::Draw(const gl::Shader& shader,
 	{
 		// Scale the block ghost to be slightly larger than a block, so that there isn't z-fighting. Sorry.
 		select_mesh_->Model = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(*target)),
-		                                glm::vec3(1.f) + 0.01f);
+		                                 glm::vec3(1.f) + 0.01f);
 
 		//GLint polyMode;
 		//glGetIntegerv(GL_POLYGON_MODE, &polyMode);
@@ -92,10 +99,12 @@ void Reticle::Draw(const gl::Shader& shader,
 	};
 
 	dir_mesh_->Model = glm::mat4(1.f);
-	dir_mesh_->BufferVertexData(&axis[0][0], sizeof(axis));
+	// TODO This is kind of nasty
+	dir_mesh_->BufferVertexData(nonstd::span(&axis[0][0], sizeof(axis)));
 	dir_mesh_->Draw(shader);
 
 	shader.Bind("proj", glm::mat4(1.f));
 	shader.Bind("view", glm::mat4(1.f));
 	reticle_mesh_->Draw(shader);
+}
 }

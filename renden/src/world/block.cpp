@@ -7,12 +7,13 @@
 #include <climits>
 
 #include "world/block.hpp"
+#include "util/context.hpp"
 
 unsigned char Block::GetPowerState() const
 {
-	auto block_db = world::block::db.lock();
+	auto& block_db = Context<world::BlockManager>::Get();
 
-	const auto block = block_db->GetBlockById(this->Id);
+		const auto block = block_db.GetBlockById(this->Id);
 	if (block && block->IsPowerSource)
 		return 16;
 	return power_state_;

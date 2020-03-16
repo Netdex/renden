@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <spdlog/spdlog.h>
+#include <nonstd/span.hpp>
 
 namespace gl
 {
@@ -42,12 +43,12 @@ public:
 		std::string path = PROJECT_SOURCE_DIR "/renden/shaders/";
 		//    std::string path = "../../renden/shaders/";
 		std::ifstream fd(path + filename);
-		const auto src = std::string(std::istreambuf_iterator<char>(fd),
+		auto src = std::string(std::istreambuf_iterator<char>(fd),
 		                             (std::istreambuf_iterator<char>()));
 
 		// Create a Shader Object
 		const char* source = src.c_str();
-		const auto shader = Create(filename);
+		auto shader = Create(filename);
 		glShaderSource(shader, 1, &source, nullptr);
 		glCompileShader(shader);
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &status_);
@@ -56,7 +57,7 @@ public:
 		if (!static_cast<bool>(status_))
 		{
 			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length_);
-			const std::unique_ptr<char[]> buffer(new char[length_]);
+			std::unique_ptr<char[]> buffer(new char[length_]);
 			glGetShaderInfoLog(shader, length_, nullptr, buffer.get());
 			spdlog::error("OGL:Shader - {}\n{}", filename.c_str(), buffer.get());
 		}
@@ -88,7 +89,7 @@ public:
 		if (status_ == false)
 		{
 			glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &length_);
-			const std::unique_ptr<char[]> buffer(new char[length_]);
+			std::unique_ptr<char[]> buffer(new char[length_]);
 			glGetProgramInfoLog(program_, length_, nullptr, buffer.get());
 			spdlog::error("OGL:Shader - {}", buffer.get());
 		}
@@ -103,7 +104,7 @@ public:
 
 	GLuint GetAttribute(std::string const& name) const
 	{
-		const GLint attribute_location = glGetAttribLocation(program_, name.c_str());
+		GLint attribute_location = glGetAttribLocation(program_, name.c_str());
 		assert(attribute_location >= 0);
 		return static_cast<GLuint>(attribute_location);
 	}
@@ -134,15 +135,15 @@ public:
 		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(matrix));
 	}
 
-	void Bind(GLint location, float* data, size_t size) const
+	void Bind(GLint location, nonstd::span<float> data) const
 	{
-		glUniform1fv(location, static_cast<GLsizei>(size), data);
+		glUniform1fv(location, static_cast<GLsizei>(data.size()), data.data());
 	}
 
 	template <typename T>
 	void Bind(std::string const& name, T&& value, size_t size) const
 	{
-		const GLint location = glGetUniformLocation(program_, name.c_str());
+		GLint location = glGetUniformLocation(program_, name.c_str());
 		if (location == -1) spdlog::error("OGL:Shader - Missing Uniform: {}", name.c_str());
 		else
 		{

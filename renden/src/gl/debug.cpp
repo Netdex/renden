@@ -1,17 +1,17 @@
-
-#ifndef RENDEN_DEBUG_HPP
-#define RENDEN_DEBUG_HPP
+#include "gl/debug.hpp"
 
 #include <sstream>
 
-#include "glitter.hpp"
+#include <spdlog/spdlog.h>
 
 void APIENTRY debug_callback(GLenum source, GLenum type, GLuint id,
-	GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+                             GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
 	std::stringstream output;
 	output << "OGL:";
 
-	switch (severity) {
+	switch (severity)
+	{
 	case GL_DEBUG_SEVERITY_HIGH:
 		output << "H";
 		break;
@@ -28,7 +28,8 @@ void APIENTRY debug_callback(GLenum source, GLenum type, GLuint id,
 	}
 	output << ":";
 
-	switch (type) {
+	switch (type)
+	{
 	case GL_DEBUG_TYPE_ERROR:
 		output << "Error";
 		break;
@@ -59,7 +60,8 @@ void APIENTRY debug_callback(GLenum source, GLenum type, GLuint id,
 	default: break;
 	}
 	output << ":";
-	switch (source) {
+	switch (source)
+	{
 	case GL_DEBUG_SOURCE_API:
 		output << "API";
 		break;
@@ -83,4 +85,3 @@ void APIENTRY debug_callback(GLenum source, GLenum type, GLuint id,
 	output << " - " << message;
 	spdlog::trace(output.str());
 }
-#endif

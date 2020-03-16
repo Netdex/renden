@@ -29,3 +29,6 @@
 [submodule "vendor/spdlog"]
 	path = vendor/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "vendor/span-lite"]
+	path = vendor/span-lite
+	url = https://github.com/martinmoene/span-lite.git

@@ -58,7 +58,6 @@ class Texture2D
 	GLuint tex_id_;
 public:
 
-
 	Texture2D(const std::string paths[], size_t count,
 	          unsigned int width, unsigned int height,
 	          TextureFilterMode filter_mode, TextureWrapMode wrap_mode,

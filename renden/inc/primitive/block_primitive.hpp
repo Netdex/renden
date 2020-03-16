@@ -57,7 +57,7 @@ public:
 	{
 	}
 
-	void AppendToVertexList(ByteBuffer<>& vlist, glm::ivec3 position, world::block::BlockFaceSet faces);
+	void AppendToVertexList(util::byte_buffer<>& vlist, glm::ivec3 position, world::block::BlockFaceSet faces);
 };
 
 

@@ -46,7 +46,8 @@ include_directories(renden/inc/
                     vendor/glfw/include/
                     vendor/glm/
                     vendor/stb/
-					vendor/spdlog/include/)
+					vendor/spdlog/include/
+					vendor/span-lite/include)
 
 file(GLOB VENDORS_SOURCES vendor/glad/src/glad.c)
 file(GLOB_RECURSE PROJECT_HEADERS renden/inc/*.hpp)
@@ -72,8 +73,7 @@ add_definitions(-DGLFW_INCLUDE_NONE
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
                                ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
                                ${VENDORS_SOURCES})
-target_link_libraries(${PROJECT_NAME} PUBLIC  glfw
-                      ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
 #target_link_libraries(${PROJECT_NAME} PUBLIC assimp BulletDynamics BulletCollision LinearMath)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 

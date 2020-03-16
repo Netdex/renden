@@ -2,10 +2,13 @@
 // Created by netdex on 2/17/19.
 //
 
-#include <primitive/block_primitive.hpp>
-#include <loader/shader_manager.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-void BlockPrimitive::AppendToVertexList(ByteBuffer<>& vlist, glm::ivec3 position, world::block::BlockFaceSet faces)
+#include "primitive/block_primitive.hpp"
+
+
+void BlockPrimitive::AppendToVertexList(util::byte_buffer<>& vlist, glm::ivec3 position,
+                                        world::block::BlockFaceSet faces)
 {
 	for (int i = 0; i < 6; i++)
 	{

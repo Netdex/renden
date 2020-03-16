@@ -9,6 +9,8 @@
 #include <gl/texture.hpp>
 #include <gl/mesh.hpp>
 
+namespace world
+{
 class Skybox
 {
 	std::shared_ptr<gl::Cubemap> texture_;
@@ -18,6 +20,7 @@ public:
 
 	void Draw(const gl::Shader& shader) const;
 };
+}
 
 
 #endif //RENDEN_SKYBOX_HPP

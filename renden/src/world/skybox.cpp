@@ -1,7 +1,13 @@
 #include "world/skybox.hpp"
-#include "loader/shader_manager.hpp"
 
-const std::vector<float> SKYBOX_VERTICES{
+#include <glad/glad.h>
+
+#include "loader/shader_program.hpp"
+#include "util/context.hpp"
+
+namespace world
+{
+const GLfloat SKYBOX_VERTICES[] = {
 	// xy -z (FRONT)
 	-1.0f, 1.0f, -1.0f,
 	1.0f, -1.0f, -1.0f,
@@ -48,11 +54,15 @@ const std::vector<float> SKYBOX_VERTICES{
 
 Skybox::Skybox(const std::vector<std::string>& paths)
 	: texture_(std::make_shared<gl::Cubemap>(paths, gl::LINEAR, gl::CLAMP_EDGE, 0)),
-	  mesh_(std::make_shared<gl::Mesh<>>(SKYBOX_VERTICES, gl::TRIANGLES, shaders::tenbox::attribs))
+	  mesh_(std::make_shared<gl::Mesh<>>(SKYBOX_VERTICES,
+	                                     Context<shader::SkyboxShader>::Get().MeshAttributes, gl::TRIANGLES))
 {
 }
 
 void Skybox::Draw(const gl::Shader& shader) const
 {
+	glDepthFunc(GL_LEQUAL);
 	mesh_->Draw(shader);
+	glDepthFunc(GL_LESS);
+}
 }

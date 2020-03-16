@@ -1,6 +1,6 @@
 #version 430 core
 
-vec3 CUBE_VERTICES[] = {
+const vec3 CUBE_VERTICES[] = {
 	// xy -z
 	{0.5f, -0.5f, -0.5f},
 	{0.5f, 0.5f, -0.5f},
@@ -33,7 +33,7 @@ vec3 CUBE_VERTICES[] = {
 	{-0.5f, 0.5f, 0.5f},
 };
 
-vec3 CUBE_NORMALS[] = {
+const vec3 CUBE_NORMALS[] = {
 	{0.0f, 0.0f, -1.0f},    // xy -z
 	{0.0f, 0.0f, 1.0f},	    // xy +z
 	{-1.0f, 0.0f, 0.0f},	// yz -x
@@ -46,7 +46,7 @@ uniform mat4 chunk;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
-uniform float now;
+//uniform float now;
 
 layout (points) in;
 layout (triangle_strip, max_vertices=4) out;

@@ -5,7 +5,8 @@
 
 #include "loader/block_manager.hpp"
 
-
+namespace world
+{
 BlockManager::BlockManager(const std::string& block_tex_conf, const std::string& block_def_conf)
 {
 	this->LoadTextures(block_tex_conf);
@@ -87,13 +88,4 @@ std::optional<unsigned int> BlockManager::GetBlockIdByName(const std::string& na
 	return (result != block_name_to_id_.end()) ? std::optional<unsigned int>{result->second} : std::nullopt;
 }
 
-
-std::weak_ptr<BlockManager> world::block::db;
-
-std::shared_ptr<BlockManager> world::block::load()
-{
-	auto shr_db = std::make_shared<BlockManager>(PROJECT_SOURCE_DIR "/renden/res/block_texture.json",
-	                                             PROJECT_SOURCE_DIR "/renden/res/block_def.json");
-	db = shr_db;
-	return shr_db;
 }

@@ -3,7 +3,8 @@
 
 #include <vector>
 
-#include "glad/glad.h"
+#include <glad/glad.h>
+#include <nonstd/span.hpp>
 
 namespace gl
 {
@@ -43,27 +44,12 @@ public:
 		this->Bind();
 	}
 
-	Buffer(BufferType type, BufferUsage usage, const T* data, size_t size)
+	Buffer(BufferType type, BufferUsage usage, nonstd::span<const T> data)
 		: type_(type), usage(usage)
 	{
 		glGenBuffers(1, &this->id_);
-		this->Allocate(data, size);
+		this->Allocate(data);
 		this->Bind();
-	}
-
-	explicit Buffer(BufferType type, BufferUsage usage, const std::vector<T>& data) : Buffer(
-		type, usage, &data[0], data.size() * sizeof(data[0]))
-	{
-	}
-
-	Buffer(const T* data, size_t size)
-		: Buffer(VERTEX_BUFFER, STATIC_DRAW, data, size)
-	{
-	}
-
-	explicit Buffer(const std::vector<T>& data)
-		: Buffer(VERTEX_BUFFER, STATIC_DRAW, data)
-	{
 	}
 
 	~Buffer()
@@ -84,7 +70,7 @@ public:
 		glBindBuffer(static_cast<GLenum>(type_), 0);
 	}
 
-	size_t GetSize()
+	size_t GetSizeBytes()
 	{
 		if (cached_size_ == 0)
 		{
@@ -93,39 +79,33 @@ public:
 			glGetBufferParameteriv(type_, GL_BUFFER_SIZE, &size);
 			cached_size_ = size;
 			this->Unbind();
-			return static_cast<size_t>(size);
 		}
 		return cached_size_;
 	}
 
-	size_t GetElementCount()
+	size_t GetSize()
 	{
-		return this->GetSize() / sizeof(T);
+		return this->GetSizeBytes() / sizeof(T);
 	}
 
 	//T *map(/* access */);
 
-	void Allocate(const T* data, size_t size)
+	void Allocate(nonstd::span<const T> data)
 	{
 		cached_size_ = 0;
 		this->Bind();
 		glBufferData(static_cast<GLenum>(type_),
-		             static_cast<GLsizeiptr>(size), static_cast<const GLvoid*>(data),
+		             static_cast<GLsizeiptr>(data.size_bytes()), static_cast<const GLvoid*>(data.data()),
 		             static_cast<GLenum>(usage));
 		this->Unbind();
 	}
 
-	void Update(unsigned int offset, const T* data, size_t size)
+	void Update(unsigned int offset, nonstd::span<T> data)
 	{
 		this->Bind();
 		glBufferSubData(type_, static_cast<GLintptr>(offset),
-		                static_cast<GLsizeiptr>(size), static_cast<const GLvoid*>(data));
+		                static_cast<GLsizeiptr>(data.size()), static_cast<const GLvoid*>(data.data()));
 		this->Unbind();
-	}
-
-	void Update(unsigned int offset, const std::vector<T>& data)
-	{
-		this->Update(offset, &data.begin(), data.size());
 	}
 };
 }

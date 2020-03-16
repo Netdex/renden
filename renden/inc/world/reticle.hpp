@@ -5,10 +5,11 @@
 #include <optional>
 
 #include "gl/mesh.hpp"
-#include "loader/shader_manager.hpp"
 #include "loader/block_manager.hpp"
 #include "primitive/block_primitive.hpp"
 
+namespace world
+{
 class Reticle
 {
 	std::unique_ptr<gl::Mesh<>> select_mesh_;
@@ -23,5 +24,6 @@ public:
 	          const glm::vec3& pos, const glm::vec3& dir,
 	          const std::optional<glm::ivec3>& target) const;
 };
+}
 
 #endif

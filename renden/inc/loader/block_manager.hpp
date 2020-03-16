@@ -9,6 +9,8 @@
 #include "gl/texture.hpp"
 #include "primitive/block_primitive.hpp"
 
+namespace world
+{
 constexpr int MAXIMUM_BLOCKS = 256;
 
 class BlockManager
@@ -34,11 +36,6 @@ public:
 
 	std::optional<unsigned int> GetBlockIdByName(const std::string& name);
 };
-
-namespace world::block
-{
-extern std::weak_ptr<BlockManager> db;
-std::shared_ptr<BlockManager> load();
 }
 
 #endif //RENDEN_BLOCK_TEXTURE_MANAGER_HPP
