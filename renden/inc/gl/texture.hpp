@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <stb_image.h>
+#include <nonstd/span.hpp>
 
 namespace gl
 {
@@ -42,16 +43,43 @@ enum TextureFilterCase : GLenum
 	SCALE_DOWN = GL_TEXTURE_MIN_FILTER
 };
 
-// TODO
+/**
+ * \brief 1D texture from data buffer
+ * \tparam T Data type of buffer
+ * TODO Use texture buffers instead?
+ */
+template <GLenum internalformat, GLenum type, typename T = GLfloat>
 class Texture1D
 {
 	GLuint id_;
 	GLuint tex_id_;
 public:
+	Texture1D(nonstd::span<T> data, GLuint tex_id) : tex_id_(tex_id)
+	{
+		glGenTextures(1, &id_);
+		this->Bind();
+		glTexStorage1D(GL_TEXTURE_1D, 1, internalformat, data.size());
+		glTexImage1D(GL_TEXTURE_1D, 0, internalformat, data.size(), 0, internalformat, type, data.data());
+	}
 
-	Texture1D(const Texture1D* o) = delete;
+	~Texture1D()
+	{
+		glDeleteTextures(1, &id_);
+	}
+
+	Texture1D(const Texture1D& o) = delete;
+	Texture1D& operator=(const Texture1D& o) = delete;
+
+	void Bind() const
+	{
+		glActiveTexture(GL_TEXTURE0 + tex_id_);
+		glBindTexture(GL_TEXTURE_1D, id_);
+	}
 };
 
+/**
+ * \brief 2D texture array from files
+ */
 class Texture2D
 {
 	GLuint id_;
@@ -61,10 +89,9 @@ public:
 	Texture2D(const std::string paths[], size_t count,
 	          unsigned int width, unsigned int height,
 	          TextureFilterMode filter_mode, TextureWrapMode wrap_mode,
-	          unsigned int tex_id) : tex_id_(tex_id)
+	          GLuint tex_id) : tex_id_(tex_id)
 	{
 		glGenTextures(1, &id_);
-		glActiveTexture(GL_TEXTURE0 + tex_id);
 		this->Bind();
 
 		glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width, height, static_cast<GLsizei>(count));
@@ -108,6 +135,7 @@ public:
 
 	void Bind() const
 	{
+		glActiveTexture(GL_TEXTURE0 + tex_id_);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, id_);
 	}
 
@@ -135,7 +163,7 @@ public:
 
 	Cubemap(const std::string paths[6],
 	        TextureFilterMode filter_mode, TextureWrapMode wrap_mode,
-	        unsigned int tex_id) : tex_id_(tex_id)
+	        GLuint tex_id) : tex_id_(tex_id)
 	{
 		glGenTextures(1, &id_);
 		this->Bind();
@@ -202,6 +230,5 @@ public:
 		glTexParameterfv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BORDER_COLOR, value_ptr(color));
 	}
 };
-
 }
 #endif //RENDEN_TEXTURE_HPP

@@ -4,6 +4,7 @@
 #include <spdlog/spdlog.h>
 
 #include "loader/block_manager.hpp"
+#include "loader/shader_program.hpp"
 
 namespace world
 {
@@ -34,7 +35,7 @@ void BlockManager::LoadTextures(const std::string& block_tex_conf)
 		++idx;
 	}
 
-	textures_ = std::make_unique<gl::Texture2D>(paths, width, height, gl::NEAREST, gl::CLAMP_EDGE, 0);
+	textures_ = std::make_unique<gl::Texture2D>(paths, width, height, gl::NEAREST, gl::CLAMP_EDGE, shader::BlockShader::kBlockTextureUnit);
 	spdlog::info("Loaded {} textures", paths.size());
 }
 

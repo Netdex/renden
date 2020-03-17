@@ -32,7 +32,7 @@ BlockShader::BlockShader()
 		},
 	};
 	// the loaded texture should never change
-	shader_->Bind("tex", 0);
+	shader_->Bind("tex", kBlockTextureUnit);
 	spdlog::debug("Loaded block shader");
 }
 
@@ -47,7 +47,7 @@ SkyboxShader::SkyboxShader()
 		},
 	};
 	// the loaded texture should never change
-	shader_->Bind("tex", 0);
+	shader_->Bind("tex",kSkyTextureUnit);
 
 	spdlog::debug("Loaded skybox shader");
 }

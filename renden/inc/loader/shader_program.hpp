@@ -33,6 +33,8 @@ public:
 	BlockShader();
 
 	std::vector<gl::VArrayAttribute> MeshAttributes;
+
+	static constexpr GLuint kBlockTextureUnit = 0;
 };
 
 class SkyboxShader : public ShaderProgram
@@ -41,6 +43,8 @@ public:
 	SkyboxShader();
 
 	std::vector<gl::VArrayAttribute> MeshAttributes;
+
+	static constexpr GLuint kSkyTextureUnit = 1;
 };
 
 class ReticleShader : public ShaderProgram
