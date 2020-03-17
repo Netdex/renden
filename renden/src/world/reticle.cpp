@@ -62,7 +62,8 @@ static const GLfloat CUBE_VERTICES[] = {
 Reticle::Reticle() :
 	select_mesh_(std::make_unique<gl::Mesh<>>(CUBE_VERTICES,
 	                                          Context<shader::ReticleShader>::Get().MeshAttributes, gl::TRIANGLES)),
-	reticle_mesh_(std::make_unique<gl::Mesh<>>(RETICLE_POINTS,Context<shader::ReticleShader>::Get().MeshAttributes, gl::LINES)),
+	reticle_mesh_(std::make_unique<gl::Mesh<>>(RETICLE_POINTS, Context<shader::ReticleShader>::Get().MeshAttributes,
+	                                           gl::LINES)),
 	dir_mesh_(std::make_unique<gl::Mesh<>>(Context<shader::ReticleShader>::Get().MeshAttributes, gl::LINES))
 {
 }
@@ -100,7 +101,7 @@ void Reticle::Draw(const gl::Shader& shader,
 
 	dir_mesh_->Model = glm::mat4(1.f);
 	// TODO This is kind of nasty
-	dir_mesh_->BufferVertexData(nonstd::span(&axis[0][0], sizeof(axis)));
+	dir_mesh_->BufferVertexData(nonstd::span(&axis[0][0], sizeof(axis) / sizeof(GLfloat)));
 	dir_mesh_->Draw(shader);
 
 	shader.Bind("proj", glm::mat4(1.f));
