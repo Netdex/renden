@@ -110,12 +110,17 @@ public:
 	}
 
 	// Wrap Calls to glUniform
-	void Bind(GLint location, int value) const
+	void Bind(GLint location, GLint value) const
 	{
 		glUniform1i(location, value);
 	}
+
+	void Bind(GLint location, GLuint value) const
+	{
+		glUniform1ui(location, value);
+	}
 	
-	void Bind(GLint location, float value) const
+	void Bind(GLint location, GLfloat value) const
 	{
 		glUniform1f(location, value);
 	}
