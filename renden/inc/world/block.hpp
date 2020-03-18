@@ -1,15 +1,17 @@
 #ifndef RENDEN_BLOCK_HPP
 #define RENDEN_BLOCK_HPP
 
+typedef unsigned char block_id_t;
+
 class Block
 {
 	unsigned char power_state_;
 
 public:
-	unsigned char Id;
+	block_id_t ID;
 
-	explicit Block(unsigned char id = 0, unsigned char power_state = 0)
-		: power_state_{power_state}, Id{id}
+	explicit Block(block_id_t id = 0, unsigned char power_state = 0)
+		: power_state_{power_state}, ID{id}
 	{
 	}
 

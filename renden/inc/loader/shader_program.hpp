@@ -35,6 +35,7 @@ public:
 	std::vector<gl::VArrayAttribute> MeshAttributes;
 
 	static constexpr GLint kBlockTextureUnit = 0;
+	static constexpr GLint kStrTextureUnit = 2;
 };
 
 class SkyboxShader : public ShaderProgram

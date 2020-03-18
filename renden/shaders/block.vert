@@ -8,17 +8,20 @@
 
 in ivec3 position;
 in int face;
-in vec3 texcoords[4];
+in uint tex_offset;
+//in vec3 texcoords[4];
 
 out VS_OUT {
 //	vec3 frag_pos;
-	vec3 texcoords[4];
+//	vec3 texcoords[4];
 	int face;
+	uint tex_offset;
 } vs_out;
 
 void main()
 {
-    vs_out.texcoords = texcoords;
+//    vs_out.texcoords = texcoords;
+	vs_out.tex_offset = tex_offset;
 	vs_out.face = face;
 	gl_Position = vec4(position, 1.0);
 //    gl_Position = proj * view * model * chunk * vec4(position, 1.0);

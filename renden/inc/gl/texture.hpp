@@ -48,7 +48,7 @@ enum TextureFilterCase : GLenum
  * \tparam T Data type of buffer
  * TODO Use texture buffers instead?
  */
-template <GLenum internalformat, GLenum type, typename T = GLfloat>
+template <GLenum internalformat, GLenum format, GLenum type, typename T = GLfloat>
 class Texture1D
 {
 	GLuint id_;
@@ -58,8 +58,8 @@ public:
 	{
 		glGenTextures(1, &id_);
 		this->Bind();
-		glTexStorage1D(GL_TEXTURE_1D, 1, internalformat, data.size());
-		glTexImage1D(GL_TEXTURE_1D, 0, internalformat, data.size(), 0, internalformat, type, data.data());
+		glTexImage1D(GL_TEXTURE_1D, 0, internalformat, data.size(), 0, format, type, data.data());
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAX_LEVEL, 0);
 	}
 
 	~Texture1D()

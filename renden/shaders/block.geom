@@ -52,13 +52,16 @@ layout (points) in;
 layout (triangle_strip, max_vertices=4) out;
 
 in VS_OUT {
-	vec3 texcoords[4];
+//	vec3 texcoords[4];
 	int face;
+	uint tex_offset;
 } gs_in[];
 
 out vec3 texcoord;
 out vec3 frag_pos;
 out vec3 normal;
+
+uniform usampler1D str_sampler;
 
 vec4 transform(vec4 v){
 	return proj * view * model * chunk * v;
@@ -70,7 +73,8 @@ void main() {
 	for(int f = 0; f < 4; f++){
 		vec4 corner = gl_in[0].gl_Position + vec4(CUBE_VERTICES[gs_in[0].face*4+f], 0);
 		gl_Position = transform(corner);
-		texcoord = gs_in[0].texcoords[f];
+		texcoord = vec3(texelFetch(str_sampler, int(gs_in[0].tex_offset * (6 * 4) + gs_in[0].face * 4 + f), 0));
+//		texcoord = gs_in[0].texcoords[f];
 		frag_pos = vec3(model * chunk * corner);
 		EmitVertex();
 	}

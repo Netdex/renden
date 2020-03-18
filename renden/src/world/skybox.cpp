@@ -61,8 +61,10 @@ Skybox::Skybox(const std::vector<std::string>& paths)
 
 void Skybox::Draw(const gl::Shader& shader) const
 {
+	GLint depth_func;
+	glGetIntegerv(GL_DEPTH_FUNC, &depth_func);
 	glDepthFunc(GL_LEQUAL);
 	mesh_->Draw(shader);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(depth_func);
 }
 }

@@ -58,7 +58,7 @@ public:
 					for (int x = 0; x < CHUNK_W; x++)
 					{
 						std::shared_ptr<BlockPrimitive> block_primitive =
-							Context<BlockManager>::Get().GetBlockById(data_[y][x][z].Id);
+							Context<BlockManager>::Get().GetBlockById(data_[y][x][z].ID);
 						if (block_primitive)
 						{
 							const glm::ivec3 position = glm::ivec3(x, y, z);
@@ -126,7 +126,7 @@ private:
 		if (offset.x < 0 || offset.x >= CHUNK_W || offset.y < 0 || offset.y >= CHUNK_H
 			|| offset.z < 0 || offset.z >= CHUNK_W)
 			return false;
-		const auto offset_block = Context<BlockManager>::Get().GetBlockById(data_[offset.y][offset.x][offset.z].Id);
+		const auto offset_block = Context<BlockManager>::Get().GetBlockById(data_[offset.y][offset.x][offset.z].ID);
 		return offset_block && offset_block->IsOpaque;
 	}
 

@@ -6,6 +6,7 @@
 #include <glm/vec3.hpp>
 
 #include "util/bytebuffer.hpp"
+#include "world/block.hpp"
 
 
 namespace world::block
@@ -35,29 +36,28 @@ constexpr glm::ivec3 kFaceToOffset[] = {
 	glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1), glm::ivec3(-1, 0, 0),
 	glm::ivec3(1, 0, 0), glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0)
 };
-
 }
 
 class BlockPrimitive
 {
 public:
-	std::array<float, 6 * 4 * 3> uv;
+	int TexOffset;
 	bool IsOpaque;
 	bool IsPowerSource;
 	bool IsConduit;
 
-	explicit BlockPrimitive(std::array<float, 6 * 4 * 3> uv,
-	                         bool is_opaque = false,
-	                         bool is_power_source = false,
-	                         bool is_conduit = false)
-		: uv{uv},
+	explicit BlockPrimitive(int tex_offset,
+	                        bool is_opaque = false,
+	                        bool is_power_source = false,
+	                        bool is_conduit = false)
+		: TexOffset{tex_offset},
 		  IsOpaque{is_opaque},
 		  IsPowerSource{is_power_source},
 		  IsConduit{is_conduit}
 	{
 	}
 
-	void AppendToVertexList(util::byte_buffer<>& vlist, glm::ivec3 position, world::block::BlockFaceSet faces);
+	void AppendToVertexList(util::byte_buffer<>& vlist, glm::ivec3 position, world::block::BlockFaceSet faces) const;
 };
 
 
