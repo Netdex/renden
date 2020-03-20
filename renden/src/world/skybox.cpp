@@ -53,9 +53,10 @@ const GLfloat SKYBOX_VERTICES[] = {
 };
 
 Skybox::Skybox(const std::vector<std::string>& paths)
-	: texture_(std::make_shared<gl::Cubemap>(paths, gl::LINEAR, gl::CLAMP_EDGE, shader::SkyboxShader::kSkyTextureUnit)),
+	: texture_(std::make_shared<gl::Cubemap>(paths, gl::LINEAR, gl::CLAMP_EDGE, 
+												shader::SkyboxShader::kSkyTextureUnit)),
 	  mesh_(std::make_shared<gl::Mesh<>>(SKYBOX_VERTICES,
-	                                     Context<shader::SkyboxShader>::Get().MeshAttributes, gl::TRIANGLES))
+	                                     Context<shader::SkyboxShader>::Get().MeshAttributes, gl::MeshDrawMode::TRIANGLES))
 {
 }
 

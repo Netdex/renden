@@ -12,80 +12,25 @@
 #undef STB_IMAGE_IMPLEMENTATION
 
 #include "control/camera.hpp"
+#include "control/imgui_interface.hpp"
+#include "control/input.hpp"
 #include "gl/debug.hpp"
 #include "gl/shader.hpp"
 #include "loader/block_manager.hpp"
 #include "world/world.hpp"
 #include "loader/shader_program.hpp"
 #include "phy/phy_engine.hpp"
-#include "primitive/block_primitive.hpp"
 #include "util/context.hpp"
 #include "world/block.hpp"
 #include "world/chunk.hpp"
 #include "world/reticle.hpp"
 
-bool wireframe = false;
-bool focus = true;
-
-int active_block = 1;
-
-std::optional<std::pair<glm::ivec3, glm::ivec3>> target;
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	if (action == GLFW_PRESS)
-	{
-		switch (key)
-		{
-		case GLFW_KEY_E:
-			wireframe = !wireframe;
-			if (wireframe)
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			else
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			break;
-		case GLFW_KEY_LEFT_ALT:
-			focus = !focus;
-			if (focus) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-			else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			break;
-		case GLFW_KEY_1:
-		case GLFW_KEY_2:
-		case GLFW_KEY_3:
-		case GLFW_KEY_4:
-		case GLFW_KEY_5:
-		case GLFW_KEY_6:
-		case GLFW_KEY_7:
-		case GLFW_KEY_8:
-		case GLFW_KEY_9:
-			active_block = key - GLFW_KEY_0;
-			break;
-		default: break;
-		}
-	}
+	glViewport(0, 0, width, height);
 }
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
-	world::World& world = Context<world::World>::Get();
-	if (action == GLFW_PRESS)
-	{
-		switch (button)
-		{
-		case GLFW_MOUSE_BUTTON_LEFT:
-			if (target)
-				world.GetBlockRefAt(target->first)->get() = Block();
-			break;
-		case GLFW_MOUSE_BUTTON_RIGHT:
-			if (target)
-				world.GetBlockRefAt(target->first + target->second, true)->get() = Block(active_block);
-			break;
-		default: break;
-		}
-	}
-}
-
-void init(GLFWwindow *m_window)
+void init(GLFWwindow* m_window)
 {
 	Context<shader::BlockShader>::Initialize().GetShader()->Activate();
 	Context<world::BlockManager>::Initialize(PROJECT_SOURCE_DIR "/renden/res/block_texture.json",
@@ -105,13 +50,13 @@ void init(GLFWwindow *m_window)
 	Context<shader::ReticleShader>::Initialize().GetShader()->Activate();
 	Context<world::Reticle>::Initialize();
 
-	Context<control::Camera>::Initialize(m_window, WINDOW_WIDTH, WINDOW_HEIGHT);
+	Context<control::Camera>::Initialize(m_window);
 
 	// Some silly code to generate test scenery.
 	world::World& world = Context<world::World>::Get();
 
-	const int scz = 8;
-	const int scx = 8;
+	const int scz = 4;
+	const int scx = 4;
 
 	for (int cz = 0; cz < scz; cz++)
 	{
@@ -168,7 +113,7 @@ void loop(GLFWwindow* m_window)
 	auto reticle_shader = Context<shader::ReticleShader>::Get().GetShader();
 	//phy_engine phy;
 
-	control::Camera cam(m_window, WINDOW_WIDTH, WINDOW_HEIGHT);
+	control::Camera& cam = Context<control::Camera>::Get();
 	// TODO This is a hack.
 
 	world::World& world = Context<world::World>::Get();
@@ -179,16 +124,19 @@ void loop(GLFWwindow* m_window)
 		if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(m_window, true);
 
+		// Pre-drawing computations.
 		const auto now = float(glfwGetTime());
 		const float delta_time = now - last_tick;
 		last_tick = now;
-		cam.Update(delta_time, focus);
+		cam.Update(delta_time, control::state.focus);
 
-		target = cam.CastTarget(world, 20);
+		control::state.target = cam.CastTarget(world, 20);
 		world.Update();
 
+		// Drawing begins!
 		glClearColor(1.f, 1.f, 1.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 
 		block_shader->Activate();
 		//			block_shader->bind("now", now);
@@ -201,13 +149,19 @@ void loop(GLFWwindow* m_window)
 		reticle_shader->Activate();
 		Context<world::Reticle>::Get().Draw(*reticle_shader, cam.View, cam.Proj,
 		                                    cam.Position, cam.GetDirection(),
-		                                    target ? std::optional<glm::ivec3>(target->first) : std::nullopt);
+		                                    control::state.target
+			                                    ? std::optional<glm::ivec3>(control::state.target->first)
+			                                    : std::nullopt);
 
 		tenbox_shader->Activate();
 		// Remove translation from view matrix by truncation.
 		tenbox_shader->Bind("view", glm::mat4(glm::mat3(cam.View)));
 		tenbox_shader->Bind("proj", cam.Proj);
 		Context<world::Skybox>::Get().Draw(*tenbox_shader);
+
+		glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+		control::imgui_frame(m_window);
+		glfwSetInputMode(m_window, GLFW_CURSOR, control::state.focus ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
 
 		glfwSwapBuffers(m_window);
 		glfwPollEvents();
@@ -216,30 +170,31 @@ void loop(GLFWwindow* m_window)
 
 int main(int argc, char* argv[])
 {
-	spdlog::set_level(spdlog::level::trace);
+	spdlog::set_level(spdlog::level::debug);
 
-	glfwInit();
+	int code = glfwInit();
+	assert(code);
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	const auto m_window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "renden", nullptr, nullptr);
-	glfwSetMouseButtonCallback(m_window, mouse_button_callback);
-
-	if (!m_window)
-	{
-		spdlog::critical("Failed to create OpenGL context!");
-		return EXIT_FAILURE;
-	}
+	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+	const auto m_window = glfwCreateWindow(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT,
+	                                       "renden", nullptr, nullptr);
+	assert(m_window);
 
 	glfwMakeContextCurrent(m_window);
-	glfwSwapInterval(1);
-	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	glfwSetKeyCallback(m_window, key_callback);
+	glfwSetMouseButtonCallback(m_window, control::mouse_button_callback);
+	glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
+	glfwSetKeyCallback(m_window, control::key_callback);
 
-	gladLoadGL();
+	glfwSwapInterval(1);
+
+	code = gladLoadGL();
+	assert(code);
 	spdlog::info("OpenGL {}", glGetString(GL_VERSION));
 
 	glEnable(GL_DEBUG_OUTPUT);
@@ -256,8 +211,11 @@ int main(int argc, char* argv[])
 	//	glLineWidth(10.f);
 
 	init(m_window);
+	control::imgui_init(m_window);
 	loop(m_window);
 	cleanup();
+
+	control::imgui_cleanup();
 
 	glfwTerminate();
 	return EXIT_SUCCESS;

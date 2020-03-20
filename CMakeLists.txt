@@ -39,23 +39,38 @@ else()
 endif()
 
 
-include_directories(renden/inc/
-                    vendor/assimp/include/
-                    vendor/bullet/src/
-                    vendor/glad/include/
-                    vendor/glfw/include/
-                    vendor/glm/
-                    vendor/stb/
-					vendor/spdlog/include/
-					vendor/span-lite/include)
+include_directories(
+    renden/inc/
+	vendor/assimp/include/
+	vendor/bullet/src/
+	vendor/glad/include/
+	vendor/glfw/include/
+	vendor/glm/
+	vendor/stb/
+	vendor/spdlog/include/
+	vendor/span-lite/include/
+	vendor/imgui/
+	vendor/imgui/examples/
+)
 
-file(GLOB VENDORS_SOURCES vendor/glad/src/glad.c)
+file(GLOB VENDORS_SOURCES 
+    vendor/glad/src/glad.c
+    vendor/imgui/imgui.cpp
+    vendor/imgui/imgui_demo.cpp
+    vendor/imgui/imgui_draw.cpp
+    vendor/imgui/imgui_widgets.cpp
+    vendor/imgui/examples/imgui_impl_opengl3.cpp
+    vendor/imgui/examples/imgui_impl_glfw.cpp
+)
+
 file(GLOB_RECURSE PROJECT_HEADERS renden/inc/*.hpp)
 file(GLOB_RECURSE PROJECT_SOURCES renden/src/*.cpp)
-file(GLOB_RECURSE PROJECT_SHADERS renden/shaders/*.comp
-                          renden/shaders/*.frag
-                          renden/shaders/*.geom
-                          renden/shaders/*.vert)
+file(GLOB_RECURSE PROJECT_SHADERS 
+    renden/shaders/*.comp
+	renden/shaders/*.frag
+	renden/shaders/*.geom
+	renden/shaders/*.vert
+)
 
 file(GLOB PROJECT_CONFIGS CMakeLists.txt
                           Readme.md
@@ -68,8 +83,11 @@ source_group("shaders" FILES ${PROJECT_SHADERS})
 source_group("src" FILES ${PROJECT_SOURCES})
 source_group("vendors" FILES ${VENDORS_SOURCES})
 
-add_definitions(-DGLFW_INCLUDE_NONE
-                -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
+add_definitions(
+	-DGLFW_INCLUDE_NONE
+    -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+	-DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\"
+)
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
                                ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
                                ${VENDORS_SOURCES})

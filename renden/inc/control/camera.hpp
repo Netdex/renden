@@ -18,7 +18,6 @@ class Camera
 {
 	GLFWwindow* window_ = nullptr;
 
-	float width_, height_;
 	float fov_ = glm::radians(45.0f);
 	float yaw_ = glm::pi<float>(); // horizontal angle : toward -Z
 	float pitch_ = 0.0f; // vertical angle : 0, look at the horizon
@@ -30,7 +29,7 @@ public:
 	glm::vec3 Position = glm::vec3(0, 0, 5);
 	glm::mat4 View, Proj;
 
-	Camera(GLFWwindow* window, float width, float height);
+	Camera(GLFWwindow* window);
 	~Camera();
 
 	Camera(const Camera& o) = delete;

@@ -59,7 +59,10 @@ public:
 		glGenTextures(1, &id_);
 		this->Bind();
 		glTexImage1D(GL_TEXTURE_1D, 0, internalformat, data.size(), 0, format, type, data.data());
-		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAX_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_1D, TextureWrapDimension::S, CLAMP_EDGE);
+		glTexParameteri(GL_TEXTURE_1D, TextureWrapDimension::T, CLAMP_EDGE);
+		glTexParameteri(GL_TEXTURE_1D, SCALE_UP, NEAREST);
+		glTexParameteri(GL_TEXTURE_1D, SCALE_DOWN, NEAREST);
 	}
 
 	~Texture1D()
@@ -86,17 +89,20 @@ class Texture2D
 	GLuint tex_id_;
 public:
 
-	Texture2D(const std::string paths[], size_t count,
+	Texture2D(nonstd::span<std::string> paths,
 	          unsigned int width, unsigned int height,
-	          TextureFilterMode filter_mode, TextureWrapMode wrap_mode,
+	          TextureFilterMode min_filter_mode, TextureFilterMode mag_filter_mode,
+	          TextureWrapMode wrap_mode,
+	          int mipmap_levels,
 	          GLuint tex_id) : tex_id_(tex_id)
 	{
 		glGenTextures(1, &id_);
 		this->Bind();
 
-		glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width, height, static_cast<GLsizei>(count));
+		assert(mipmap_levels >= 1);
+		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipmap_levels, GL_RGBA8, width, height, static_cast<GLsizei>(paths.size()));
 
-		for (unsigned i = 0; i < count; i++)
+		for (unsigned i = 0; i < paths.size(); i++)
 		{
 			const std::string& path = paths[i];
 			int w, h, bpp;
@@ -107,22 +113,15 @@ public:
 			stbi_image_free(imgbuf);
 		}
 
-		this->SetFilterMode(SCALE_UP, filter_mode);
-		this->SetFilterMode(SCALE_DOWN, filter_mode);
+		this->SetFilterMode(SCALE_UP, mag_filter_mode);
+		this->SetFilterMode(SCALE_DOWN, min_filter_mode);
 		this->SetWrapMode(S, wrap_mode);
 		this->SetWrapMode(T, wrap_mode);
-		if (filter_mode == NEAREST_MIPMAP_NEAREST || filter_mode == LINEAR_MIPMAP_NEAREST
-			|| filter_mode == NEAREST_MIPMAP_LINEAR || filter_mode == LINEAR_MIPMAP_LINEAR)
+		if (min_filter_mode == NEAREST_MIPMAP_NEAREST || min_filter_mode == LINEAR_MIPMAP_NEAREST
+			|| min_filter_mode == NEAREST_MIPMAP_LINEAR || min_filter_mode == LINEAR_MIPMAP_LINEAR)
 		{
 			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 		}
-	}
-
-	Texture2D(const std::vector<std::string>& paths, unsigned int width, unsigned int height,
-	          TextureFilterMode filter_mode, TextureWrapMode wrap_mode,
-	          unsigned int tex_id) : Texture2D(&paths[0], paths.size(), width, height,
-	                                           filter_mode, wrap_mode, tex_id)
-	{
 	}
 
 	~Texture2D()

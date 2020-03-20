@@ -8,7 +8,7 @@
 
 namespace control
 {
-Camera::Camera(GLFWwindow* window, float width, float height) : window_(window), width_(width), height_(height)
+Camera::Camera(GLFWwindow* window) : window_(window)
 {
 }
 
@@ -16,14 +16,16 @@ Camera::~Camera() = default;
 
 void Camera::Update(float deltaTime, bool focus)
 {
+	int width, height;
+	glfwGetFramebufferSize(window_, &width, &height);
 	// calculate mouse movement
 	if (focus)
 	{
 		double xpos, ypos;
 		glfwGetCursorPos(window_, &xpos, &ypos);
-		glfwSetCursorPos(window_, width_ / 2, height_ / 2);
-		yaw_ += mouse_speed_ * deltaTime * float(width_ / 2 - xpos);
-		pitch_ += mouse_speed_ * deltaTime * float(height_ / 2 - ypos);
+		glfwSetCursorPos(window_, width / 2, height / 2);
+		yaw_ += mouse_speed_ * deltaTime * float(width / 2 - xpos);
+		pitch_ += mouse_speed_ * deltaTime * float(height / 2 - ypos);
 		if (pitch_ > glm::pi<float>() / 2 - 0.01)
 			pitch_ = static_cast<float>(glm::pi<float>() / 2 - 0.01);
 		if (pitch_ < -glm::pi<float>() / 2 + 0.01)
@@ -84,7 +86,7 @@ void Camera::Update(float deltaTime, bool focus)
 		Position + direction,
 		up_
 	);
-	Proj = glm::perspective(fov_, width_ / height_, 0.01f, 1000.0f);
+	Proj = glm::perspective(fov_, float(width) / height, 0.01f, 1000.0f);
 }
 
 std::optional<std::pair<glm::ivec3, glm::ivec3>> Camera::CastTarget(world::World& world,

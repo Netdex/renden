@@ -32,3 +32,6 @@
 [submodule "vendor/span-lite"]
 	path = vendor/span-lite
 	url = https://github.com/martinmoene/span-lite.git
+[submodule "vendor/imgui"]
+	path = vendor/imgui
+	url = https://github.com/ocornut/imgui.git
