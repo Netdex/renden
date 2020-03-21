@@ -6,6 +6,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
+#include <imgui.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -55,37 +56,31 @@ void init(GLFWwindow* m_window)
 	// Some silly code to generate test scenery.
 	world::World& world = Context<world::World>::Get();
 
-	const int scz = 4;
-	const int scx = 4;
+	int bx = 4;
+	int by = 1;
+	int bz = 4;
 
-	for (int cz = 0; cz < scz; cz++)
+	for (int ax = -bx; ax < bx; ++ax)
 	{
-		for (int cx = 0; cx < scx; cx++)
+		for (int ay = -by; ay < by; ++ay)
 		{
-			auto cnk = world.GetChunkAt(cx - 4, cz - 4);
-			for (int i = 0; i < 5; i++)
-				cnk->GetBlockRefAt(8, i + 3 + 64, 8)->get() = Block(17);
-			for (int y = 0; y < 3 + 64; y++)
-				for (int z = 0; z < 16; z++)
-					for (int x = 0; x < 16; x++)
-					{
-						if (y == 2 + 64)
-							cnk->GetBlockRefAt(x, y, z)->get() = Block(2);
-						else
-							cnk->GetBlockRefAt(x, y, z)->get() = Block(3);
-					}
-
-			for (int y = 8 + 64; y < 13 + 64; y++)
+			for (int az = -bz; az < bz; ++az)
 			{
-				for (int z = 6; z < 11; z++)
-					for (int x = 6; x < 11; x++)
+				world::Chunk* chunk = world.GetChunkAt({ax, ay, az}, true);
+				for (int cx = 0; cx < world::CHUNK_W; cx++)
+				{
+					for (int cy = 0; cy < world::CHUNK_W; cy++)
 					{
-						cnk->GetBlockRefAt(x, y, z)->get() = Block(18);
+						for (int cz = 0; cz < world::CHUNK_W; cz++)
+						{
+							auto p = world::Chunk::chunk_to_block_pos({ax, ay, az}, {cx, cy, cz});
+							Block& b = chunk->GetBlockRefAt({cx, cy, cz}, true);
+							if (abs(100 * sin(0.001f * (p.x * p.x + p.z * p.z)) / 10.f - p.y) <= 1)
+								b = Block(1);
+						}
 					}
+				}
 			}
-			cnk->GetBlockRefAt(10, 10 + 64, 10)->get() = Block(5);
-			cnk->GetBlockRefAt(10, 10 + 64, 9)->get() = Block(4);
-			cnk->GetBlockRefAt(10, 10 + 64, 8)->get() = Block(40);
 		}
 	}
 }
@@ -117,6 +112,8 @@ void loop(GLFWwindow* m_window)
 	// TODO This is a hack.
 
 	world::World& world = Context<world::World>::Get();
+
+	GLFWcursor* standard_cursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 
 	auto last_tick = float(glfwGetTime());
 	while (!static_cast<bool>(glfwWindowShouldClose(m_window)))
@@ -157,10 +154,11 @@ void loop(GLFWwindow* m_window)
 		// Remove translation from view matrix by truncation.
 		tenbox_shader->Bind("view", glm::mat4(glm::mat3(cam.View)));
 		tenbox_shader->Bind("proj", cam.Proj);
-		Context<world::Skybox>::Get().Draw(*tenbox_shader);
+		//Context<world::Skybox>::Get().Draw(*tenbox_shader);
 
 		glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 		control::imgui_frame(m_window);
+
 		glfwSetInputMode(m_window, GLFW_CURSOR, control::state.focus ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
 
 		glfwSwapBuffers(m_window);
@@ -197,8 +195,10 @@ int main(int argc, char* argv[])
 	assert(code);
 	spdlog::info("OpenGL {}", glGetString(GL_VERSION));
 
-	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(debug_callback, nullptr);
+#ifndef NDEBUG
+	glEnable(GL_DEBUG_OUTPUT);
+#endif
 
 	glFrontFace(GL_CW);
 	glEnable(GL_DEPTH_TEST);

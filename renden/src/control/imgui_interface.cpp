@@ -23,6 +23,8 @@ void imgui_init(GLFWwindow* window)
 	io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleFonts;
 	io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	// TODO Set the cursor properly... possibly through exposing some ImGui internals
+	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();

@@ -13,26 +13,43 @@ namespace world
 {
 class World
 {
-	std::map<std::pair<int, int>, std::shared_ptr<Chunk>> chunks_;
+	struct ivec3_map_predicate
+	{
+		bool operator()(const glm::ivec3& a, const glm::ivec3& b) const
+		{
+			if (a.x > b.x) return false;
+			if (a.x == b.x)
+			{
+				if (a.y > b.y) return false;
+				if (a.y == b.y)
+				{
+					if (a.z >= b.z) return false;
+				}
+			}
+			return true;
+		}
+	};
+
+	std::map<glm::ivec3, std::unique_ptr<Chunk>, ivec3_map_predicate> chunks_;
 
 public:
 	World() = default;
 
-	std::shared_ptr<Chunk> GetChunkAt(int x, int z)
+	Chunk* GetChunkAt(glm::ivec3 loc, bool create_if_not_exists = false)
 	{
 		// if chunk does not exist, it will be default constructed
-		auto& ptr = chunks_[std::make_pair(x, z)];
-		if (!ptr)
+		auto& ptr = chunks_[loc];
+		if (!ptr && create_if_not_exists)
 		{
-			spdlog::debug("generated chunk ({},{}) due to first time access", x, z);
-			ptr = std::make_shared<Chunk>(glm::ivec2{x, z});
+			ptr.reset(new Chunk{loc});
+			spdlog::debug("Generated chunk ({},{},{})", loc.x, loc.y, loc.z);
 		}
-		return ptr;
+		return ptr.get();
 	}
 
-	bool ChunkExists(int x, int z)
+	bool ChunkExists(glm::ivec3 loc)
 	{
-		return chunks_.find(std::make_pair(x, z)) != chunks_.end();
+		return chunks_.find(loc) != chunks_.end();
 	}
 
 	void Render(const gl::Shader& block_shader)
@@ -45,35 +62,39 @@ public:
 
 	std::optional<Block> GetBlockAt(glm::ivec3 world_pos, bool create_if_not_exists = false)
 	{
-		const glm::ivec2 chunk_pos = Chunk::block_to_chunk_pos(world_pos);
-		if (!create_if_not_exists && !ChunkExists(chunk_pos.x, chunk_pos.y))
+		const auto chunk_pos = Chunk::block_to_chunk_pos(world_pos);
+		if (!create_if_not_exists && !ChunkExists(chunk_pos))
 			return std::nullopt;
 
-		glm::ivec3 loc_pos = Chunk::block_to_loc_pos(world_pos);
-		return GetChunkAt(chunk_pos.x, chunk_pos.y)->GetBlockAt(loc_pos.x, loc_pos.y, loc_pos.z);
+		const glm::ivec3 loc_pos = Chunk::block_to_loc_pos(world_pos);
+		return GetChunkAt(chunk_pos)->GetBlockAt(loc_pos);
 	}
 
-	std::optional<std::reference_wrapper<Block>> GetBlockRefAt(glm::ivec3 world_pos,
-	                                                           bool create_if_not_exists = false, bool taint = true)
+	Block* GetBlockRefAt(glm::ivec3 world_pos, bool create_if_not_exists = false, bool taint = true)
 	{
-		const glm::ivec2 chunk_pos = Chunk::block_to_chunk_pos(world_pos);
-		if (!create_if_not_exists && !ChunkExists(chunk_pos.x, chunk_pos.y))
-			return std::nullopt;
-		glm::ivec3 loc_pos = Chunk::block_to_loc_pos(world_pos);
+		const auto chunk_pos = Chunk::block_to_chunk_pos(world_pos);
+		const glm::ivec3 loc_pos = Chunk::block_to_loc_pos(world_pos);
 
-		spdlog::debug("block ref: ({},{},{}) -> ({},{}) ({},{},{})",
-		              world_pos.x, world_pos.y, world_pos.z,
-		              chunk_pos.x, chunk_pos.y, loc_pos.x, loc_pos.y, loc_pos.z);
-
-		return GetChunkAt(chunk_pos.x, chunk_pos.y)->GetBlockRefAt(loc_pos.x, loc_pos.y, loc_pos.z, taint);
+		Chunk* chunk = GetChunkAt(chunk_pos, create_if_not_exists);
+		if (!chunk)
+			return nullptr;
+		return &chunk->GetBlockRefAt(loc_pos, taint);
 	}
 
 	void Update()
 	{
 		// TODO Maybe lazily stagger chunks that need updating across multiple frames?
-		for (auto cnk : chunks_)
-			cnk.second->UpdateMesh();
+		int count = 0;
+		for (const auto& cnk : chunks_)
+		{
+			if (cnk.second->UpdateMesh())
+				count++;
+			if (count >= kMaximumChunksPerUpdate)
+				break;
+		}
 	}
+
+	static constexpr int kMaximumChunksPerUpdate = 10;
 };
 }
 

@@ -53,11 +53,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		{
 		case GLFW_MOUSE_BUTTON_LEFT:
 			if (state.target)
-				world.GetBlockRefAt(state.target->first)->get() = Block();
+				*world.GetBlockRefAt(state.target->first) = Block();
 			break;
 		case GLFW_MOUSE_BUTTON_RIGHT:
 			if (state.target)
-				world.GetBlockRefAt(state.target->first + state.target->second, true)->get() =
+				*world.GetBlockRefAt(state.target->first + state.target->second, true) =
 					Block(state.active_block);
 			break;
 		default: break;

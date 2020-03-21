@@ -14,7 +14,7 @@ in uint tex_offset;
 out VS_OUT {
 //	vec3 frag_pos;
 //	vec3 texcoords[4];
-	int face;
+	uint face;
 	uint tex_offset;
 } vs_out;
 

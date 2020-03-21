@@ -28,7 +28,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(MSVC)
-    add_compile_options("/W4" "$<$<CONFIG:RELEASE>:/O2>")
+    add_compile_options("/W4")
 #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 #    set(CMAKE_CXX_FLAGS_RELEASE "") MSVC hates this
 else()
@@ -94,6 +94,10 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
 #target_link_libraries(${PROJECT_NAME} PUBLIC assimp BulletDynamics BulletCollision LinearMath)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+
+if(MSVC)
+    target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:RELWITHDEBINFO>:/PROFILE>")
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})

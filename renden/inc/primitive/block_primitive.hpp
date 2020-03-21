@@ -38,6 +38,7 @@ constexpr glm::ivec3 kFaceToOffset[] = {
 };
 }
 
+// TODO I don't like this class, could probably combine it with Block.
 class BlockPrimitive
 {
 public:

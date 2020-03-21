@@ -14,20 +14,19 @@
 
 namespace world
 {
-constexpr int CHUNK_W = 16;
-constexpr int CHUNK_H = 128;
+constexpr int CHUNK_W = 32;
 
 class Chunk
 {
-	glm::ivec2 location_;
+	glm::ivec3 location_;
 	std::unique_ptr<gl::Mesh<GLbyte>> mesh_;
 
 	// y-z-x order
-	Block data_[CHUNK_H][CHUNK_W][CHUNK_W];
+	Block data_[CHUNK_W][CHUNK_W][CHUNK_W];
 	bool dirty_ = false;
 public:
 
-	Chunk(glm::ivec2 location) : location_(location),
+	Chunk(glm::ivec3 location) : location_(location),
 	                             mesh_(std::make_unique<gl::Mesh<GLbyte>>(
 		                             Context<shader::BlockShader>::Get().MeshAttributes, gl::POINTS))
 	{
@@ -38,20 +37,20 @@ public:
 	{
 		if (is_visible())
 		{
-			glm::mat4 chunk = translate(glm::mat4(1.f), glm::vec3{chunk_to_block_pos(location_, glm::ivec3{})});
-			// MUST be a block shader
+			const glm::vec3 translation = glm::vec3{chunk_to_block_pos(location_, glm::ivec3{})};
+			glm::mat4 chunk = translate(glm::mat4(1.f), translation);
 			shader.Bind("chunk", chunk);
 			mesh_->Draw(shader);
 		}
 	}
 
-	void UpdateMesh()
+	bool UpdateMesh()
 	{
 		// TODO Maybe use a thread pool for this?
 		if (dirty_)
 		{
 			util::byte_buffer<> vlist;
-			for (int y = 0; y < CHUNK_H; y++)
+			for (int y = 0; y < CHUNK_W; y++)
 			{
 				for (int z = 0; z < CHUNK_W; z++)
 				{
@@ -68,43 +67,46 @@ public:
 				}
 			}
 			mesh_->BufferVertexData(vlist);
-			spdlog::debug("Regenerating chunk mesh");
+			spdlog::debug("Regenerating mesh for chunk ({},{},{})", location_.x, location_.y, location_.z);
 			dirty_ = false;
+			return true;
 		}
+		return false;
 	}
 
-	std::optional<Block> GetBlockAt(int x, int y, int z)
+	Block GetBlockAt(glm::ivec3 loc)
 	{
-		if (x >= 0 && x < CHUNK_W && y >= 0 && y < CHUNK_H && z >= 0 && z < CHUNK_W)
-			return data_[y][x][z];
-		return std::nullopt;
+		return GetBlockRefAt(loc, false);
 	}
 
-	std::optional<std::reference_wrapper<Block>> GetBlockRefAt(int x, int y, int z,
-	                                                           bool taint = true)
+	Block& GetBlockRefAt(glm::ivec3 loc, bool taint = true)
 	{
-		if (x >= 0 && x < CHUNK_W && y >= 0 && y < CHUNK_H && z >= 0 && z < CHUNK_W)
-		{
-			dirty_ |= taint;
-			return data_[y][x][z];
-		}
-		return std::nullopt;
+		assert(loc.x >= 0 && loc.x < CHUNK_W && loc.y >= 0 && loc.y < CHUNK_W && loc.z >= 0 && loc.z < CHUNK_W);
+		dirty_ |= taint;
+		return data_[loc.y][loc.x][loc.z];
 	}
 
-	static glm::ivec2 block_to_chunk_pos(glm::ivec3 pos)
+	static constexpr glm::ivec3 block_to_chunk_pos(glm::ivec3 pos)
 	{
-		return glm::ivec2(int(floorf(float(pos.x) / CHUNK_W)), int(floorf(float(pos.z) / CHUNK_W)));
+		return glm::ivec3(
+			int(floorf(float(pos.x) / CHUNK_W)),
+			int(floorf(float(pos.y) / CHUNK_W)),
+			int(floorf(float(pos.z) / CHUNK_W)));
 	}
 
-	static glm::ivec3 chunk_to_block_pos(glm::ivec2 chunk_pos, glm::ivec3 loc)
+	static constexpr glm::ivec3 chunk_to_block_pos(glm::ivec3 chunk_pos, glm::ivec3 loc)
 	{
-		return glm::ivec3(chunk_pos.x * CHUNK_W + loc.x, loc.y, chunk_pos.y * CHUNK_W + loc.z);
+		return chunk_pos * CHUNK_W + loc;
 	}
 
-	static glm::ivec3 block_to_loc_pos(glm::ivec3 pos)
+	static constexpr glm::ivec3 block_to_loc_pos(glm::ivec3 pos)
 	{
 		// took me a few times to get this right
-		return {(pos.x % CHUNK_W + CHUNK_W) % CHUNK_W, pos.y, (pos.z % CHUNK_W + CHUNK_W) % CHUNK_W};
+		return {
+			(pos.x % CHUNK_W + CHUNK_W) % CHUNK_W,
+			(pos.y % CHUNK_W + CHUNK_W) % CHUNK_W,
+			(pos.z % CHUNK_W + CHUNK_W) % CHUNK_W
+		};
 	}
 
 private:
@@ -114,16 +116,16 @@ private:
 
 		assert(position.x >= 0 && position.x < CHUNK_W
 			&& position.z >= 0 && position.z < CHUNK_W
-			&& position.y >= 0 && position.y < CHUNK_H);
+			&& position.y >= 0 && position.y < CHUNK_W);
 		// chunk boundaries can never be occluded
 		if ((position.x == 0 && face == NEG_X) || (position.y == 0 && face == NEG_Y) ||
 			(position.z == 0 && face == NEG_Z)
 			|| (position.x == CHUNK_W - 1 && face == POS_X)
-			|| (position.y == CHUNK_H - 1 && face == POS_Y)
+			|| (position.y == CHUNK_W - 1 && face == POS_Y)
 			|| (position.z == CHUNK_W - 1 && face == POS_Z))
 			return false;
-		glm::ivec3 offset = kFaceToOffset[kFaceToIndex[face]] + position;
-		if (offset.x < 0 || offset.x >= CHUNK_W || offset.y < 0 || offset.y >= CHUNK_H
+		const glm::ivec3 offset = kFaceToOffset[kFaceToIndex[face]] + position;
+		if (offset.x < 0 || offset.x >= CHUNK_W || offset.y < 0 || offset.y >= CHUNK_W
 			|| offset.z < 0 || offset.z >= CHUNK_W)
 			return false;
 		const auto offset_block = Context<BlockManager>::Get().GetBlockById(data_[offset.y][offset.x][offset.z].ID);

@@ -16,7 +16,7 @@ BlockShader::BlockShader()
 		},
 		{
 			shader_->GetAttribute("tex_offset"), 1, gl::UINT, total,
-			static_cast<unsigned int>(4 * sizeof(GLint)), false, 0
+			static_cast<unsigned int>(3 * sizeof(GLint) + sizeof(GLuint)), false, 0
 		},
 	};
 
