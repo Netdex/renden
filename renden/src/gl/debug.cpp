@@ -10,24 +10,6 @@ void APIENTRY debug_callback(GLenum source, GLenum type, GLuint id,
 	std::stringstream output;
 	output << "OGL:";
 
-	switch (severity)
-	{
-	case GL_DEBUG_SEVERITY_HIGH:
-		output << "H";
-		break;
-	case GL_DEBUG_SEVERITY_MEDIUM:
-		output << "M";
-		break;
-	case GL_DEBUG_SEVERITY_LOW:
-		output << "L";
-		break;
-	case GL_DEBUG_SEVERITY_NOTIFICATION:
-		output << "N";
-		break;
-	default: break;
-	}
-	output << ":";
-
 	switch (type)
 	{
 	case GL_DEBUG_TYPE_ERROR:
@@ -83,5 +65,21 @@ void APIENTRY debug_callback(GLenum source, GLenum type, GLuint id,
 	default: break;
 	}
 	output << " - " << message;
-	spdlog::trace(output.str());
+
+	switch (severity)
+	{
+	case GL_DEBUG_SEVERITY_HIGH:
+		spdlog::error(output.str());
+		break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		spdlog::warn(output.str());
+		break;
+	case GL_DEBUG_SEVERITY_LOW:
+		spdlog::info(output.str());
+		break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION:
+		spdlog::trace(output.str());
+		break;
+	default: break;
+	}
 }

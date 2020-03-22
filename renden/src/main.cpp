@@ -39,14 +39,15 @@ void init(GLFWwindow* m_window)
 	Context<world::World>::Initialize();
 
 	Context<shader::SkyboxShader>::Initialize().GetShader()->Activate();
-	Context<world::Skybox>::Initialize(std::vector<std::string>{
+	const std::string cubemap_paths[6] = {
 		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_rt.tga",
 		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_lf.tga",
 		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_up.tga",
 		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_dn.tga",
 		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_bk.tga",
 		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_ft.tga",
-	});
+	};
+	Context<world::Skybox>::Initialize(cubemap_paths);
 
 	Context<shader::ReticleShader>::Initialize().GetShader()->Activate();
 	Context<world::Reticle>::Initialize();
@@ -67,11 +68,11 @@ void init(GLFWwindow* m_window)
 			for (int az = -bz; az < bz; ++az)
 			{
 				world::Chunk* chunk = world.GetChunkAt({ax, ay, az}, true);
-				for (int cx = 0; cx < world::CHUNK_W; cx++)
+				for (int cx = 0; cx < world::Chunk::kChunkWidth; cx++)
 				{
-					for (int cy = 0; cy < world::CHUNK_W; cy++)
+					for (int cy = 0; cy < world::Chunk::kChunkWidth; cy++)
 					{
-						for (int cz = 0; cz < world::CHUNK_W; cz++)
+						for (int cz = 0; cz < world::Chunk::kChunkWidth; cz++)
 						{
 							auto p = world::Chunk::chunk_to_block_pos({ax, ay, az}, {cx, cy, cz});
 							Block& b = chunk->GetBlockRefAt({cx, cy, cz}, true);
@@ -154,12 +155,10 @@ void loop(GLFWwindow* m_window)
 		// Remove translation from view matrix by truncation.
 		tenbox_shader->Bind("view", glm::mat4(glm::mat3(cam.View)));
 		tenbox_shader->Bind("proj", cam.Proj);
-		//Context<world::Skybox>::Get().Draw(*tenbox_shader);
+		Context<world::Skybox>::Get().Draw(*tenbox_shader);
 
 		glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 		control::imgui_frame(m_window);
-
-		glfwSetInputMode(m_window, GLFW_CURSOR, control::state.focus ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
 
 		glfwSwapBuffers(m_window);
 		glfwPollEvents();

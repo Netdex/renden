@@ -22,9 +22,9 @@ enum TextureWrapMode : GLenum
 
 enum TextureWrapDimension : GLenum
 {
-	S = GL_TEXTURE_WRAP_S,
-	T = GL_TEXTURE_WRAP_T,
-	R = GL_TEXTURE_WRAP_R
+	DIM_S = GL_TEXTURE_WRAP_S,
+	DIM_T = GL_TEXTURE_WRAP_T,
+	DIM_R = GL_TEXTURE_WRAP_R
 };
 
 enum TextureFilterMode : GLenum
@@ -43,61 +43,91 @@ enum TextureFilterCase : GLenum
 	SCALE_DOWN = GL_TEXTURE_MIN_FILTER
 };
 
+enum TextureTarget : GLenum
+{
+	TEXTURE_1D = GL_TEXTURE_1D,
+	TEXTURE_2D_ARRAY = GL_TEXTURE_2D_ARRAY,
+	TEXTURE_CUBEMAP = GL_TEXTURE_CUBE_MAP
+};
+
+template <TextureTarget target>
+class Texture
+{
+protected:
+	GLuint id_;
+	GLuint tex_id_;
+
+	Texture(GLuint tex_id) : tex_id_(tex_id)
+	{
+	}
+
+	virtual ~Texture()
+	{
+		glDeleteTextures(1, &id_);
+	}
+
+	Texture(const Texture& o) = delete;
+	Texture& operator=(const Texture& o) = delete;
+
+	void Bind() const
+	{
+		glActiveTexture(GL_TEXTURE0 + tex_id_);
+		glBindTexture(target, id_);
+	}
+
+	void SetFilterMode(TextureFilterCase cse, TextureFilterMode mode)
+	{
+		glTexParameteri(target, static_cast<GLenum>(cse), mode);
+	}
+
+	void SetWrapMode(TextureWrapDimension dim, TextureWrapMode mode)
+	{
+		glTexParameteri(target, static_cast<GLenum>(dim), mode);
+	}
+
+	void SetBorderColor(glm::vec4 color)
+	{
+		glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, value_ptr(color));
+	}
+};
+
 /**
  * \brief 1D texture from data buffer
  * \tparam T Data type of buffer
  * TODO Use texture buffers instead?
  */
-template <GLenum internalformat, GLenum format, GLenum type, typename T = GLfloat>
-class Texture1D
+template <GLenum internalformat, GLenum format, GLenum type, typename U = GLfloat>
+class Texture1D : public Texture<TEXTURE_1D>
 {
-	GLuint id_;
-	GLuint tex_id_;
 public:
-	Texture1D(nonstd::span<T> data, GLuint tex_id) : tex_id_(tex_id)
+	Texture1D(nonstd::span<U> data, GLuint tex_id) : Texture(tex_id)
 	{
 		glGenTextures(1, &id_);
-		this->Bind();
-		glTexImage1D(GL_TEXTURE_1D, 0, internalformat, data.size(), 0, format, type, data.data());
-		glTexParameteri(GL_TEXTURE_1D, TextureWrapDimension::S, CLAMP_EDGE);
-		glTexParameteri(GL_TEXTURE_1D, TextureWrapDimension::T, CLAMP_EDGE);
-		glTexParameteri(GL_TEXTURE_1D, SCALE_UP, NEAREST);
-		glTexParameteri(GL_TEXTURE_1D, SCALE_DOWN, NEAREST);
-	}
-
-	~Texture1D()
-	{
-		glDeleteTextures(1, &id_);
-	}
-
-	Texture1D(const Texture1D& o) = delete;
-	Texture1D& operator=(const Texture1D& o) = delete;
-
-	void Bind() const
-	{
-		glActiveTexture(GL_TEXTURE0 + tex_id_);
-		glBindTexture(GL_TEXTURE_1D, id_);
+		Bind();
+		// Width is in texels!
+		glTexImage1D(GL_TEXTURE_1D, 0, internalformat, data.size() / 4, 0, format, type, data.data());
+		SetFilterMode(SCALE_UP, NEAREST);
+		SetFilterMode(SCALE_DOWN, NEAREST);
+		SetWrapMode(DIM_S, CLAMP_EDGE);
+		SetWrapMode(DIM_T, CLAMP_EDGE);
 	}
 };
 
 /**
  * \brief 2D texture array from files
  */
-class Texture2D
+class Texture2DArray : public Texture<TEXTURE_2D_ARRAY>
 {
-	GLuint id_;
-	GLuint tex_id_;
 public:
-
-	Texture2D(nonstd::span<std::string> paths,
+	Texture2DArray(nonstd::span<std::string> paths,
 	          unsigned int width, unsigned int height,
 	          TextureFilterMode min_filter_mode, TextureFilterMode mag_filter_mode,
 	          TextureWrapMode wrap_mode,
 	          int mipmap_levels,
-	          GLuint tex_id) : tex_id_(tex_id)
+	          GLuint tex_id) : Texture(tex_id)
 	{
 		glGenTextures(1, &id_);
-		this->Bind();
+		Bind();
 
 		assert(mipmap_levels >= 1);
 		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipmap_levels, GL_RGBA8, width, height, static_cast<GLsizei>(paths.size()));
@@ -113,59 +143,29 @@ public:
 			stbi_image_free(imgbuf);
 		}
 
-		this->SetFilterMode(SCALE_UP, mag_filter_mode);
-		this->SetFilterMode(SCALE_DOWN, min_filter_mode);
-		this->SetWrapMode(S, wrap_mode);
-		this->SetWrapMode(T, wrap_mode);
+		SetFilterMode(SCALE_UP, mag_filter_mode);
+		SetFilterMode(SCALE_DOWN, min_filter_mode);
+		SetWrapMode(DIM_S, wrap_mode);
+		SetWrapMode(DIM_T, wrap_mode);
+
 		if (min_filter_mode == NEAREST_MIPMAP_NEAREST || min_filter_mode == LINEAR_MIPMAP_NEAREST
 			|| min_filter_mode == NEAREST_MIPMAP_LINEAR || min_filter_mode == LINEAR_MIPMAP_LINEAR)
 		{
 			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 		}
 	}
-
-	~Texture2D()
-	{
-		glDeleteTextures(1, &id_);
-	}
-
-	Texture2D(const Texture2D& o) = delete;
-	Texture2D operator=(const Texture2D& o) = delete;
-
-	void Bind() const
-	{
-		glActiveTexture(GL_TEXTURE0 + tex_id_);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, id_);
-	}
-
-	void SetFilterMode(TextureFilterCase cse, TextureFilterMode mode)
-	{
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, static_cast<GLenum>(cse), mode);
-	}
-
-	void SetWrapMode(TextureWrapDimension dim, TextureWrapMode mode)
-	{
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, static_cast<GLenum>(dim), mode);
-	}
-
-	void SetBorderColor(glm::vec4 color)
-	{
-		glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, value_ptr(color));
-	}
 };
 
-class Cubemap
+class Cubemap : public Texture<TEXTURE_CUBEMAP>
 {
-	GLuint id_;
-	GLuint tex_id_;
 public:
 
 	Cubemap(const std::string paths[6],
 	        TextureFilterMode filter_mode, TextureWrapMode wrap_mode,
-	        GLuint tex_id) : tex_id_(tex_id)
+	        GLuint tex_id) : Texture(tex_id)
 	{
 		glGenTextures(1, &id_);
-		this->Bind();
+		Bind();
 
 		for (int i = 0; i < 6; i++)
 		{
@@ -178,55 +178,17 @@ public:
 			stbi_image_free(imgbuf);
 		}
 
-		this->SetFilterMode(SCALE_UP, filter_mode);
-		this->SetFilterMode(SCALE_DOWN, filter_mode);
-		this->SetWrapMode(S, wrap_mode);
-		this->SetWrapMode(T, wrap_mode);
-		this->SetWrapMode(R, wrap_mode);
+		SetFilterMode(SCALE_UP, filter_mode);
+		SetFilterMode(SCALE_DOWN, filter_mode);
+		SetWrapMode(DIM_S, wrap_mode);
+		SetWrapMode(DIM_T, wrap_mode);
+		SetWrapMode(DIM_R, wrap_mode);
 
 		if (filter_mode == NEAREST_MIPMAP_NEAREST || filter_mode == LINEAR_MIPMAP_NEAREST
 			|| filter_mode == NEAREST_MIPMAP_LINEAR || filter_mode == LINEAR_MIPMAP_LINEAR)
 		{
 			glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		}
-	}
-
-	Cubemap(const std::vector<std::string>& paths,
-	        TextureFilterMode filter_mode, TextureWrapMode wrap_mode,
-	        unsigned int tex_id) : Cubemap((assert(paths.size() == 6), &paths[0]),
-	                                       filter_mode, wrap_mode, tex_id)
-	{
-	}
-
-	~Cubemap()
-	{
-		glDeleteTextures(1, &id_);
-	}
-
-	Cubemap(const Texture2D& o) = delete;
-	Cubemap operator=(const Texture2D& o) = delete;
-
-	void Bind()
-	{
-		glActiveTexture(GL_TEXTURE0 + tex_id_);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, id_);
-	}
-
-	void SetFilterMode(TextureFilterCase cse, TextureFilterMode mode)
-	{
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, static_cast<GLenum>(cse),
-		                static_cast<GLenum>(mode));
-	}
-
-	void SetWrapMode(TextureWrapDimension dim, TextureWrapMode mode)
-	{
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, static_cast<GLenum>(dim),
-		                static_cast<GLenum>(mode));
-	}
-
-	void SetBorderColor(glm::vec4 color)
-	{
-		glTexParameterfv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BORDER_COLOR, value_ptr(color));
 	}
 };
 }

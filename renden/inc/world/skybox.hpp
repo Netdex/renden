@@ -16,7 +16,7 @@ class Skybox
 	std::shared_ptr<gl::Cubemap> texture_;
 	std::shared_ptr<gl::Mesh<>> mesh_;
 public:
-	Skybox(const std::vector<std::string>& paths);
+	Skybox(const std::string paths[6]);
 
 	void Draw(const gl::Shader& shader) const;
 };

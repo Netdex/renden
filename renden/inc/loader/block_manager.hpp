@@ -13,11 +13,12 @@ namespace world
 {
 constexpr int MAXIMUM_BLOCKS = 256;
 
+// TODO I have some problems with this class.
 class BlockManager
 {
 	// convert name of texture to index of 2D texture array
 	std::unordered_map<std::string, unsigned int> texture_name_to_layer_;
-	std::unique_ptr<gl::Texture2D> textures_;
+	std::unique_ptr<gl::Texture2DArray> textures_;
 	std::unique_ptr<gl::Texture1D<GL_RGBA8UI,GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, GLubyte>> str_texture_;
 
 	// convert name of block to block primitive mesh
