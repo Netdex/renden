@@ -55,6 +55,7 @@ uniform mat4 chunk;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
+uniform mat4 light_space;
 //uniform float now;
 
 layout (points) in;
@@ -71,6 +72,7 @@ in VS_OUT {
 out vec3 texcoord;
 out vec3 frag_pos;
 out vec3 normal;
+out vec4 frag_pos_light_space;
 
 uniform usampler1D str_sampler;
 
@@ -86,6 +88,7 @@ void main() {
 			texcoord = vec3(texelFetch(str_sampler, int(gs_in[0].tex_offset*(6*4) + gl_InvocationID*4+f), 0));
 			frag_pos = vec3(world_loc);
 			normal = CUBE_NORMALS[gl_InvocationID];
+			frag_pos_light_space = light_space * world_loc;
 			EmitVertex();
 		}
 	}

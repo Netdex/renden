@@ -19,7 +19,7 @@ class BlockManager
 	// convert name of texture to index of 2D texture array
 	std::unordered_map<std::string, unsigned int> texture_name_to_layer_;
 	std::unique_ptr<gl::Texture2DArray> textures_;
-	std::unique_ptr<gl::Texture1D<GL_RGBA8UI,GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, GLubyte>> str_texture_;
+	std::unique_ptr<gl::Texture1D<GLubyte>> str_texture_;
 
 	// convert name of block to block primitive mesh
 	std::shared_ptr<BlockPrimitive> block_id_to_primitive_[MAXIMUM_BLOCKS];
@@ -37,6 +37,16 @@ public:
 	std::shared_ptr<BlockPrimitive> GetBlockById(unsigned int id);
 
 	std::optional<unsigned int> GetBlockIdByName(const std::string& name);
+
+	gl::Texture2DArray& GetBlockTexture() const
+	{
+		return *textures_;
+	}
+
+	gl::Texture1D<GLubyte>& GetBlockStrTexture() const
+	{
+		return *str_texture_;
+	}
 };
 }
 

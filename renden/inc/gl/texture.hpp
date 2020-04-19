@@ -46,48 +46,68 @@ enum TextureFilterCase : GLenum
 enum TextureTarget : GLenum
 {
 	TEXTURE_1D = GL_TEXTURE_1D,
+	TEXTURE_2D = GL_TEXTURE_2D,
 	TEXTURE_2D_ARRAY = GL_TEXTURE_2D_ARRAY,
 	TEXTURE_CUBEMAP = GL_TEXTURE_CUBE_MAP
 };
 
-template <TextureTarget target>
 class Texture
 {
-protected:
-	GLuint id_;
-	GLuint tex_id_;
-
-	Texture(GLuint tex_id) : tex_id_(tex_id)
-	{
-	}
-
+public:
 	virtual ~Texture()
 	{
 		glDeleteTextures(1, &id_);
 	}
 
-	Texture(const Texture& o) = delete;
-	Texture& operator=(const Texture& o) = delete;
-
 	void Bind() const
 	{
 		glActiveTexture(GL_TEXTURE0 + tex_id_);
-		glBindTexture(target, id_);
+		glBindTexture(target_, id_);
 	}
 
-	void SetFilterMode(TextureFilterCase cse, TextureFilterMode mode)
+	void Unbind() const
 	{
-		glTexParameteri(target, static_cast<GLenum>(cse), mode);
+#ifndef NDEBUG
+		glActiveTexture(GL_TEXTURE0 + tex_id_);
+		glBindTexture(target_, 0);
+#endif
 	}
 
-	void SetWrapMode(TextureWrapDimension dim, TextureWrapMode mode)
+	TextureTarget GetTarget() const
 	{
-		glTexParameteri(target, static_cast<GLenum>(dim), mode);
+		return target_;
 	}
 
-	void SetBorderColor(glm::vec4 color)
+	GLuint GetID() const
 	{
-		glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, value_ptr(color));
+		return id_;
+	}
+
+protected:
+	TextureTarget target_;
+	GLuint id_;
+	GLuint tex_id_;
+
+	Texture(TextureTarget target, GLuint tex_id) : target_(target), tex_id_(tex_id)
+	{
+	}
+
+	Texture(const Texture& o) = delete;
+	Texture& operator=(const Texture& o) = delete;
+
+	void SetFilterMode(TextureFilterCase cse, TextureFilterMode mode) const
+	{
+		glTexParameteri(target_, static_cast<GLenum>(cse), mode);
+	}
+
+	void SetWrapMode(TextureWrapDimension dim, TextureWrapMode mode) const
+	{
+		glTexParameteri(target_, static_cast<GLenum>(dim), mode);
+	}
+
+	void SetBorderColor(glm::vec4 color) const
+	{
+		glTexParameterfv(target_, GL_TEXTURE_BORDER_COLOR, value_ptr(color));
 	}
 };
 
@@ -96,11 +116,12 @@ protected:
  * \tparam T Data type of buffer
  * TODO Use texture buffers instead?
  */
-template <GLenum internalformat, GLenum format, GLenum type, typename U = GLfloat>
-class Texture1D : public Texture<TEXTURE_1D>
+template <typename U = GLfloat>
+class Texture1D : public Texture
 {
 public:
-	Texture1D(nonstd::span<U> data, GLuint tex_id) : Texture(tex_id)
+	Texture1D(nonstd::span<U> data, GLuint tex_id, GLenum internalformat, GLenum format, GLenum type) : Texture(
+		TEXTURE_1D, tex_id)
 	{
 		glGenTextures(1, &id_);
 		Bind();
@@ -110,21 +131,45 @@ public:
 		SetFilterMode(SCALE_DOWN, NEAREST);
 		SetWrapMode(DIM_S, CLAMP_EDGE);
 		SetWrapMode(DIM_T, CLAMP_EDGE);
+		Unbind();
+	}
+};
+
+
+template <typename U = GLfloat>
+class Texture2D : public Texture
+{
+public:
+	Texture2D(nonstd::span<U> data, int width, int height, TextureFilterMode min_filter_mode,
+	          TextureFilterMode mag_filter_mode,
+	          TextureWrapMode wrap_mode, GLuint tex_id, GLenum internalformat, GLenum format,
+	          GLenum type) : Texture(TEXTURE_2D, tex_id)
+	{
+		glGenTextures(1, &id_);
+		Bind();
+
+		glTexImage2D(TEXTURE_2D, 0, internalformat, width, height, 0, format, type, data.data());
+
+		SetFilterMode(SCALE_UP, mag_filter_mode);
+		SetFilterMode(SCALE_DOWN, min_filter_mode);
+		SetWrapMode(DIM_S, wrap_mode);
+		SetWrapMode(DIM_T, wrap_mode);
+		Unbind();
 	}
 };
 
 /**
  * \brief 2D texture array from files
  */
-class Texture2DArray : public Texture<TEXTURE_2D_ARRAY>
+class Texture2DArray : public Texture
 {
 public:
 	Texture2DArray(nonstd::span<std::string> paths,
-	          unsigned int width, unsigned int height,
-	          TextureFilterMode min_filter_mode, TextureFilterMode mag_filter_mode,
-	          TextureWrapMode wrap_mode,
-	          int mipmap_levels,
-	          GLuint tex_id) : Texture(tex_id)
+	               unsigned int width, unsigned int height,
+	               TextureFilterMode min_filter_mode, TextureFilterMode mag_filter_mode,
+	               TextureWrapMode wrap_mode,
+	               int mipmap_levels,
+	               GLuint tex_id) : Texture(TEXTURE_2D_ARRAY, tex_id)
 	{
 		glGenTextures(1, &id_);
 		Bind();
@@ -153,16 +198,17 @@ public:
 		{
 			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 		}
+		Unbind();
 	}
 };
 
-class Cubemap : public Texture<TEXTURE_CUBEMAP>
+class Cubemap : public Texture
 {
 public:
 
 	Cubemap(const std::string paths[6],
 	        TextureFilterMode filter_mode, TextureWrapMode wrap_mode,
-	        GLuint tex_id) : Texture(tex_id)
+	        GLuint tex_id) : Texture(TEXTURE_CUBEMAP, tex_id)
 	{
 		glGenTextures(1, &id_);
 		Bind();
@@ -189,6 +235,7 @@ public:
 		{
 			glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		}
+		Unbind();
 	}
 };
 }

@@ -35,9 +35,9 @@ void BlockManager::LoadTextures(const std::string& block_tex_conf)
 		++idx;
 	}
 
-	textures_ = std::make_unique<gl::Texture2DArray>(paths, width, height, 
-												gl::LINEAR_MIPMAP_LINEAR, gl::NEAREST,
-												gl::CLAMP_EDGE, 2, shader::BlockShader::kBlockTextureUnit);
+	textures_ = std::make_unique<gl::Texture2DArray>(paths, width, height,
+	                                                 gl::LINEAR_MIPMAP_LINEAR, gl::NEAREST,
+	                                                 gl::CLAMP_EDGE, 2, shader::BlockShader::kBlockTextureUnit);
 	spdlog::debug("Loaded {} textures", paths.size());
 }
 
@@ -81,8 +81,8 @@ void BlockManager::CreateBlockPrimitives(const std::string& block_def_conf)
 		++idx;
 	}
 
-	this->str_texture_ = std::make_unique<gl::Texture1D<GL_RGBA8UI,GL_RGBA_INTEGER,GL_UNSIGNED_BYTE,GLubyte>>(
-		str_buffer, shader::BlockShader::kStrTextureUnit);
+	this->str_texture_ = std::make_unique<gl::Texture1D<GLubyte>>(
+		str_buffer, shader::BlockShader::kStrTextureUnit, GL_RGBA8UI,GL_RGBA_INTEGER,GL_UNSIGNED_BYTE);
 	spdlog::debug("Loaded {} block definitions", j.size());
 }
 

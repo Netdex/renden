@@ -62,6 +62,7 @@ Skybox::Skybox(const std::string paths[6])
 
 void Skybox::Draw(const gl::Shader& shader) const
 {
+	texture_->Bind();
 	GLint depth_func;
 	glGetIntegerv(GL_DEPTH_FUNC, &depth_func);
 	glDepthFunc(GL_LEQUAL);

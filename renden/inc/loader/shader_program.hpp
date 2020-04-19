@@ -5,13 +5,14 @@
 #include "gl/varray.hpp"
 #include "world/skybox.hpp"
 
-namespace shader {
+namespace shader
+{
 class ShaderProgram
 {
 protected:
-	std::shared_ptr<gl::Shader> shader_;
+	std::unique_ptr<gl::Shader> shader_;
 public:
-	ShaderProgram() : shader_(std::make_shared<gl::Shader>())
+	ShaderProgram() : shader_(std::make_unique<gl::Shader>())
 	{
 	}
 
@@ -20,12 +21,11 @@ public:
 	ShaderProgram(const ShaderProgram& o) = delete;
 	ShaderProgram& operator=(const ShaderProgram& o) = delete;
 
-	std::shared_ptr<gl::Shader> GetShader() const
+	gl::Shader& GetShader() const
 	{
-		return shader_;
+		return *shader_;
 	}
 };
-
 
 class BlockShader : public ShaderProgram
 {
@@ -36,6 +36,17 @@ public:
 
 	static constexpr GLint kBlockTextureUnit = 0;
 	static constexpr GLint kStrTextureUnit = 2;
+};
+
+/// \brief A BlockShader but with an empty fragment shader.
+class BlockDepthShader : public ShaderProgram
+{
+public:
+	BlockDepthShader();
+
+	// Shares mesh attributes with BlockShader.
+
+	static constexpr GLint kShadowmapTextureUnit = 3;
 };
 
 class SkyboxShader : public ShaderProgram
@@ -55,5 +66,4 @@ public:
 
 	std::vector<gl::VArrayAttribute> MeshAttributes;
 };
-
 }

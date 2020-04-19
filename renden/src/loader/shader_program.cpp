@@ -22,7 +22,16 @@ BlockShader::BlockShader()
 
 	shader_->Bind("tex", kBlockTextureUnit);
 	shader_->Bind("str_sampler", kStrTextureUnit);
+	shader_->Bind("shadow_map", BlockDepthShader::kShadowmapTextureUnit);
+	// TODO Bind shadow buffer texture unit.
+	//shader_->Bind()
 	spdlog::debug("Loaded block shader");
+}
+
+BlockDepthShader::BlockDepthShader()
+{
+	shader_->Attach("block.vert").Attach("block.geom").Attach("block_depth.frag").Link().Activate();
+	spdlog::debug("Loaded block depth shader");
 }
 
 SkyboxShader::SkyboxShader()

@@ -65,6 +65,10 @@ private:
 	glm::ivec3 location_;
 	std::unique_ptr<gl::Mesh<GLbyte>> mesh_;
 	bool dirty_ = false;
+
+	//
+	// Don't know whether this is a good idea yet.
+	Chunk* adjacent_chunks_[6];
 };
 }
 

@@ -70,7 +70,7 @@ public:
 
 	static GLuint Create(std::string const& filename)
 	{
-		const auto index = filename.rfind(".");
+		const auto index = filename.rfind('.');
 		const auto ext = filename.substr(index + 1);
 		if (ext == "comp") return glCreateShader(GL_COMPUTE_SHADER);
 		if (ext == "frag") return glCreateShader(GL_FRAGMENT_SHADER);

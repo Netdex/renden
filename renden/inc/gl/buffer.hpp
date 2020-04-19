@@ -67,7 +67,9 @@ public:
 
 	void Unbind() const
 	{
+#ifndef NDEBUG
 		glBindBuffer(static_cast<GLenum>(type_), 0);
+#endif
 	}
 
 	size_t GetSizeBytes()
