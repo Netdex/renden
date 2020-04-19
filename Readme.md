@@ -1,7 +1,7 @@
 # renden
 `This project is a work-in-progress.`
 
-![](https://i.imgur.com/1igdT3w.jpg)
+![](https://i.imgur.com/jKC6PV5.jpg)
 
 ## What
 renden is a 3D voxel engine designed to be a digital systems simulation environment for hands-on prototyping of digital circuits.
