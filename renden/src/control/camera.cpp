@@ -86,7 +86,7 @@ void Camera::Update(float deltaTime, bool focus)
 		Position + direction,
 		up_
 	);
-	Proj = glm::perspective(fov_, float(width) / height, 0.01f, 1000.0f);
+	Proj = glm::perspective(fov_, float(width) / height, 0.01f, 200.0f);
 }
 
 std::optional<std::pair<glm::ivec3, glm::ivec3>> Camera::CastTarget(world::World& world,

@@ -125,24 +125,14 @@ void loop(GLFWwindow* m_window)
 	// TODO Tidy this code up.
 	constexpr int SHADOW_WIDTH = 2048;
 
-	glm::mat4 shadow_view;
-	glm::mat4 shadow_proj;
-	const float part_intervals[] = {0.f, 1.f};
+	const float part_intervals[] = {0.f, 0.2f, 0.3f, 1.f};
 	gl::DepthMap shadowmap(SHADOW_WIDTH, shader::BlockDepthShader::kShadowmapTextureUnit, part_intervals);
-
-	gl::FrameBuffer shadowbuffer;
-	shadowbuffer.Bind();
-	gl::FrameBuffer::Attach(shadowmap, GL_DEPTH_ATTACHMENT, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	gl::FrameBuffer::Unbind();
 
 	bool depth_clamp = false;
 	auto last_tick = float(glfwGetTime());
 	while (!static_cast<bool>(glfwWindowShouldClose(m_window)))
 	{
 		control::imgui_frame_begin();
-		ImGui::Begin("Render Control");
 
 		if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(m_window, true);
@@ -157,24 +147,10 @@ void loop(GLFWwindow* m_window)
 
 		control::state.target = cam.CastTarget(world, 20);
 		world.Update();
-		glm::vec3 light_dir = glm::normalize(glm::vec3{0, -1, 0});
-		shadowmap.ComputeShadowViewProj(cam.View, cam.Proj, 0.f, .005f,
-		                                light_dir, shadow_view, shadow_proj);
+		glm::vec3 light_dir = glm::normalize(glm::vec3{1, -10, 1});
 
-		block_depth_shader.Activate();
-		// Render world from direction light source POV.
-		glViewport(0, 0, SHADOW_WIDTH, SHADOW_WIDTH);
-		shadowbuffer.Bind();
-		glClear(GL_DEPTH_BUFFER_BIT);
-		glCullFace(GL_FRONT);
-		ImGui::Checkbox("GL_DEPTH_CLAMP", &depth_clamp);
-		if(depth_clamp)
-			glEnable(GL_DEPTH_CLAMP);
-		//glDisable(GL_CULL_FACE);
-		block_depth_shader.Bind("view", shadow_view);
-		block_depth_shader.Bind("proj", shadow_proj);
-		world.Render(block_depth_shader);
-		gl::FrameBuffer::Unbind();
+		shadowmap.Render(block_shader, block_depth_shader, cam.View, cam.Proj, light_dir,
+		                 [&world, &block_depth_shader] { world.Render(block_depth_shader); });
 
 		// Drawing begins!
 		glViewport(0, 0, fb_width, fb_height);
@@ -190,8 +166,6 @@ void loop(GLFWwindow* m_window)
 		//			block_shader->bind("now", now);
 		block_shader.Bind("view", cam.View);
 		block_shader.Bind("proj", cam.Proj);
-		block_shader.Bind("shadow_view", shadow_view);
-		block_shader.Bind("shadow_proj", shadow_proj);
 		// TODO You can probably derive this from the view matrix
 		block_shader.Bind("camera_pos", cam.Position);
 		block_manager.GetBlockTexture().Bind();

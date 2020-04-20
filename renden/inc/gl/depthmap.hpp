@@ -3,8 +3,9 @@
 
 #include <functional>
 
-#include "framebuffer.hpp"
+#include "gl/framebuffer.hpp"
 #include "gl/texture.hpp"
+#include "gl/shader.hpp"
 
 namespace gl
 {
@@ -33,14 +34,16 @@ public:
 		Unbind();
 	}
 
-	void Render(const glm::mat4& view, const glm::mat4& proj, const glm::vec3& light_dir,
-	            const std::function<void()>& renderer);
+	void Render(Shader& block_shader, Shader& block_depth_shader,
+	            const glm::mat4& view, const glm::mat4& proj, const glm::vec3& light_dir,
+	            const std::function<void()>& renderer) const;
 
 	void ComputeShadowViewProj(const glm::mat4& view, const glm::mat4& proj, float near_plane_norm,
 	                           float far_plane_norm,
-	                           const glm::vec3& light_dir, glm::mat4& shadow_view, glm::mat4& shadow_proj) const;
-private:
+	                           const glm::vec3& light_dir, glm::mat4& shadow_view,
+	                           glm::mat4& shadow_proj, float& depth) const;
 
+	//private:
 	/**
 	 * \brief Compute the bounding sphere of a truncated frustum defined by its projection matrix
 	 * \param proj The projection matrix

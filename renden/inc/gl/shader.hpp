@@ -145,6 +145,11 @@ public:
 		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(matrix));
 	}
 
+	void Bind(GLint location, nonstd::span<glm::mat4> matrices) const
+	{
+		glUniformMatrix4fv(location, matrices.size(), GL_FALSE, value_ptr(matrices[0]));
+	}
+
 	void Bind(GLint location, nonstd::span<float> data) const
 	{
 		glUniform1fv(location, static_cast<GLsizei>(data.size()), data.data());

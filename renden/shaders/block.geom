@@ -51,12 +51,15 @@ const vec3 CUBE_NORMALS[] = {
 	{0.0f, 1.0f, 0.0f},	    // xz +y
 };
 
+// Must agree with other definitions
+const int SHADOW_MAP_PARTITIONS = 3;
+
 uniform mat4 chunk;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
-uniform mat4 shadow_view;
-uniform mat4 shadow_proj;
+uniform mat4 shadow_view[SHADOW_MAP_PARTITIONS];
+uniform mat4 shadow_proj[SHADOW_MAP_PARTITIONS];
 //uniform float now;
 
 layout (points) in;
@@ -73,7 +76,7 @@ in VS_OUT {
 out vec3 texcoord;
 out vec3 frag_pos;
 out vec3 normal;
-out vec4 shadow_frag_pos;
+out vec4 shadow_frag_pos[SHADOW_MAP_PARTITIONS];
 
 uniform usampler1D str_sampler;
 
@@ -89,7 +92,9 @@ void main() {
 			texcoord = vec3(texelFetch(str_sampler, int(gs_in[0].tex_offset*(6*4) + gl_InvocationID*4+f), 0));
 			frag_pos = vec3(world_loc);
 			normal = CUBE_NORMALS[gl_InvocationID];
-			shadow_frag_pos = shadow_proj * shadow_view * world_loc;
+			for(int i = 0; i < SHADOW_MAP_PARTITIONS; ++i){
+				shadow_frag_pos[i] = shadow_proj[i] * shadow_view[i] * world_loc;
+			}
 			EmitVertex();
 		}
 	}
