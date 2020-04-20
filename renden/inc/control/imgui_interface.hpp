@@ -6,7 +6,8 @@
 namespace control
 {
 	void imgui_init(GLFWwindow*);
-	void imgui_frame(GLFWwindow*);
+	void imgui_frame_begin();
+	void imgui_frame_end(GLFWwindow*);
 	void imgui_cleanup();
 }
 

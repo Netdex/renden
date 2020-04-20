@@ -10,9 +10,7 @@ namespace control
 {
 namespace
 {
-	bool show_demo_window = true;
-	bool show_another_window = false;
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	bool show_demo_window = false;
 	GLFWcursor* g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 }
 
@@ -53,7 +51,7 @@ void imgui_init(GLFWwindow* window)
 	glfwSetErrorCallback(prev_error_callback);
 }
 
-void imgui_frame(GLFWwindow* window)
+void imgui_frame_begin()
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -71,6 +69,10 @@ void imgui_frame(GLFWwindow* window)
 		ImGui::End();
 	}
 
+}
+
+void imgui_frame_end(GLFWwindow *window)
+{
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

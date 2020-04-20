@@ -38,6 +38,9 @@ public:
 	void Update(float deltaTime, bool focus);
 	std::optional<std::pair<glm::ivec3, glm::ivec3>> CastTarget(world::World& world, int distance) const;
 	glm::vec3 GetDirection() const;
+
+	float GetAspectRatio() const;
+	float GetFov() const;
 };
 }
 

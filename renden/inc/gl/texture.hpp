@@ -158,18 +158,41 @@ public:
 	}
 };
 
-/**
- * \brief 2D texture array from files
- */
 class Texture2DArray : public Texture
 {
 public:
+	/*
+	 * \brief Create an empty texture 2D array
+	 */
+	Texture2DArray(int width, int height, int size, TextureFilterMode min_filter_mode,
+	               TextureFilterMode mag_filter_mode, TextureWrapMode wrap_mode, int mipmap_levels, GLuint tex_id,
+	               GLenum internalformat)
+		: Texture(TEXTURE_2D_ARRAY, tex_id),
+		  width_(width), height_(height), size_(size)
+	{
+		glGenTextures(1, &id_);
+		Bind();
+
+		assert(mipmap_levels >= 1);
+		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipmap_levels, internalformat, width, height, GLsizei(size));
+		SetFilterMode(SCALE_UP, mag_filter_mode);
+		SetFilterMode(SCALE_DOWN, min_filter_mode);
+		SetWrapMode(DIM_S, wrap_mode);
+		SetWrapMode(DIM_T, wrap_mode);
+
+		Unbind();
+	}
+
+	/*
+	 * \brief Create a texture 2D array from image files
+	 */
 	Texture2DArray(nonstd::span<std::string> paths,
 	               unsigned int width, unsigned int height,
 	               TextureFilterMode min_filter_mode, TextureFilterMode mag_filter_mode,
 	               TextureWrapMode wrap_mode,
 	               int mipmap_levels,
-	               GLuint tex_id) : Texture(TEXTURE_2D_ARRAY, tex_id)
+	               GLuint tex_id) : Texture(TEXTURE_2D_ARRAY, tex_id),
+	                                width_(width), height_(height), size_(paths.size())
 	{
 		glGenTextures(1, &id_);
 		Bind();
@@ -200,6 +223,12 @@ public:
 		}
 		Unbind();
 	}
+
+	int GetWidth() const { return width_; }
+	int GetHeight() const { return height_; }
+	int GetSize() const { return size_; }
+private:
+	int width_, height_, size_;
 };
 
 class Cubemap : public Texture

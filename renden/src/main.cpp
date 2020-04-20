@@ -123,22 +123,27 @@ void loop(GLFWwindow* m_window)
 	world::World& world = Context<world::World>::Get();
 
 	// TODO Tidy this code up.
-	constexpr int SHADOW_WIDTH = 1024;
-	constexpr int SHADOW_HEIGHT = 1024;
+	constexpr int SHADOW_WIDTH = 2048;
 
-	glm::mat4 light_proj, light_view, light_space;
+	glm::mat4 shadow_view;
+	glm::mat4 shadow_proj;
+	const float part_intervals[] = {0.f, 1.f};
+	gl::DepthMap shadowmap(SHADOW_WIDTH, shader::BlockDepthShader::kShadowmapTextureUnit, part_intervals);
 
-	gl::DepthMap shadowmap(SHADOW_WIDTH, SHADOW_HEIGHT, shader::BlockDepthShader::kShadowmapTextureUnit);
-	gl::Framebuffer shadowbuffer;
+	gl::FrameBuffer shadowbuffer;
 	shadowbuffer.Bind();
-	gl::Framebuffer::Attach(shadowmap, GL_DEPTH_ATTACHMENT);
+	gl::FrameBuffer::Attach(shadowmap, GL_DEPTH_ATTACHMENT, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
-	gl::Framebuffer::Unbind();
+	gl::FrameBuffer::Unbind();
 
+	bool depth_clamp = false;
 	auto last_tick = float(glfwGetTime());
 	while (!static_cast<bool>(glfwWindowShouldClose(m_window)))
 	{
+		control::imgui_frame_begin();
+		ImGui::Begin("Render Control");
+
 		if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(m_window, true);
 
@@ -152,42 +157,41 @@ void loop(GLFWwindow* m_window)
 
 		control::state.target = cam.CastTarget(world, 20);
 		world.Update();
+		glm::vec3 light_dir = glm::normalize(glm::vec3{0, -1, 0});
+		shadowmap.ComputeShadowViewProj(cam.View, cam.Proj, 0.f, .005f,
+		                                light_dir, shadow_view, shadow_proj);
 
-		if (!control::state.wireframe)
-		{
-			light_proj = glm::ortho(-10.f, 10.f, -10.f, 10.f, 1.f, 50.f);
-			light_view = glm::lookAt(cam.Position + glm::vec3(1,10,0),
-			                         cam.Position - glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-			light_space = light_proj * light_view;
-
-			block_depth_shader.Activate();
-			// Render world from direction light source POV.
-			glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-			//glViewport(0, 0, fb_width, fb_height);
-			shadowbuffer.Bind();
-			glClear(GL_DEPTH_BUFFER_BIT);
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			// TODO Set view matrix from light perspective, and use depth shader
-			block_depth_shader.Bind("view", light_view);
-			block_depth_shader.Bind("proj", light_proj);
-			//block_depth_shader.Bind("view", cam.View);
-			//block_depth_shader.Bind("proj", cam.Proj);
-			world.Render(block_depth_shader);
-			gl::Framebuffer::Unbind();
-		}
+		block_depth_shader.Activate();
+		// Render world from direction light source POV.
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_WIDTH);
+		shadowbuffer.Bind();
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glCullFace(GL_FRONT);
+		ImGui::Checkbox("GL_DEPTH_CLAMP", &depth_clamp);
+		if(depth_clamp)
+			glEnable(GL_DEPTH_CLAMP);
+		//glDisable(GL_CULL_FACE);
+		block_depth_shader.Bind("view", shadow_view);
+		block_depth_shader.Bind("proj", shadow_proj);
+		world.Render(block_depth_shader);
+		gl::FrameBuffer::Unbind();
 
 		// Drawing begins!
 		glViewport(0, 0, fb_width, fb_height);
 		glClearColor(1.f, 1.f, 1.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+		glCullFace(GL_BACK);
+		glDisable(GL_DEPTH_CLAMP);
+		glEnable(GL_CULL_FACE);
 
 		// TODO Would like to do something similar to Skybox (i.e. WorldRenderer).
 		block_shader.Activate();
 		//			block_shader->bind("now", now);
 		block_shader.Bind("view", cam.View);
 		block_shader.Bind("proj", cam.Proj);
-		block_shader.Bind("light_space", light_space);
+		block_shader.Bind("shadow_view", shadow_view);
+		block_shader.Bind("shadow_proj", shadow_proj);
 		// TODO You can probably derive this from the view matrix
 		block_shader.Bind("camera_pos", cam.Position);
 		block_manager.GetBlockTexture().Bind();
@@ -209,7 +213,7 @@ void loop(GLFWwindow* m_window)
 		Context<world::Skybox>::Get().Draw(tenbox_shader);
 
 		glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-		control::imgui_frame(m_window);
+		control::imgui_frame_end(m_window);
 
 		glfwSwapBuffers(m_window);
 		glfwPollEvents();

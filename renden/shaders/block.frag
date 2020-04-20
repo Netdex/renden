@@ -1,13 +1,13 @@
 #version 430 core
 
 uniform sampler2DArray tex;
-uniform sampler2D shadow_map;
+uniform sampler2DArray shadow_map;
 uniform vec3 camera_pos;
 
 in vec3 texcoord;
 in vec3 frag_pos;
 in vec3 normal;
-in vec4 frag_pos_light_space;
+in vec4 shadow_frag_pos;
 
 out vec4 out_color;
 
@@ -24,15 +24,15 @@ float shadow_intensity(vec4 frag_pos){
 	vec3 proj_coords = frag_pos.xyz / frag_pos.w;
 	proj_coords = proj_coords * 0.5 + 0.5;
 //	float closest_depth = texture(shadow_map, proj_coords.xy).r;
-	float bias = 0.00005;
+	float bias = 0;
 //	return proj_coords.z - bias > closest_depth ? 1.0 : 0.0;
 	float shadow = 0.0;
-	vec2 texel_size = 1.0 / textureSize(shadow_map, 0);
+	vec2 texel_size = (1.0 / textureSize(shadow_map, 0)).xy;
 	for(int x = -1; x <= 1; ++x)
 	{
 		for(int y = -1; y <= 1; ++y)
 		{
-			float pcf_depth = texture(shadow_map, proj_coords.xy + vec2(x, y) * texel_size).r; 
+			float pcf_depth = texture(shadow_map, vec3(proj_coords.xy + vec2(x, y) * texel_size,0)).r; 
 			shadow += proj_coords.z - bias > pcf_depth ? 1.0 : 0.0;        
 		}    
 	}
@@ -58,7 +58,7 @@ void main() {
 	float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
 	vec3 specular = SPECULAR_STR * spec * LIGHT_COLOR;
 
-	float shadow = shadow_intensity(frag_pos_light_space);
+	float shadow = shadow_intensity(shadow_frag_pos);
 
 	out_color = vec4(ambient + (1.0 - shadow) * (diffuse + specular), 1.0) * tex_color;
 }

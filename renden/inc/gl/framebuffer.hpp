@@ -1,20 +1,19 @@
 #ifndef RENDEN_GL_FRAMEBUFFER_HPP_
 #define RENDEN_GL_FRAMEBUFFER_HPP_
 
-#include <GL/gl.h>
+#include <glad/glad.h>
 
-#include "glad/glad.h"
 #include "texture.hpp"
 
 namespace gl
 {
-class Framebuffer
+class FrameBuffer
 {
 	GLuint fbo_;
 
 public:
 
-	Framebuffer()
+	FrameBuffer()
 	{
 		glGenFramebuffers(1, &fbo_);
 	}
@@ -31,7 +30,26 @@ public:
 
 	static void Attach(const Texture& texture, GLenum attachment)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture.GetTarget(), texture.GetID(), 0);
+		switch(texture.GetTarget())
+		{
+		case TEXTURE_2D:
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture.GetTarget(), texture.GetID(), 0);
+			break;
+		default:
+			assert(false);
+		}
+	}
+
+	static void Attach(const Texture& texture, GLenum attachment, GLint layer)
+	{
+		switch(texture.GetTarget())
+		{
+		case TEXTURE_2D_ARRAY:
+			glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, texture.GetID(), 0, layer);
+			break;
+		default:
+			assert(false);
+		}
 	}
 };
 }
