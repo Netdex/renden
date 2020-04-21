@@ -3,13 +3,13 @@
 
 #include <memory>
 
-#include <glm/glm.hpp>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <nonstd/span.hpp>
 
-#include "buffer.hpp"
-#include "varray.hpp"
-#include "shader.hpp"
+#include "gl/buffer.hpp"
+#include "gl/shader.hpp"
+#include "gl/varray.hpp"
 
 namespace gl
 {
@@ -130,7 +130,7 @@ public:
 		assert(vbo_.size() == 1);
 		const size_t vertex_count = vbo_[0]->GetSizeBytes() / attrib_0_size_;
 
-		glDrawArrays(static_cast<GLenum>(DrawMode), 0, vertex_count);
+		glDrawArrays(static_cast<GLenum>(DrawMode), 0, GLsizei(vertex_count));
 		this->Unbind();
 	}
 

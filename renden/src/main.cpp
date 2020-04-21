@@ -1,7 +1,6 @@
 #include "glitter.hpp"
 
 #include <cstdlib>
-#include <memory>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -17,7 +16,6 @@
 #include "control/input.hpp"
 #include "gl/debug.hpp"
 #include "gl/depthmap.hpp"
-#include "gl/framebuffer.hpp"
 #include "gl/shader.hpp"
 #include "loader/block_manager.hpp"
 #include "world/world.hpp"
@@ -193,7 +191,7 @@ void loop(GLFWwindow* m_window)
 	}
 }
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
 	spdlog::set_level(spdlog::level::debug);
 
@@ -222,8 +220,8 @@ int main(int argc, char* argv[])
 	assert(code);
 	spdlog::info("OpenGL {}", glGetString(GL_VERSION));
 
-#ifndef NDEBUG
 	glDebugMessageCallback(debug_callback, nullptr);
+#ifndef NDEBUG
 	glEnable(GL_DEBUG_OUTPUT);
 #endif
 

@@ -4,7 +4,6 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-
 #include "util/math.hpp"
 #include "world/world.hpp"
 
@@ -88,13 +87,13 @@ void Camera::Update(float deltaTime, bool focus)
 	}
 	if (glfwGetKey(window_, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
 	{
-		if (fov_ > 0.01)
-			fov_ -= 0.01;
+		if (fov_ > 0.01f)
+			fov_ -= 0.01f;
 	}
 	if (glfwGetKey(window_, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
 	{
-		if (fov_ < glm::pi<float>() - 0.01)
-			fov_ += 0.01;
+		if (fov_ < glm::pi<float>() - 0.01f)
+			fov_ += 0.01f;
 	}
 
 	View = glm::lookAt(

@@ -3,10 +3,10 @@
 
 #include <functional>
 
-#include "gl/framebuffer.hpp"
-#include "gl/texture.hpp"
-#include "gl/shader.hpp"
 #include "control/camera.hpp"
+#include "gl/framebuffer.hpp"
+#include "gl/shader.hpp"
+#include "gl/texture.hpp"
 
 namespace control
 {

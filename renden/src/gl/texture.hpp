@@ -2,7 +2,6 @@
 #define RENDEN_TEXTURE_HPP
 
 #include <string>
-#include <vector>
 
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -126,7 +125,7 @@ public:
 		glGenTextures(1, &id_);
 		Bind();
 		// Width is in texels!
-		glTexImage1D(GL_TEXTURE_1D, 0, internalformat, data.size() / 4, 0, format, type, data.data());
+		glTexImage1D(GL_TEXTURE_1D, 0, internalformat, GLsizei(data.size() / 4), 0, format, type, data.data());
 		SetFilterMode(SCALE_UP, NEAREST);
 		SetFilterMode(SCALE_DOWN, NEAREST);
 		SetWrapMode(DIM_S, CLAMP_EDGE);
@@ -226,9 +225,10 @@ public:
 
 	int GetWidth() const { return width_; }
 	int GetHeight() const { return height_; }
-	int GetSize() const { return size_; }
+	size_t GetSize() const { return size_; }
 private:
-	int width_, height_, size_;
+	int width_, height_;
+	size_t size_;
 };
 
 class Cubemap : public Texture

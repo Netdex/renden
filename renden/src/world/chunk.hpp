@@ -1,16 +1,14 @@
 #ifndef RENDEN_CHUNK_HPP
 #define RENDEN_CHUNK_HPP
 
-#include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 
-#include "block.hpp"
-#include "control/camera.hpp"
 #include "gl/mesh.hpp"
 #include "loader/block_manager.hpp"
 #include "loader/shader_program.hpp"
 #include "primitive/block_primitive.hpp"
 #include "util/context.hpp"
+#include "world/block.hpp"
 
 namespace world
 {

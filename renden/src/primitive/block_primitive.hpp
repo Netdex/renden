@@ -1,12 +1,9 @@
 #ifndef RENDEN_BLOCK_PRIMITIVE_HPP
 #define RENDEN_BLOCK_PRIMITIVE_HPP
 
-#include <array>
-
 #include <glm/vec3.hpp>
 
 #include "util/bytebuffer.hpp"
-#include "world/block.hpp"
 
 
 namespace world::block

@@ -2,11 +2,9 @@
 // Created by netdex on 2/17/19.
 //
 
-#include <world/block.hpp>
-#include <loader/block_manager.hpp>
-#include <climits>
-
 #include "world/block.hpp"
+
+#include "loader/block_manager.hpp"
 #include "util/context.hpp"
 
 unsigned char Block::GetPowerState() const

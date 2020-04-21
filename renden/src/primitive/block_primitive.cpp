@@ -1,6 +1,7 @@
+#include "primitive/block_primitive.hpp"
+
 #include <glm/gtc/type_ptr.hpp>
 
-#include "primitive/block_primitive.hpp"
 
 void BlockPrimitive::AppendToVertexList(util::byte_buffer<>& vlist, glm::ivec3 position,
                                         world::block::BlockFaceSet faces) const

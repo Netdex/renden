@@ -60,12 +60,12 @@ public:
 	Buffer(const Buffer& o) = delete;
 	Buffer operator=(const Buffer& o) = delete;
 
-	void Bind()
+	void Bind() const
 	{
 		glBindBuffer(static_cast<GLenum>(type_), this->id_);
 	}
 
-	static void Unbind()
+	void Unbind() const
 	{
 #ifndef NDEBUG
 		glBindBuffer(static_cast<GLenum>(type_), 0);

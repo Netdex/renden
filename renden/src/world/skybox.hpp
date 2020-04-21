@@ -6,8 +6,8 @@
 #define RENDEN_SKYBOX_HPP
 
 
-#include <gl/texture.hpp>
-#include <gl/mesh.hpp>
+#include "gl/texture.hpp"
+#include "gl/mesh.hpp"
 
 namespace world
 {

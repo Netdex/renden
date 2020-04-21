@@ -8,10 +8,10 @@
 namespace world
 {
 static const GLfloat RETICLE_POINTS[] = {
-	-0.01, 0, 0, 1, 1, 1,
-	0.01, 0, 0, 1, 1, 1,
-	0, -0.01, 0, 1, 1, 1,
-	0, 0.01, 0, 1, 1, 1,
+	-0.01f, 0.f, 0.f, 1.f, 1.f, 1.f,
+	0.01f, 0.f, 0.f, 1.f, 1.f, 1.f,
+	0.f, -0.01f, 0.f, 1.f, 1.f, 1.f,
+	0.f, 0.01f, 0.f, 1.f, 1.f, 1.f,
 };
 
 static const GLfloat CUBE_VERTICES[] = {

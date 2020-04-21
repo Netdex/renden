@@ -7,6 +7,7 @@
 #include <glm/vec2.hpp>
 #include <spdlog/spdlog.h>
 
+#include "control/camera.hpp"
 #include "world/chunk.hpp"
 
 namespace world

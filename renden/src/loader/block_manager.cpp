@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
+#include "world/block.hpp"
 #include "loader/block_manager.hpp"
 #include "loader/shader_program.hpp"
 

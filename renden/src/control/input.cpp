@@ -9,7 +9,7 @@ namespace control
 {
 ControllerState state;
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void key_callback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int /*mods*/)
 {
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.WantCaptureKeyboard)
@@ -34,14 +34,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		case GLFW_KEY_7:
 		case GLFW_KEY_8:
 		case GLFW_KEY_9:
-			state.active_block = key - GLFW_KEY_0;
+			state.active_block = block_id_t(key - GLFW_KEY_0);
 			break;
 		default: break;
 		}
 	}
 }
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+void mouse_button_callback(GLFWwindow* /*window*/, int button, int action, int /*mods*/)
 {
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.WantCaptureMouse)

@@ -76,16 +76,16 @@ public:
 		case SHORT:
 		case USHORT:
 			glVertexAttribIPointer(location, GLint(size), GLenum(type), GLsizei(stride),
-			                       reinterpret_cast<const GLvoid *>(offset));
+			                       reinterpret_cast<const GLvoid*>(intptr_t(offset)));
 			break;
 		case HFLOAT:
 		case FLOAT:
 			glVertexAttribPointer(location, GLint(size), GLenum(type), GLboolean(normalized), GLsizei(stride),
-			                      reinterpret_cast<const GLvoid *>(offset));
+			                      reinterpret_cast<const GLvoid *>(intptr_t(offset)));
 			break;
 		case DOUBLE:
 			glVertexAttribLPointer(location, GLint(size), GLenum(type), GLsizei(stride),
-			                       reinterpret_cast<const GLvoid *>(offset));
+			                       reinterpret_cast<const GLvoid *>(intptr_t(offset)));
 			break;
 		default:
 			assert(false);

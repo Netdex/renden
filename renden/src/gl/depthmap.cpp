@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
 #include "control/camera.hpp"
 #include "gl/shader.hpp"
 #include "imgui.h"

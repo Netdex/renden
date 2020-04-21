@@ -86,14 +86,14 @@ public:
 	{
 		glLinkProgram(program_);
 		glGetProgramiv(program_, GL_LINK_STATUS, &status_);
-		if (status_ == false)
+		if (!status_)
 		{
 			glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &length_);
 			std::unique_ptr<char[]> buffer(new char[length_]);
 			glGetProgramInfoLog(program_, length_, nullptr, buffer.get());
 			spdlog::error("OGL:Shader - {}", buffer.get());
 		}
-		assert(status_ == true);
+		assert(status_);
 		return *this;
 	}
 
@@ -147,7 +147,7 @@ public:
 
 	void Bind(GLint location, nonstd::span<glm::mat4> matrices) const
 	{
-		glUniformMatrix4fv(location, matrices.size(), GL_FALSE, value_ptr(matrices[0]));
+		glUniformMatrix4fv(location, GLsizei(matrices.size()), GL_FALSE, value_ptr(matrices[0]));
 	}
 
 	void Bind(GLint location, nonstd::span<float> data) const
