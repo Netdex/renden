@@ -1,46 +1,37 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.16)
 project(renden)
 
-set (CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
 
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 add_subdirectory(vendor/glfw)
 
-option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-option(ASSIMP_BUILD_SAMPLES OFF)
-option(ASSIMP_BUILD_TESTS OFF)
+#option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+#option(ASSIMP_BUILD_SAMPLES OFF)
+#option(ASSIMP_BUILD_TESTS OFF)
 #add_subdirectory(vendor/assimp)
 
-option(BUILD_BULLET2_DEMOS OFF)
-option(BUILD_CPU_DEMOS OFF)
-option(BUILD_EXTRAS OFF)
-option(BUILD_OPENGL3_DEMOS OFF)
-option(BUILD_UNIT_TESTS OFF)
+#option(BUILD_BULLET2_DEMOS OFF)
+#option(BUILD_CPU_DEMOS OFF)
+#option(BUILD_EXTRAS OFF)
+#option(BUILD_OPENGL3_DEMOS OFF)
+#option(BUILD_UNIT_TESTS OFF)
 #add_subdirectory(vendor/bullet)
 
-set(JSON_BuildTests OFF CACHE INTERNAL "")
+option(BUILD_TESTING OFF)
 add_subdirectory(vendor/json)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-if(MSVC)
-    add_compile_options("/W4")
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-#    set(CMAKE_CXX_FLAGS_RELEASE "") MSVC hates this
-else()
-    add_compile_options("-Wall" "-Wextra" "$<$<CONFIG:RELEASE>:-O3>" "$<$<CONFIG:DEBUG>:-g>")
-    if(NOT WIN32)
-        set(GLAD_LIBRARIES dl)
-    endif()
-endif()
-
-
 include_directories(
-    renden/inc/
+    renden/src/
+)
+
+include_directories(SYSTEM
 	vendor/assimp/include/
 	vendor/bullet/src/
 	vendor/glad/include/
@@ -63,7 +54,7 @@ file(GLOB VENDORS_SOURCES
     vendor/imgui/examples/imgui_impl_glfw.cpp
 )
 
-file(GLOB_RECURSE PROJECT_HEADERS renden/inc/*.hpp)
+file(GLOB_RECURSE PROJECT_HEADERS renden/src/*.hpp)
 file(GLOB_RECURSE PROJECT_SOURCES renden/src/*.cpp)
 file(GLOB_RECURSE PROJECT_SHADERS 
     renden/shaders/*.comp
@@ -81,7 +72,7 @@ file(GLOB PROJECT_CONFIGS CMakeLists.txt
 source_group("inc" FILES ${PROJECT_HEADERS})
 source_group("shaders" FILES ${PROJECT_SHADERS})
 source_group("src" FILES ${PROJECT_SOURCES})
-source_group("vendors" FILES ${VENDORS_SOURCES})
+source_group("vendor" FILES ${VENDORS_SOURCES})
 
 add_definitions(
 	-DGLFW_INCLUDE_NONE
@@ -92,11 +83,22 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
                                ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
                                ${VENDORS_SOURCES})
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
-#target_link_libraries(${PROJECT_NAME} PUBLIC assimp BulletDynamics BulletCollision LinearMath)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+#target_link_libraries(${PROJECT_NAME} PUBLIC assimp BulletDynamics BulletCollision LinearMath)
 
 if(MSVC)
-    target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:RELWITHDEBINFO>:/PROFILE>")
+	target_compile_options(${PROJECT_NAME} PRIVATE /experimental:external /external:W0 /external:anglebrackets /external:templates-)
+	set_source_files_properties(${PROJECT_HEADERS} ${PROJECT_SOURCES} PROPERTIES COMPILE_FLAGS "/W4")
+	set_source_files_properties(${VENDORS_SOURCES} PROPERTIES COMPILE_FLAGS "/w")
+	target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:RELWITHDEBINFO>:/PROFILE>")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+#    set(CMAKE_CXX_FLAGS_RELEASE "") MSVC hates this
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE "-Wall" "-Wextra" "$<$<CONFIG:RELEASE>:-O3>" "$<$<CONFIG:DEBUG>:-g>")
+    set_source_files_properties(${VENDORS_SOURCES} PROPERTIES COMPILE_FLAGS "-w")
+    if(NOT WIN32)
+        set(GLAD_LIBRARIES dl)
+    endif()
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
