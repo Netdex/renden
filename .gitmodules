@@ -35,6 +35,3 @@
 [submodule "vendor/imgui"]
 	path = vendor/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "vendor/cpptoml"]
-	path = vendor/cpptoml
-	url = https://github.com/skystrife/cpptoml.git
