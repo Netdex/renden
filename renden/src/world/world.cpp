@@ -1,5 +1,7 @@
 #include "world/world.hpp"
 
+#include "util/math.hpp"
+
 bool world::World::ivec3_map_predicate::operator()(const glm::ivec3& a, const glm::ivec3& b) const
 {
 	if (a.x > b.x) return false;
@@ -31,11 +33,13 @@ bool world::World::ChunkExists(glm::ivec3 loc)
 	return chunks_.find(loc) != chunks_.end();
 }
 
-void world::World::Render(const gl::Shader& block_shader)
+void world::World::Render(const gl::Shader& block_shader, const control::Camera &camera)
 {
-	for (const auto& chunk : chunks_)
+	const auto frustum_aabb = camera.ComputeFrustumAABB();
+	for (const auto& [location, chunk] : chunks_)
 	{
-		chunk.second->Draw(block_shader);
+		if(util::aabb_intersects(chunk->GetAABB(), frustum_aabb))
+			chunk->Draw(block_shader);
 	}
 }
 
@@ -62,7 +66,6 @@ Block* world::World::GetBlockRefAt(glm::ivec3 world_pos, bool create_if_not_exis
 
 void world::World::Update()
 {
-	// TODO Maybe lazily stagger chunks that need updating across multiple frames?
 	int count = 0;
 	for (const auto& cnk : chunks_)
 	{

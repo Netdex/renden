@@ -9,7 +9,7 @@ namespace gl
 {
 class FrameBuffer
 {
-	GLuint fbo_;
+	GLuint fbo_{};
 
 public:
 

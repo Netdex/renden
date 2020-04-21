@@ -59,6 +59,9 @@ public:
 		glDeleteTextures(1, &id_);
 	}
 
+	Texture(const Texture& o) = delete;
+	Texture& operator=(const Texture& o) = delete;
+
 	void Bind() const
 	{
 		glActiveTexture(GL_TEXTURE0 + tex_id_);
@@ -85,15 +88,13 @@ public:
 
 protected:
 	TextureTarget target_;
-	GLuint id_;
-	GLuint tex_id_;
+	GLuint id_{};
+	GLuint tex_id_{};
 
 	Texture(TextureTarget target, GLuint tex_id) : target_(target), tex_id_(tex_id)
 	{
 	}
 
-	Texture(const Texture& o) = delete;
-	Texture& operator=(const Texture& o) = delete;
 
 	void SetFilterMode(TextureFilterCase cse, TextureFilterMode mode) const
 	{
@@ -113,8 +114,7 @@ protected:
 
 /**
  * \brief 1D texture from data buffer
- * \tparam T Data type of buffer
- * TODO Use texture buffers instead?
+ * \tparam U Data type of buffer
  */
 template <typename U = GLfloat>
 class Texture1D : public Texture
@@ -187,7 +187,7 @@ public:
 	 * \brief Create a texture 2D array from image files
 	 */
 	Texture2DArray(nonstd::span<std::string> paths,
-	               unsigned int width, unsigned int height,
+	               int width, int height,
 	               TextureFilterMode min_filter_mode, TextureFilterMode mag_filter_mode,
 	               TextureWrapMode wrap_mode,
 	               int mipmap_levels,

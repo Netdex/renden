@@ -6,6 +6,11 @@
 #include "gl/framebuffer.hpp"
 #include "gl/texture.hpp"
 #include "gl/shader.hpp"
+#include "control/camera.hpp"
+
+namespace control
+{
+}
 
 namespace gl
 {
@@ -34,43 +39,15 @@ public:
 		Unbind();
 	}
 
-	void Render(Shader& block_shader, Shader& block_depth_shader,
-	            const glm::mat4& view, const glm::mat4& proj, const glm::vec3& light_dir,
-	            const std::function<void()>& renderer) const;
+	void Render(const control::Camera& camera, Shader& block_shader, Shader& block_depth_shader,
+	            const glm::vec3& light_dir, const std::function<void()>& renderer) const;
 
-	void ComputeShadowViewProj(const glm::mat4& view, const glm::mat4& proj, float near_plane_norm,
+private:
+	void ComputeShadowViewProj(const control::Camera& camera, float near_plane_norm,
 	                           float far_plane_norm,
 	                           const glm::vec3& light_dir, glm::mat4& shadow_view,
 	                           glm::mat4& shadow_proj, float& depth) const;
 
-	//private:
-	/**
-	 * \brief Compute the bounding sphere of a truncated frustum defined by its projection matrix
-	 * \param proj The projection matrix
-	 * \param near_plane_norm The 0-1 normalized position along the frustum to truncate the near plane
-	 * \param far_plane_norm The 0-1 normalized position along the frustum to truncate the far plane
-	 * \return The bounding sphere of the frustum as (center,radius)
-	 */
-	static std::pair<glm::vec3, float> ComputeFrustumBoundingSphere(const glm::mat4& view, const glm::mat4& proj,
-	                                                                float near_plane_norm,
-	                                                                float far_plane_norm);
-
-	/**
-	 * \brief Compute the distance to the near and far clipping planes from a projection matrix.
-	 * \param proj A projection matrix
-	 * \return A pair of floats of the form (near, far)
-	 */
-	static std::pair<float, float> ComputeClipPlaneDist(const glm::mat4& proj);
-
-	/**
-	 * \brief Modify the near and far plane distance of a projection matrix
-	 * \param proj The projection matrix to modify
-	 * \param near_plane_norm The new position of the near plane as a normalized value from [0,1]
-	 * as a fraction of the original frustum range
-	 * \param far_plane_norm The new position of the far plane as a normalized value from [0,1]
-	 * as a fraction of the original frustum range
-	 */
-	static void AugmentClipPlaneDist(glm::mat4& proj, float near_plane_norm, float far_plane_norm);
 
 	nonstd::span<const float> part_intervals_;
 	gl::FrameBuffer framebuffer_;

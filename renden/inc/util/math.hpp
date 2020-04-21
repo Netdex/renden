@@ -21,6 +21,15 @@ T map(T x, T a1, T a2, T b1, T b2)
 	assert(a1 < a2 && b1 < b2 && a1 <= x && x <= a2);
 	return b1 + (x - a1) * (b2 - b1) / (a2 - a1);
 }
+
+inline bool aabb_intersects(std::pair<glm::vec3, glm::vec3> a, std::pair<glm::vec3, glm::vec3> b)
+{
+	auto [min_a, max_a] = a;
+	auto [min_b, max_b] = b;
+	return (min_a.x <= max_b.x && max_a.x >= min_b.x)
+		&& (min_a.y <= max_b.y && max_a.y >= min_b.y)
+		&& (min_a.z <= max_b.z && max_a.z >= min_b.z);
+}
 }
 
 #endif

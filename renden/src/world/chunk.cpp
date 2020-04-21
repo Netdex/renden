@@ -2,13 +2,16 @@
 
 void world::Chunk::Draw(const gl::Shader& shader) const
 {
-	if (is_visible())
-	{
-		const glm::vec3 translation = glm::vec3{chunk_to_block_pos(location_, glm::ivec3{})};
-		glm::mat4 chunk = translate(glm::mat4(1.f), translation);
-		shader.Bind("chunk", chunk);
-		mesh_->Draw(shader);
-	}
+	const glm::vec3 translation = glm::vec3{chunk_to_block_pos(location_, glm::ivec3{})};
+	glm::mat4 chunk = translate(glm::mat4(1.f), translation);
+	shader.Bind("chunk", chunk);
+	mesh_->Draw(shader);
+}
+
+std::pair<glm::vec3, glm::vec3> world::Chunk::GetAABB() const
+{
+	glm::ivec3 min = chunk_to_block_pos(location_, glm::ivec3{});
+	return { glm::vec3{min}, glm::vec3{min} + glm::vec3{kChunkWidth} };
 }
 
 bool world::Chunk::UpdateMesh()
@@ -88,13 +91,4 @@ world::block::BlockFaceSet world::Chunk::visible_faces(glm::ivec3 position) cons
 			mask |= face;
 	}
 	return mask;
-}
-
-bool world::Chunk::is_visible() const
-{
-	const control::Camera& camera = Context<control::Camera>::Get();
-	glm::vec3 pos = camera.Position;
-	glm::vec3 dir = camera.GetDirection();
-	// TODO Frustum culling
-	return true;
 }

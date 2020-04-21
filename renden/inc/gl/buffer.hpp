@@ -65,7 +65,7 @@ public:
 		glBindBuffer(static_cast<GLenum>(type_), this->id_);
 	}
 
-	void Unbind() const
+	static void Unbind()
 	{
 #ifndef NDEBUG
 		glBindBuffer(static_cast<GLenum>(type_), 0);

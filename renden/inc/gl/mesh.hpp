@@ -23,6 +23,10 @@ enum MeshDrawMode : GLenum
 	POINTS = GL_POINTS
 };
 
+/*
+ * TODO: This class needs some changes to properly support multiple VBOs.
+ * There is currently no use-case in Renden that requires this.
+ */
 template <typename T = GLfloat>
 class Mesh
 {
@@ -30,7 +34,6 @@ class Mesh
 	std::vector<std::unique_ptr<Buffer<T>>> vbo_;
 	std::unique_ptr<Buffer<GLuint>> ebo_;
 
-	// TODO: Deprecate this member.
 	size_t attrib_0_size_{};
 public:
 	glm::mat4 Model = glm::mat4(1.f);
@@ -65,118 +68,6 @@ public:
 		}
 		this->Unbind();
 	}
-
-
-	///**
-	// * \brief Constructs a mesh with multiple VBOs
-	// * \param vertices List of list of vertices
-	// * \param draw_mode Draw mode for the entire mesh
-	// * \param attribs List of list vertex attributes, where vertex attribute list i corresponds to vertex list i
-	// */
-	//Mesh(const std::vector<std::vector<T>>& vertices, MeshDrawMode draw_mode,
-	//     const std::vector<std::vector<VArrayAttribute>>& attribs)
-	//	: vao_(std::make_shared<VArray>()), attrib_0_size_(attribs[0][0].stride),
-	//	  DrawMode(draw_mode)
-	//{
-	//	assert(attribs.size() == vertices.size());
-	//	for (int i = 0; i < vertices.size(); i++)
-	//	{
-	//		// Create and bind a VBO to the VAO, with the specified vertices
-	//		vbo_.push_back(std::make_shared<Buffer<T>>(vertices[i]));
-	//		// Set all vertex attributes corresponding to this VBO
-	//		for (auto a : attribs[i])
-	//		{
-	//			vao_->SetAttribute(a.location, a.size, a.type, a.stride, a.offset, a.normalized);
-	//			glVertexAttribDivisor(a.location, a.divisor);
-	//		}
-	//	}
-	//	this->Unbind();
-	//}
-
-	///**
-	// * \brief Constructs a mesh with a single VBO and EBO
-	// * \param vertices List of vertices in VBO
-	// * \param vert_size Vertex count
-	// * \param elements EBO corresponding to single VBO
-	// * \param elem_size Element count
-	// * \param draw_mode Draw mode for the entire mesh
-	// * \param attributes List of vertex attributes
-	// * \param attrib_count Vertex attribute count
-	// */
-	//Mesh(const T* vertices, size_t vert_size, const GLuint* elements, size_t elem_size,
-	//     MeshDrawMode draw_mode,
-	//     const VArrayAttribute* attributes, size_t attrib_count)
-	//// Note: The initialization order is actually very important, since the VAO is bound on construction,
-	//// and the VBO/EBO are bound on construction as well.
-	//	: vao_(std::make_shared<VArray>()),
-	//	  vbo_({std::make_shared<Buffer<T>>(vertices, vert_size)}),
-	//	  ebo_(std::make_shared<Buffer<GLuint>>(elements,
-	//	                                        elem_size)),
-	//	  attrib_0_size_(attributes[0].stride),
-	//	  DrawMode(draw_mode)
-	//{
-	//	for (unsigned i = 0; i < attrib_count; i++)
-	//	{
-	//		const VArrayAttribute& a = attributes[i];
-	//		vao_->SetAttribute(a.location, a.size, a.type, a.stride, a.offset, a.normalized);
-	//		glVertexAttribDivisor(a.location, a.divisor);
-	//	}
-
-	//	this->Unbind();
-	//}
-
-	///**
-	// * \brief Constructs a mesh with a single VBO
-	// * \param vertices List of vertices in VBO
-	// * \param vert_size Vertex count
-	// * \param draw_mode Draw mode for the entire mesh
-	// * \param attributes List of vertex attributes
-	// * \param attrib_count Vertex attribute count
-	// */
-	//Mesh(const T* vertices, size_t vert_size,
-	//     MeshDrawMode draw_mode,
-	//     const VArrayAttribute* attributes, size_t attrib_count)
-	//	: vao_(std::make_shared<VArray>()),
-	//	  vbo_({std::make_shared<Buffer<T>>(vertices, vert_size)}),
-	//	  attrib_0_size_(attributes[0].stride),
-	//	  DrawMode(draw_mode)
-	//{
-	//	for (unsigned int i = 0; i < attrib_count; i++)
-	//	{
-	//		const VArrayAttribute& a = attributes[i];
-	//		vao_->SetAttribute(a.location, a.size, a.type, a.stride, a.offset, a.normalized);
-	//		glVertexAttribDivisor(a.location, a.divisor);
-	//	}
-
-	//	this->Unbind();
-	//}
-
-	///**
-	// * \brief Constructs a mesh with a VBO and corresponding EBO, from vectors
-	// * \param vertices List of vertices in VBO
-	// * \param elements List of elements in EBO
-	// * \param draw_mode Draw mode for the entire mesh
-	// * \param attributes List of vertex attributes
-	// */
-	//Mesh(const std::vector<T>& vertices, const std::vector<GLuint>& elements,
-	//     MeshDrawMode draw_mode, const std::vector<VArrayAttribute>& attributes)
-	//	: Mesh(&vertices[0], vertices.size() * sizeof(T), &elements[0], elements.size() * sizeof(GLuint),
-	//	       draw_mode, &attributes[0], attributes.size())
-	//{
-	//}
-
-	///**
-	// * \brief Constructs a mesh with a VBO, from vectors
-	// * \param vertices List of vertices in VBO
-	// * \param draw_mode Draw mode for the entire mesh
-	// * \param attributes List of vertex attributes
-	// */
-	//Mesh(const std::vector<T>& vertices,
-	//     MeshDrawMode draw_mode, const std::vector<VArrayAttribute>& attributes)
-	//	: Mesh(&vertices[0], vertices.size() * sizeof(T),
-	//	       draw_mode, &attributes[0], attributes.size())
-	//{
-	//}
 
 	/**
 	 * \brief Constructs a mesh with an empty VBO
@@ -220,7 +111,7 @@ public:
 		this->Bind();
 		shader.Bind("model", Model);
 		glDrawElements(static_cast<GLenum>(DrawMode),
-		               static_cast<GLsizei>(ebo_->GetSize()), GL_UNSIGNED_INT, 0);
+		               static_cast<GLsizei>(ebo_->GetSize()), GL_UNSIGNED_INT, nullptr);
 		this->Unbind();
 	}
 
@@ -241,11 +132,6 @@ public:
 
 		glDrawArrays(static_cast<GLenum>(DrawMode), 0, vertex_count);
 		this->Unbind();
-	}
-
-	void DrawInstanced(const Shader& shader)
-	{
-		// TODO
 	}
 
 	/**

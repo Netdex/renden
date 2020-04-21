@@ -28,7 +28,7 @@ public:
 	std::optional<Block> GetBlockAt(glm::ivec3 world_pos, bool create_if_not_exists = false);
 	Block* GetBlockRefAt(glm::ivec3 world_pos, bool create_if_not_exists = false, bool taint = true);
 
-	void Render(const gl::Shader& block_shader);
+	void Render(const gl::Shader& block_shader, const control::Camera &camera);
 	void Update();
 
 	static constexpr int kMaximumChunksPerUpdate = 10;

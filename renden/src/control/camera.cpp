@@ -4,10 +4,26 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+
+#include "util/math.hpp"
 #include "world/world.hpp"
 
 namespace control
 {
+namespace
+{
+	constexpr glm::vec4 kNormalizedFrustumBounds[] = {
+		glm::vec4{-1, -1, -1, 1},
+		glm::vec4{1, -1, -1, 1},
+		glm::vec4{1, 1, -1, 1},
+		glm::vec4{-1, 1, -1, 1},
+		glm::vec4{-1, -1, 1, 1},
+		glm::vec4{1, -1, 1, 1},
+		glm::vec4{1, 1, 1, 1},
+		glm::vec4{-1, 1, 1, 1}
+	};
+}
+
 Camera::Camera(GLFWwindow* window) : window_(window)
 {
 }
@@ -86,7 +102,7 @@ void Camera::Update(float deltaTime, bool focus)
 		Position + direction,
 		up_
 	);
-	Proj = glm::perspective(fov_, float(width) / height, 0.01f, 200.0f);
+	Proj = glm::perspective(fov_, float(width) / float(height), 0.01f, 200.0f);
 }
 
 std::optional<std::pair<glm::ivec3, glm::ivec3>> Camera::CastTarget(world::World& world,
@@ -167,5 +183,60 @@ glm::vec3 Camera::GetDirection() const
 		std::sin(pitch_),
 		std::cos(pitch_) * std::cos(yaw_)
 	);
+}
+
+std::pair<glm::vec3, float> Camera::ComputeFrustumBoundingSphere(float near_plane_norm, float far_plane_norm) const
+{
+	glm::mat4 aug_proj{Proj};
+	AugmentClipPlaneDist(aug_proj, near_plane_norm, far_plane_norm);
+	glm::mat4 vp_inv = inverse(aug_proj * View);
+
+	glm::vec3 worldFrustumBounds[8];
+
+	glm::vec3 center{};
+	for (int i = 0; i < 8; ++i)
+	{
+		const glm::vec4& corner = kNormalizedFrustumBounds[i];
+		glm::vec4 transform(vp_inv * corner);
+		const glm::vec3 world = transform / transform.w;
+		worldFrustumBounds[i] = world;
+		center += world;
+	}
+	float radius = distance(worldFrustumBounds[6], worldFrustumBounds[0]) / 2.f;
+	center /= 8;
+	return {center, radius};
+}
+
+std::pair<glm::vec3, glm::vec3> Camera::ComputeFrustumAABB() const
+{
+	glm::vec3 min{FLT_MAX};
+	glm::vec3 max{-max};
+
+	glm::mat4 vp_inv = inverse(Proj * View);
+	for (int i = 0; i < 8; ++i)
+	{
+		const glm::vec4& corner = kNormalizedFrustumBounds[i];
+		glm::vec4 transform(vp_inv * corner);
+		const glm::vec3 world = transform / transform.w;
+		max = glm::max(max, world);
+		min = glm::min(min, world);
+	}
+	return {min, max};
+}
+
+std::pair<float, float> Camera::ComputeClipPlaneDist(const glm::mat4& proj)
+{
+	float c = proj[2][2];
+	float d = proj[3][2];
+	return std::pair{d / (c - 1.f), d / (c + 1.f)};
+}
+
+void Camera::AugmentClipPlaneDist(glm::mat4& proj, float near_plane_norm, float far_plane_norm)
+{
+	auto [clip_near, clip_far] = ComputeClipPlaneDist(proj);
+	float n = util::map(near_plane_norm, 0.f, 1.f, clip_near, clip_far);
+	float f = util::map(far_plane_norm, 0.f, 1.f, clip_near, clip_far);
+	proj[2][2] = -(f + n) / (f - n);
+	proj[3][2] = -2.f * f * n / (f - n);
 }
 }

@@ -38,7 +38,7 @@ struct VArrayAttribute
 
 class VArray
 {
-	GLuint id_;
+	GLuint id_{};
 public:
 	VArray()
 	{

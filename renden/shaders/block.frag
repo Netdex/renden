@@ -6,7 +6,6 @@
 const int SHADOW_MAP_PARTITIONS = 3;
 
 const vec3 LIGHT_COLOR      = vec3(1,1,1);
-const vec3 LIGHT_POS		= vec3(128,256,128);
 
 const float SPECULAR_STR    = 0.5;
 const float AMBIENT_STR     = 0.5;
@@ -35,7 +34,7 @@ vec2 shadow_intensity(){
 		
 		if(clamp(proj_coords.x, 0, 1) == proj_coords.x 
 				&& clamp(proj_coords.y, 0, 1) == proj_coords.y
-				&& proj_coords.z <= 1.0){
+				&& clamp(proj_coords.z, 0, 1) == proj_coords.z){
 			float shadow = 0.0;
 			vec2 texel_size = (1.0 / textureSize(shadow_map, 0)).xy;
 			for(int x = -1; x <= 1; ++x)

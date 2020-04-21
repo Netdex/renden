@@ -29,7 +29,9 @@ public:
 	bool UpdateMesh();
 	void Draw(const gl::Shader& shader) const;
 
-	static constexpr glm::ivec3 block_to_chunk_pos(glm::ivec3 pos)
+	std::pair<glm::vec3, glm::vec3> GetAABB() const;
+
+	static glm::ivec3 block_to_chunk_pos(glm::ivec3 pos)
 	{
 		return glm::ivec3(
 			int(floorf(float(pos.x) / kChunkWidth)),
@@ -57,8 +59,6 @@ public:
 private:
 	bool face_occluded(glm::ivec3 position, world::block::BlockFace face) const;
 	block::BlockFaceSet visible_faces(glm::ivec3 position) const;
-	bool is_visible() const;
-
 
 	// y-z-x order
 	Block data_[kChunkWidth][kChunkWidth][kChunkWidth];
