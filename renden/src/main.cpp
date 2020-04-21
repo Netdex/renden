@@ -25,6 +25,7 @@
 #include "world/block.hpp"
 #include "world/chunk.hpp"
 #include "world/reticle.hpp"
+#include "util/config.hpp"
 
 //void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 //{
@@ -33,6 +34,22 @@
 
 void init(GLFWwindow* m_window)
 {
+	util::config::Load();
+
+	auto& config = util::config::Get();
+	int width, height, xpos, ypos;
+	glfwGetWindowSize(m_window, &width, &height);
+	glfwGetWindowPos(m_window, &xpos, &ypos);
+	if (const auto& window_rect = config["window_rect"])
+	{
+		xpos = int(window_rect["x"].value_or(xpos));
+		ypos = int(window_rect["y"].value_or(ypos));
+		width = int(window_rect["w"].value_or(width));
+		height = int(window_rect["h"].value_or(height));
+		glfwSetWindowPos(m_window, xpos, ypos);
+		glfwSetWindowSize(m_window, width, height);
+	}
+
 	Context<shader::BlockShader>::Initialize().GetShader().Activate();
 	Context<world::BlockManager>::Initialize(PROJECT_SOURCE_DIR "/renden/res/block_texture.json",
 	                                         PROJECT_SOURCE_DIR "/renden/res/block_def.json");
@@ -87,8 +104,23 @@ void init(GLFWwindow* m_window)
 	}
 }
 
-void cleanup()
+void cleanup(GLFWwindow* m_window)
 {
+	auto& config = util::config::Get();
+	int width, height, xpos, ypos;
+	glfwGetWindowPos(m_window, &xpos, &ypos);
+	glfwGetWindowSize(m_window, &width, &height);
+	config.insert_or_assign("window_rect", toml::table{
+		                        {
+			                        {"x", xpos},
+			                        {"y", ypos},
+			                        {"w", width},
+			                        {"h", height},
+		                        }
+	                        });
+
+	util::config::Save();
+
 	// Free all resources which depend on OpenGL context.
 	Context<shader::BlockShader>::Reset();
 	Context<world::BlockManager>::Reset();
@@ -132,7 +164,7 @@ void loop(GLFWwindow* m_window)
 	{
 		control::imgui_frame_begin();
 
-		if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
 			glfwSetWindowShouldClose(m_window, true);
 
 		// Pre-drawing computations.
@@ -238,8 +270,7 @@ int main(int /*argc*/, char* /*argv*/[])
 	init(m_window);
 	control::imgui_init(m_window);
 	loop(m_window);
-	cleanup();
-
+	cleanup(m_window);
 	control::imgui_cleanup();
 
 	glfwTerminate();
