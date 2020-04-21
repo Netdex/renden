@@ -35,18 +35,8 @@ vec2 shadow_intensity(){
 		if(clamp(proj_coords.x, 0, 1) == proj_coords.x 
 				&& clamp(proj_coords.y, 0, 1) == proj_coords.y
 				&& clamp(proj_coords.z, 0, 1) == proj_coords.z){
-			float shadow = 0.0;
-			vec2 texel_size = (1.0 / textureSize(shadow_map, 0)).xy;
-			for(int x = -1; x <= 1; ++x)
-			{
-				for(int y = -1; y <= 1; ++y)
-				{
-					float pcf_depth = texture(shadow_map, vec3(proj_coords.xy + vec2(x, y) * texel_size, i)).r; 
-					shadow += proj_coords.z - bias > pcf_depth ? 1.0 : 0.0;        
-				}    
-			}
-			shadow /= 9.0;
-			return vec2(shadow, i);
+			float depth = texture(shadow_map, vec3(proj_coords.xy, i)).r;
+			return vec2(proj_coords.z - bias > depth ? 1.0 : 0.0, i); 
 		}
 	}
 	return vec2(0, SHADOW_MAP_PARTITIONS);

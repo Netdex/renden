@@ -123,12 +123,12 @@ void loop(GLFWwindow* m_window)
 	world::World& world = Context<world::World>::Get();
 
 	// TODO Tidy this code up.
-	constexpr int SHADOW_WIDTH = 2048;
+	constexpr int SHADOW_WIDTH = 1024;
 
-	const float part_intervals[] = {0.f, 0.1f, 0.3f, 1.f};
+	const glm::vec3 light_dir = glm::normalize(glm::vec3{0, -1, 0});
+	const float part_intervals[] = {0.f, 0.1f, 0.2f, 1.f};
 	const gl::DepthMap shadowmap(SHADOW_WIDTH, shader::BlockDepthShader::kShadowmapTextureUnit, part_intervals);
 
-	bool depth_clamp = false;
 	auto last_tick = float(glfwGetTime());
 	while (!static_cast<bool>(glfwWindowShouldClose(m_window)))
 	{
@@ -147,7 +147,6 @@ void loop(GLFWwindow* m_window)
 
 		control::state.target = cam.CastTarget(world, 20);
 		world.Update();
-		glm::vec3 light_dir = glm::normalize(glm::vec3{0, -1, 0});
 
 		shadowmap.Render(cam, block_shader, block_depth_shader, light_dir,
 		                 [&world, &block_depth_shader, &cam] { world.Render(block_depth_shader, cam); });

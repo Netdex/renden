@@ -58,7 +58,8 @@ void DepthMap::ComputeShadowViewProj(const control::Camera& camera, float near_p
 	ImGui::Begin("Shadow View-Projection");
 	auto [center, radius] = camera.ComputeFrustumBoundingSphere(near_plane_norm, far_plane_norm);
 	const float texels_per_unit = float(this->GetWidth()) / (radius * 2.f);
-	//const float slipping_factor = float(this->GetWidth()) / float(this->GetWidth() - 1);
+	const float slipping_factor = float(this->GetWidth()) / float(this->GetWidth() - 1);
+	//radius *= slipping_factor;
 
 	const glm::vec3 up{1, 0, 0};
 	const glm::mat4 scale_mat = scale(glm::mat4{1.f}, glm::vec3{texels_per_unit});
@@ -71,7 +72,7 @@ void DepthMap::ComputeShadowViewProj(const control::Camera& camera, float near_p
 
 	glm::vec3 eye = center - (light_dir * radius);
 	shadow_view = lookAt(eye, center, up);
-	constexpr float grace = 2.f;
+	constexpr float grace = 1.f;
 	shadow_proj = glm::ortho(-radius, radius, -radius, radius,
 	                         -radius * grace, radius * grace);
 	depth = radius * 1.f;
