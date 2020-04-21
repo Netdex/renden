@@ -23,7 +23,6 @@ world::Chunk* world::World::GetChunkAt(glm::ivec3 loc, bool create_if_not_exists
 	if (!ptr && create_if_not_exists)
 	{
 		ptr.reset(new Chunk{loc});
-		spdlog::debug("Generated chunk ({},{},{})", loc.x, loc.y, loc.z);
 	}
 	return ptr.get();
 }
@@ -74,4 +73,6 @@ void world::World::Update()
 		if (count >= kMaximumChunksPerUpdate)
 			break;
 	}
+	if (count > 0)
+		spdlog::debug("Updated {} chunks on render tick", count);
 }

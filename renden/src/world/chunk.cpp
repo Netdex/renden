@@ -37,7 +37,6 @@ bool world::Chunk::UpdateMesh()
 			}
 		}
 		mesh_->BufferVertexData(vlist);
-		spdlog::debug("Regenerating mesh for chunk ({},{},{})", location_.x, location_.y, location_.z);
 		dirty_ = false;
 		return true;
 	}

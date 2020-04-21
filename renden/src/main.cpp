@@ -222,8 +222,8 @@ int main(int argc, char* argv[])
 	assert(code);
 	spdlog::info("OpenGL {}", glGetString(GL_VERSION));
 
-	glDebugMessageCallback(debug_callback, nullptr);
 #ifndef NDEBUG
+	glDebugMessageCallback(debug_callback, nullptr);
 	glEnable(GL_DEBUG_OUTPUT);
 #endif
 
