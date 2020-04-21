@@ -42,6 +42,7 @@ include_directories(SYSTEM
 	vendor/span-lite/include/
 	vendor/imgui/
 	vendor/imgui/examples/
+    vendor/tomlplusplus/
 )
 
 file(GLOB VENDORS_SOURCES 
