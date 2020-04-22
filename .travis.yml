@@ -2,4 +2,12 @@ language: cpp
 compiler: clang
 os: linux
 
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+    packages:
+      - cmake-data
+      - cmake
+
 script: bash build.sh
