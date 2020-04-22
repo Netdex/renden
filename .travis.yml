@@ -1,13 +1,17 @@
 language: cpp
 compiler: clang
 os: linux
+dist: bionic
+
 
 addons:
-  apt:
-    sources:
-      - george-edison55-precise-backports
-    packages:
-      - cmake-data
-      - cmake
+    apt:
+        packages:
+            - xorg-dev
+
+install:
+- mkdir $HOME/cmake &&
+  wget -qO- https://github.com/Kitware/CMake/releases/download/v3.17.0/cmake-3.17.0-Linux-x86_64.tar.gz | tar -xzC $HOME/cmake --strip-components 1 &&
+  export PATH=$HOME/cmake/bin:$PATH
 
 script: bash build.sh

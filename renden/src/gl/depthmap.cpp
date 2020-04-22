@@ -27,7 +27,7 @@ void DepthMap::Render(const control::Camera& camera, Shader& block_shader, Shade
 	std::vector<glm::mat4> shadow_proj(partition_count);
 	std::vector<float> shadow_depth(partition_count);
 
-	for (int i = 0; i < partition_count; ++i)
+	for (size_t i = 0; i < partition_count; ++i)
 	{
 		float near_plane_norm = part_intervals_[i];
 		float far_plane_norm = part_intervals_[i + 1];
@@ -57,7 +57,7 @@ void DepthMap::ComputeShadowViewProj(const control::Camera& camera, float near_p
 	ImGui::Begin("Shadow View-Projection");
 	auto [center, radius] = camera.ComputeFrustumBoundingSphere(near_plane_norm, far_plane_norm);
 	const float texels_per_unit = float(this->GetWidth()) / (radius * 2.f);
-	const float slipping_factor = float(this->GetWidth()) / float(this->GetWidth() - 1);
+	//const float slipping_factor = float(this->GetWidth()) / float(this->GetWidth() - 1);
 	//radius *= slipping_factor;
 
 	const glm::vec3 up{1, 0, 0};
