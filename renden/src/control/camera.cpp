@@ -209,7 +209,7 @@ std::pair<glm::vec3, float> Camera::ComputeFrustumBoundingSphere(float near_plan
 std::pair<glm::vec3, glm::vec3> Camera::ComputeFrustumAABB() const
 {
 	glm::vec3 min{FLT_MAX};
-	glm::vec3 max{-max};
+	glm::vec3 max{-min};
 
 	glm::mat4 vp_inv = inverse(Proj * View);
 	for (int i = 0; i < 8; ++i)
