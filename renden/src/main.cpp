@@ -38,8 +38,8 @@ void init(GLFWwindow* m_window)
 
 	auto& config = util::config::Get();
 	int width, height, xpos, ypos;
-	glfwGetWindowSize(m_window, &width, &height);
 	glfwGetWindowPos(m_window, &xpos, &ypos);
+	glfwGetWindowSize(m_window, &width, &height);
 	if (const auto& window_rect = config["window_rect"])
 	{
 		xpos = int(window_rect["x"].value_or(xpos));
@@ -227,8 +227,11 @@ int main(int /*argc*/, char* /*argv*/[])
 {
 	spdlog::set_level(spdlog::level::debug);
 
-	int code = glfwInit();
-	assert(code);
+	if(!glfwInit())
+	{
+		spdlog::critical("glfwInit() returned error");
+		return 1;
+	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -239,7 +242,11 @@ int main(int /*argc*/, char* /*argv*/[])
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 	const auto m_window = glfwCreateWindow(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT,
 	                                       "renden", nullptr, nullptr);
-	assert(m_window);
+	if(!m_window)
+	{
+		spdlog::critical("glfwCreateWindow() returned error");
+		return 1;
+	}
 
 	glfwMakeContextCurrent(m_window);
 	glfwSetMouseButtonCallback(m_window, control::mouse_button_callback);
@@ -248,8 +255,11 @@ int main(int /*argc*/, char* /*argv*/[])
 
 	glfwSwapInterval(1);
 
-	code = gladLoadGL();
-	assert(code);
+	if(!gladLoadGL())
+	{
+		spdlog::critical("gladLoadGL() returned error");
+		return 1;
+	}
 	spdlog::info("OpenGL {}", glGetString(GL_VERSION));
 
 	glDebugMessageCallback(debug_callback, nullptr);
