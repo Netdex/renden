@@ -33,7 +33,7 @@ void DepthMap::Render(const control::Camera& camera, Shader& block_shader, Shade
 		float far_plane_norm = part_intervals_[i + 1];
 		ComputeShadowViewProj(camera, near_plane_norm, far_plane_norm, light_dir,
 		                      shadow_view[i], shadow_proj[i], shadow_depth[i]);
-		FrameBuffer::Attach(*this, GL_DEPTH_ATTACHMENT, i);
+		FrameBuffer::Attach(*this, GL_DEPTH_ATTACHMENT, GLint(i));
 		glClear(GL_DEPTH_BUFFER_BIT);
 		block_depth_shader.Bind("view", shadow_view[i]);
 		block_depth_shader.Bind("proj", shadow_proj[i]);
