@@ -27,28 +27,24 @@
 #include "world/reticle.hpp"
 #include "util/config.hpp"
 
-//void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-//{
-//	glViewport(0, 0, width, height);
-//}
-
-void init(GLFWwindow* m_window)
+void init(GLFWwindow* window)
 {
 	util::config::Load();
 
 	auto& config = util::config::Get();
 	int width, height, xpos, ypos;
-	glfwGetWindowPos(m_window, &xpos, &ypos);
-	glfwGetWindowSize(m_window, &width, &height);
+	glfwGetWindowPos(window, &xpos, &ypos);
+	glfwGetWindowSize(window, &width, &height);
 	if (const auto& window_rect = config["window_rect"])
 	{
 		xpos = int(window_rect["x"].value_or(xpos));
 		ypos = int(window_rect["y"].value_or(ypos));
 		width = int(window_rect["w"].value_or(width));
 		height = int(window_rect["h"].value_or(height));
-		glfwSetWindowPos(m_window, xpos, ypos);
-		glfwSetWindowSize(m_window, width, height);
+		glfwSetWindowPos(window, xpos, ypos);
+		glfwSetWindowSize(window, width, height);
 	}
+	glfwShowWindow(window);
 
 	Context<shader::BlockShader>::Initialize().GetShader().Activate();
 	Context<world::BlockManager>::Initialize(PROJECT_SOURCE_DIR "/renden/res/block_texture.json",
@@ -70,7 +66,7 @@ void init(GLFWwindow* m_window)
 	Context<shader::ReticleShader>::Initialize().GetShader().Activate();
 	Context<world::Reticle>::Initialize();
 
-	Context<control::Camera>::Initialize(m_window);
+	Context<control::Camera>::Initialize(window);
 
 	// Some silly code to generate test scenery.
 	world::World& world = Context<world::World>::Get();
@@ -104,12 +100,12 @@ void init(GLFWwindow* m_window)
 	}
 }
 
-void cleanup(GLFWwindow* m_window)
+void cleanup(GLFWwindow* window)
 {
 	auto& config = util::config::Get();
 	int width, height, xpos, ypos;
-	glfwGetWindowPos(m_window, &xpos, &ypos);
-	glfwGetWindowSize(m_window, &width, &height);
+	glfwGetWindowPos(window, &xpos, &ypos);
+	glfwGetWindowSize(window, &width, &height);
 	config.insert_or_assign("window_rect", toml::table{
 		                        {
 			                        {"x", xpos},
@@ -227,37 +223,38 @@ int main(int /*argc*/, char* /*argv*/[])
 {
 	spdlog::set_level(spdlog::level::debug);
 
-	if(!glfwInit())
+	if(const int code = !glfwInit())
 	{
-		spdlog::critical("glfwInit() returned error");
+		spdlog::critical("glfwInit() returned {}", code);
 		return 1;
 	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+	glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-	const auto m_window = glfwCreateWindow(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT,
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+	const auto window = glfwCreateWindow(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT,
 	                                       "renden", nullptr, nullptr);
-	if(!m_window)
+	if(!window)
 	{
-		spdlog::critical("glfwCreateWindow() returned error");
+		const char* description;
+		spdlog::critical("glfwCreateWindow() returned {}: {}", glfwGetError(&description), description);
 		return 1;
 	}
 
-	glfwMakeContextCurrent(m_window);
-	glfwSetMouseButtonCallback(m_window, control::mouse_button_callback);
-	//glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
-	glfwSetKeyCallback(m_window, control::key_callback);
+	glfwMakeContextCurrent(window);
+	glfwSetMouseButtonCallback(window, control::mouse_button_callback);
+	glfwSetKeyCallback(window, control::key_callback);
 
 	glfwSwapInterval(1);
 
-	if(!gladLoadGL())
+	if(const int code = !gladLoadGL())
 	{
-		spdlog::critical("gladLoadGL() returned error");
+		spdlog::critical("gladLoadGL() returned {}", code);
 		return 1;
 	}
 	spdlog::info("OpenGL {}", glGetString(GL_VERSION));
@@ -275,12 +272,11 @@ int main(int /*argc*/, char* /*argv*/[])
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//	glLineWidth(10.f);
 
-	init(m_window);
-	control::imgui_init(m_window);
-	loop(m_window);
-	cleanup(m_window);
+	init(window);
+	control::imgui_init(window);
+	loop(window);
+	cleanup(window);
 	control::imgui_cleanup();
 
 	glfwTerminate();
