@@ -66,7 +66,7 @@ private:
 
 	//
 	// Don't know whether this is a good idea yet.
-	Chunk* adjacent_chunks_[6];
+	//Chunk* adjacent_chunks_[6];
 };
 }
 

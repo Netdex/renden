@@ -4,6 +4,7 @@
 .idea
 .vs
 renden/res/tex
+build
 
 # User-specific stuff
 .idea/**/workspace.xml

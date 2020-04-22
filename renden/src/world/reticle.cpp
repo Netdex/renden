@@ -101,7 +101,7 @@ void Reticle::Draw(const gl::Shader& shader,
 
 	dir_mesh_->Model = glm::mat4(1.f);
 	// TODO This is kind of nasty
-	dir_mesh_->BufferVertexData(nonstd::span(&axis[0][0], sizeof(axis) / sizeof(float)));
+	dir_mesh_->BufferVertexData(nonstd::span(&axis[0][0], sizeof(axis) / (sizeof(float))));
 	dir_mesh_->Draw(shader);
 
 	shader.Bind("proj", glm::mat4(1.f));
