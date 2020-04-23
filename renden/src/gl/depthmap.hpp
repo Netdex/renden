@@ -28,7 +28,7 @@ public:
 	 */
 	DepthMap(int width, GLuint tex_id, nonstd::span<const float> part_intervals) :
 		Texture2DArray(
-			width, width, int(part_intervals.size()) - 1, NEAREST, NEAREST,
+			width, width, int(part_intervals.size()) - 1,NEAREST,NEAREST,
 			CLAMP_BORDER, 1, tex_id, GL_DEPTH_COMPONENT32F),
 		part_intervals_(part_intervals)
 	{
@@ -36,6 +36,8 @@ public:
 		Bind();
 		float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
 		glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, borderColor);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
 		Unbind();
 	}
 

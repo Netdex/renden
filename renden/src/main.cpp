@@ -149,7 +149,7 @@ void loop(GLFWwindow* window)
 	constexpr int SHADOW_WIDTH = 1024;
 
 	const glm::vec3 light_dir = glm::normalize(glm::vec3{0, -1, 0});
-	const float part_intervals[] = {0.f, 0.1f, 0.2f, 1.f};
+	const float part_intervals[] = {0.f, 0.1f, 0.4f, 1.f};
 	const gl::DepthMap shadowmap(SHADOW_WIDTH, shader::BlockDepthShader::kShadowmapTextureUnit, part_intervals);
 
 	auto last_tick = float(glfwGetTime());
