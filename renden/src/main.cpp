@@ -40,7 +40,9 @@ void init(GLFWwindow* window)
 		ypos = int(window_rect["y"].value_or(ypos));
 		width = int(window_rect["w"].value_or(width));
 		height = int(window_rect["h"].value_or(height));
-		//glfwSetWindowPos(window, xpos, ypos);
+		// We need to do this twice for some reason, or else it breaks for multi-DPI configurations.
+		glfwSetWindowPos(window, xpos, ypos);
+		glfwSetWindowPos(window, xpos, ypos);
 		glfwSetWindowSize(window, width, height);
 	}
 	glfwShowWindow(window);
@@ -131,7 +133,7 @@ void cleanup(GLFWwindow* window)
 	Context<control::Camera>::Reset();
 }
 
-void loop(GLFWwindow* m_window)
+void loop(GLFWwindow* window)
 {
 	auto& block_shader = Context<shader::BlockShader>::Get().GetShader();
 	auto& block_depth_shader = Context<shader::BlockDepthShader>::Get().GetShader();
@@ -151,19 +153,19 @@ void loop(GLFWwindow* m_window)
 	const gl::DepthMap shadowmap(SHADOW_WIDTH, shader::BlockDepthShader::kShadowmapTextureUnit, part_intervals);
 
 	auto last_tick = float(glfwGetTime());
-	while (!static_cast<bool>(glfwWindowShouldClose(m_window)))
+	while (!static_cast<bool>(glfwWindowShouldClose(window)))
 	{
 		control::imgui_frame_begin();
 
-		if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
-			glfwSetWindowShouldClose(m_window, true);
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+			glfwSetWindowShouldClose(window, true);
 
 		// Pre-drawing computations.
 		const auto now = float(glfwGetTime());
 		const float delta_time = now - last_tick;
 		last_tick = now;
 		int fb_width, fb_height;
-		glfwGetFramebufferSize(m_window, &fb_width, &fb_height);
+		glfwGetFramebufferSize(window, &fb_width, &fb_height);
 		cam.Update(delta_time, control::state.focus);
 
 		control::state.target = cam.CastTarget(world, 20);
@@ -207,9 +209,9 @@ void loop(GLFWwindow* m_window)
 		Context<world::Skybox>::Get().Draw(tenbox_shader);
 
 		glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-		control::imgui_frame_end(m_window);
+		control::imgui_frame_end(window);
 
-		glfwSwapBuffers(m_window);
+		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 }
