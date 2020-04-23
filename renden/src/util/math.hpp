@@ -22,13 +22,18 @@ T map(T x, T a1, T a2, T b1, T b2)
 	return b1 + (x - a1) * (b2 - b1) / (a2 - a1);
 }
 
+inline bool interval_intersects(float min_a, float max_a, float min_b, float max_b)
+{
+    return !(min_b < min_a&& max_b < min_a || min_b > max_a&& max_b > max_a);
+}
+
 inline bool aabb_intersects(std::pair<glm::vec3, glm::vec3> a, std::pair<glm::vec3, glm::vec3> b)
 {
 	auto [min_a, max_a] = a;
 	auto [min_b, max_b] = b;
-	return (min_a.x <= max_b.x && max_a.x >= min_b.x)
-		&& (min_a.y <= max_b.y && max_a.y >= min_b.y)
-		&& (min_a.z <= max_b.z && max_a.z >= min_b.z);
+    return interval_intersects(min_a.x, max_a.x, min_b.x, max_b.x)
+        && interval_intersects(min_a.y, max_a.y, min_b.y, max_b.y)
+        && interval_intersects(min_a.z, max_a.z, min_b.z, max_b.z);
 }
 }
 
