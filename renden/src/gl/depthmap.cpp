@@ -71,7 +71,7 @@ void DepthMap::ComputeShadowViewProj(const control::Camera& camera, float near_p
 
 	glm::vec3 eye = center - (light_dir * radius);
 	shadow_view = lookAt(eye, center, up);
-	constexpr float grace = 1.f;
+	constexpr float grace = 2.f;
 	shadow_proj = glm::ortho(-radius, radius, -radius, radius,
 	                         -radius * grace, radius * grace);
 	depth = radius * 1.f;
