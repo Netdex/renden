@@ -17,7 +17,7 @@ struct ControllerState
 {
 	bool wireframe = false;
 	bool focus = true;
-	block_id_t active_block = 1;
+	world::block_id_t active_block = 1;
 	std::optional<std::pair<glm::ivec3, glm::ivec3>> target;
 };
 extern ControllerState state;

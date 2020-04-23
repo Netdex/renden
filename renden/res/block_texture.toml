@@ -1,0 +1,19 @@
+width = 16
+height = 16
+
+[textures]
+stone = "stone.png"
+grass_top = "grass_top.png"
+grass_side = "grass_side.png"
+dirt = "dirt.png"
+cobblestone = "cobblestone.png"
+planks = "planks_oak.png"
+wood_side = "log_oak.png"
+wood_top = "log_oak_top.png"
+leaves = "leaves_oak.png"
+crafting_table_top = "crafting_table_top.png"
+crafting_table_side = "crafting_table_side.png"
+crafting_table_front = "crafting_table_front.png"
+conduit = "wool_colored_gray.png"
+powered_conduit = "wool_colored_white.png"
+power_source = "wool_colored_lime.png"

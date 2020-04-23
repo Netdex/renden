@@ -42,7 +42,7 @@ void world::World::Render(const gl::Shader& block_shader, const control::Camera 
 	}
 }
 
-std::optional<Block> world::World::GetBlockAt(glm::ivec3 world_pos, bool create_if_not_exists)
+std::optional<world::Block> world::World::GetBlockAt(glm::ivec3 world_pos, bool create_if_not_exists)
 {
 	const auto chunk_pos = Chunk::block_to_chunk_pos(world_pos);
 	if (!create_if_not_exists && !ChunkExists(chunk_pos))
@@ -52,7 +52,7 @@ std::optional<Block> world::World::GetBlockAt(glm::ivec3 world_pos, bool create_
 	return GetChunkAt(chunk_pos)->GetBlockAt(loc_pos);
 }
 
-Block* world::World::GetBlockRefAt(glm::ivec3 world_pos, bool create_if_not_exists, bool taint)
+world::Block* world::World::GetBlockRefAt(glm::ivec3 world_pos, bool create_if_not_exists, bool taint)
 {
 	const auto chunk_pos = Chunk::block_to_chunk_pos(world_pos);
 	const glm::ivec3 loc_pos = Chunk::block_to_loc_pos(world_pos);

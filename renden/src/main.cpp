@@ -17,7 +17,6 @@
 #include "gl/debug.hpp"
 #include "gl/depthmap.hpp"
 #include "gl/shader.hpp"
-#include "loader/block_manager.hpp"
 #include "world/world.hpp"
 #include "loader/shader_program.hpp"
 #include "phy/phy_engine.hpp"
@@ -41,18 +40,18 @@ void init(GLFWwindow* window)
 		ypos = int(window_rect["y"].value_or(ypos));
 		width = int(window_rect["w"].value_or(width));
 		height = int(window_rect["h"].value_or(height));
-		glfwSetWindowPos(window, xpos, ypos);
+		//glfwSetWindowPos(window, xpos, ypos);
 		glfwSetWindowSize(window, width, height);
 	}
 	glfwShowWindow(window);
 
-	Context<shader::BlockShader>::Initialize().GetShader().Activate();
-	Context<world::BlockManager>::Initialize(PROJECT_SOURCE_DIR "/renden/res/block_texture.json",
-	                                         PROJECT_SOURCE_DIR "/renden/res/block_def.json");
-	Context<shader::BlockDepthShader>::Initialize().GetShader().Activate();
+	Context<shader::BlockShader>::Initialize();
+	world::Block::LoadTextures(PROJECT_SOURCE_DIR "/renden/res/block_def.json",
+	                           PROJECT_SOURCE_DIR "/renden/res/block_texture.json");
+	Context<shader::BlockDepthShader>::Initialize();
 	Context<world::World>::Initialize();
 
-	Context<shader::SkyboxShader>::Initialize().GetShader().Activate();
+	Context<shader::SkyboxShader>::Initialize();
 	const std::string cubemap_paths[6] = {
 		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_rt.tga",
 		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_lf.tga",
@@ -63,7 +62,7 @@ void init(GLFWwindow* window)
 	};
 	Context<world::Skybox>::Initialize(cubemap_paths);
 
-	Context<shader::ReticleShader>::Initialize().GetShader().Activate();
+	Context<shader::ReticleShader>::Initialize();
 	Context<world::Reticle>::Initialize();
 
 	Context<control::Camera>::Initialize(window);
@@ -89,9 +88,9 @@ void init(GLFWwindow* window)
 						for (int cz = 0; cz < world::Chunk::kChunkWidth; cz++)
 						{
 							auto p = world::Chunk::chunk_to_block_pos({ax, ay, az}, {cx, cy, cz});
-							Block& b = chunk->GetBlockRefAt({cx, cy, cz}, true);
+							world::Block& b = chunk->GetBlockRefAt({cx, cy, cz}, true);
 							if (abs(100 * sin(0.001f * (p.x * p.x + p.z * p.z)) / 10.f - p.y) <= 1)
-								b = Block(1);
+								b = world::Block(1);
 						}
 					}
 				}
@@ -119,7 +118,6 @@ void cleanup(GLFWwindow* window)
 
 	// Free all resources which depend on OpenGL context.
 	Context<shader::BlockShader>::Reset();
-	Context<world::BlockManager>::Reset();
 	Context<world::World>::Reset();
 
 	Context<shader::BlockDepthShader>::Reset();
@@ -139,9 +137,6 @@ void loop(GLFWwindow* m_window)
 	auto& block_depth_shader = Context<shader::BlockDepthShader>::Get().GetShader();
 	auto& tenbox_shader = Context<shader::SkyboxShader>::Get().GetShader();
 	auto& reticle_shader = Context<shader::ReticleShader>::Get().GetShader();
-
-	auto& block_manager = Context<world::BlockManager>::Get();
-	//phy_engine phy;
 
 	control::Camera& cam = Context<control::Camera>::Get();
 
@@ -193,8 +188,8 @@ void loop(GLFWwindow* m_window)
 		block_shader.Bind("proj", cam.Proj);
 		// TODO You can probably derive this from the view matrix
 		block_shader.Bind("camera_pos", cam.Position);
-		block_manager.GetBlockTexture().Bind();
-		block_manager.GetBlockStrTexture().Bind();
+		world::Block::GetBlockTexture().Bind();
+		world::Block::GetBlockStrTexture().Bind();
 		shadowmap.Bind();
 		world.Render(block_shader, cam);
 
@@ -223,7 +218,7 @@ int main(int /*argc*/, char* /*argv*/[])
 {
 	spdlog::set_level(spdlog::level::debug);
 
-	if(const int code = !glfwInit())
+	if (const int code = !glfwInit())
 	{
 		spdlog::critical("glfwInit() returned {}", code);
 		return 1;
@@ -238,8 +233,8 @@ int main(int /*argc*/, char* /*argv*/[])
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 	const auto window = glfwCreateWindow(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT,
-	                                       "renden", nullptr, nullptr);
-	if(!window)
+	                                     "renden", nullptr, nullptr);
+	if (!window)
 	{
 		const char* description;
 		spdlog::critical("glfwCreateWindow() returned {}: {}", glfwGetError(&description), description);
@@ -252,7 +247,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
 	glfwSwapInterval(1);
 
-	if(const int code = !gladLoadGL())
+	if (const int code = !gladLoadGL())
 	{
 		spdlog::critical("gladLoadGL() returned {}", code);
 		return 1;

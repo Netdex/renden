@@ -169,8 +169,8 @@ std::optional<std::pair<glm::ivec3, glm::ivec3>> Camera::CastTarget(world::World
 			}
 		}
 		glm::ivec3 pos = glm::ivec3(x, y, z);
-		std::optional<Block> blk = world.GetBlockAt(pos);
-		if (blk && blk->ID > 0) return std::make_pair(pos, norm);
+		std::optional<world::Block> blk = world.GetBlockAt(pos);
+		if (blk && blk->id()) return std::make_pair(pos, norm);
 	}
 	return std::nullopt;
 }

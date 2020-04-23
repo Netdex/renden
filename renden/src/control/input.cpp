@@ -34,7 +34,7 @@ void key_callback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action,
 		case GLFW_KEY_7:
 		case GLFW_KEY_8:
 		case GLFW_KEY_9:
-			state.active_block = block_id_t(key - GLFW_KEY_0);
+			state.active_block = world::block_id_t(key - GLFW_KEY_0);
 			break;
 		default: break;
 		}
@@ -53,12 +53,12 @@ void mouse_button_callback(GLFWwindow* /*window*/, int button, int action, int /
 		{
 		case GLFW_MOUSE_BUTTON_LEFT:
 			if (state.target)
-				*world.GetBlockRefAt(state.target->first) = Block();
+				*world.GetBlockRefAt(state.target->first) = world::Block();
 			break;
 		case GLFW_MOUSE_BUTTON_RIGHT:
 			if (state.target)
 				*world.GetBlockRefAt(state.target->first + state.target->second, true) =
-					Block(state.active_block);
+					world::Block(state.active_block);
 			break;
 		default: break;
 		}

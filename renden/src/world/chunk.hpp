@@ -4,10 +4,9 @@
 #include <glm/vec3.hpp>
 
 #include "gl/mesh.hpp"
-#include "loader/block_manager.hpp"
 #include "loader/shader_program.hpp"
-#include "primitive/block_primitive.hpp"
 #include "util/context.hpp"
+#include "util/vec_iterator.hpp"
 #include "world/block.hpp"
 
 namespace world
@@ -15,13 +14,29 @@ namespace world
 class Chunk
 {
 public:
+	class iterator : public util::vec_iterator<glm::ivec3, const Block&>
+	{
+	public:
+		iterator(const Chunk& chunk, glm::ivec3 location, glm::ivec3 step) : vec_iterator(location, step), chunk_(chunk)
+		{
+		}
+
+		const Block& operator*() override
+		{
+			return chunk_.GetBlockAt(position());
+		}
+
+	private:
+		const Chunk& chunk_;
+	};
+
 	Chunk(glm::ivec3 location) : location_(location),
 	                             mesh_(std::make_unique<gl::Mesh<GLbyte>>(
 		                             Context<shader::BlockShader>::Get().MeshAttributes, gl::POINTS))
 	{
 	}
 
-	Block GetBlockAt(glm::ivec3 loc);
+	const Block& GetBlockAt(glm::ivec3 loc) const;
 	Block& GetBlockRefAt(glm::ivec3 loc, bool taint = true);
 
 	bool UpdateMesh();
@@ -55,8 +70,8 @@ public:
 	static constexpr int kChunkWidth = 32;
 
 private:
-	bool face_occluded(glm::ivec3 position, world::block::BlockFace face) const;
-	block::BlockFaceSet visible_faces(glm::ivec3 position) const;
+	bool face_occluded(glm::ivec3 position, world::BlockFace face) const;
+	block_face_mask_t visible_faces(glm::ivec3 position) const;
 
 	// y-z-x order
 	Block data_[kChunkWidth][kChunkWidth][kChunkWidth];
@@ -64,9 +79,8 @@ private:
 	std::unique_ptr<gl::Mesh<GLbyte>> mesh_;
 	bool dirty_ = false;
 
-	//
 	// Don't know whether this is a good idea yet.
-	//Chunk* adjacent_chunks_[6];
+	Chunk* adjacent_chunks_[6];
 };
 }
 

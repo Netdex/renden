@@ -5,8 +5,6 @@
 #include <optional>
 
 #include "gl/mesh.hpp"
-#include "loader/block_manager.hpp"
-#include "primitive/block_primitive.hpp"
 
 namespace world
 {

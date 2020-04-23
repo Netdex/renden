@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <toml.hpp>
+#include <toml++/toml.h>
 
 namespace util::config
 {

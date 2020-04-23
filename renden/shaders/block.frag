@@ -1,6 +1,6 @@
 #version 430 core
 
-//#define DEBUG_SHADOW_PARTITION
+#define DEBUG_SHADOW_PARTITION
 
 // Must agree with other definitions
 const int SHADOW_MAP_PARTITIONS = 3;
