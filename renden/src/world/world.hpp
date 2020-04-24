@@ -33,6 +33,8 @@ public:
 	void Update();
 
 	static constexpr int kMaximumChunksPerUpdate = 10;
+private:
+	Chunk* CreateChunk(glm::ivec3 loc);
 };
 }
 

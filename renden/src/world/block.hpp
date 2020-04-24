@@ -25,6 +25,7 @@ enum BlockFace : int
 typedef int block_face_mask_t;
 
 constexpr BlockFace kFaceToBlock[] = {NEG_Z, POS_Z, NEG_X, POS_X, NEG_Y, POS_Y};
+constexpr BlockFace kFaceToBlockInv[] = { POS_Z, NEG_Z, POS_X, NEG_X, POS_Y, NEG_Y };
 
 constexpr int kFaceToIndex[] = {
 	-1, 0, 1, -1, 2, -1, -1, -1,

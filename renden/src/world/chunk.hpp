@@ -30,7 +30,7 @@ public:
 		const Chunk& chunk_;
 	};
 
-	Chunk(glm::ivec3 location) : location_(location),
+	Chunk(glm::ivec3 location, std::array<Chunk*, 6> neighbors) : location_(location), neighbors_(neighbors),
 	                             mesh_(std::make_unique<gl::Mesh<GLbyte>>(
 		                             Context<shader::BlockShader>::Get().MeshAttributes, gl::POINTS))
 	{
@@ -67,8 +67,9 @@ public:
 		};
 	}
 
-	static constexpr int kChunkWidth = 32;
+	friend class World;
 
+	static constexpr int kChunkWidth = 32;
 private:
 	bool face_occluded(glm::ivec3 position, world::BlockFace face) const;
 	block_face_mask_t visible_faces(glm::ivec3 position) const;
@@ -76,11 +77,9 @@ private:
 	// y-z-x order
 	Block data_[kChunkWidth][kChunkWidth][kChunkWidth];
 	glm::ivec3 location_;
+	std::array<Chunk*,6> neighbors_;
 	std::unique_ptr<gl::Mesh<GLbyte>> mesh_;
 	bool dirty_ = false;
-
-	// Don't know whether this is a good idea yet.
-	Chunk* adjacent_chunks_[6];
 };
 }
 
