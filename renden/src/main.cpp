@@ -49,8 +49,8 @@ void init(GLFWwindow* window)
 	glfwShowWindow(window);
 
 	Context<shader::BlockShader>::Initialize();
-	world::Block::LoadTextures(PROJECT_SOURCE_DIR "/renden/res/block_def.json",
-	                           PROJECT_SOURCE_DIR "/renden/res/block_texture.json");
+	world::Block::LoadTextures(PROJECT_SOURCE_DIR "/renden/res/block_def.toml",
+	                           PROJECT_SOURCE_DIR "/renden/res/block_texture.toml");
 	Context<shader::BlockDepthShader>::Initialize();
 	Context<world::World>::Initialize();
 
@@ -109,13 +109,13 @@ void cleanup(GLFWwindow* window)
 	glfwGetWindowPos(window, &xpos, &ypos);
 	glfwGetWindowSize(window, &width, &height);
 	config["window_rect"] = toml::table{
-		                        {
-			                        {"x", xpos},
-			                        {"y", ypos},
-			                        {"w", width},
-			                        {"h", height},
-		                        }
-	                        };
+		{
+			{"x", xpos},
+			{"y", ypos},
+			{"w", width},
+			{"h", height},
+		}
+	};
 
 	util::config::Save();
 
@@ -188,26 +188,32 @@ void loop(GLFWwindow* window)
 		world::Block::GetBlockTexture().Bind();
 		world::Block::GetBlockStrTexture().Bind();
 		shadowmap.Bind();
-		block_shader.Activate();
 		//			block_shader->bind("now", now);
-		block_shader.Bind("view", cam.View);
-		block_shader.Bind("proj", cam.Proj);
-		// TODO You can probably derive this from the view matrix
-		block_shader.Bind("camera_pos", cam.Position);
-		world.Render(block_shader, cam);
+		{
+			auto scoped_lock = block_shader.Use();
+			block_shader.Bind("view", cam.View);
+			block_shader.Bind("proj", cam.Proj);
+			// TODO You can probably derive this from the view matrix
+			block_shader.Bind("camera_pos", cam.Position);
+			world.Render(block_shader, cam);
+		}
 
-		reticle_shader.Activate();
-		Context<world::Reticle>::Get().Draw(reticle_shader, cam.View, cam.Proj,
-		                                    cam.Position, cam.GetDirection(),
-		                                    control::state.target
-			                                    ? std::optional<glm::ivec3>(control::state.target->first)
-			                                    : std::nullopt);
+		{
+			auto scoped_lock = reticle_shader.Use();
+			Context<world::Reticle>::Get().Draw(reticle_shader, cam.View, cam.Proj,
+			                                    cam.Position, cam.GetDirection(),
+			                                    control::state.target
+				                                    ? std::optional<glm::ivec3>(control::state.target->first)
+				                                    : std::nullopt);
+		}
 
-		tenbox_shader.Activate();
-		// Remove translation from view matrix by truncation.
-		tenbox_shader.Bind("view", glm::mat4(glm::mat3(cam.View)));
-		tenbox_shader.Bind("proj", cam.Proj);
-		Context<world::Skybox>::Get().Draw(tenbox_shader);
+		{
+			auto scoped_lock = tenbox_shader.Use();
+			// Remove translation from view matrix by truncation.
+			tenbox_shader.Bind("view", glm::mat4(glm::mat3(cam.View)));
+			tenbox_shader.Bind("proj", cam.Proj);
+			Context<world::Skybox>::Get().Draw(tenbox_shader);
+		}
 
 		glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 		control::imgui_frame_end(window);

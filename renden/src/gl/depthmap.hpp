@@ -28,13 +28,14 @@ public:
 	 */
 	DepthMap(int width, GLuint tex_id, nonstd::span<const float> part_intervals) :
 		Texture2DArray(
-			width, width, int(part_intervals.size()) - 1,NEAREST,NEAREST,
+			width, width, int(part_intervals.size()) - 1, NEAREST, NEAREST,
 			CLAMP_BORDER, 1, tex_id, GL_DEPTH_COMPONENT24),
-		part_intervals_(part_intervals)
+		part_intervals_(part_intervals),
+		framebuffer_{ColorBuffer::NONE, ColorBuffer::NONE}
 	{
 		// TODO We do a double-bind on construction here.
 		Bind();
-		SetBorderColor({ 1.0f,1.0f,1.0f,1.0f });
+		SetBorderColor({1.0f, 1.0f, 1.0f, 1.0f});
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
 		Unbind();

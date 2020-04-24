@@ -15,39 +15,40 @@ void DepthMap::Render(const control::Camera& camera, Shader& block_shader, Shade
 {
 	const size_t partition_count = part_intervals_.size() - 1;
 	framebuffer_.Bind();
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-
-	block_depth_shader.Activate();
-	glViewport(0, 0, this->GetWidth(), this->GetHeight());
-	glCullFace(GL_FRONT);
-	glEnable(GL_DEPTH_CLAMP);
-
 	std::vector<glm::mat4> shadow_view(partition_count);
 	std::vector<glm::mat4> shadow_proj(partition_count);
 	std::vector<float> shadow_depth(partition_count);
 
-	for (size_t i = 0; i < partition_count; ++i)
 	{
-		float near_plane_norm = part_intervals_[i];
-		float far_plane_norm = part_intervals_[i + 1];
-		ComputeShadowViewProj(camera, near_plane_norm, far_plane_norm, light_dir,
-		                      shadow_view[i], shadow_proj[i], shadow_depth[i]);
-		FrameBuffer::Attach(*this, GL_DEPTH_ATTACHMENT, GLint(i));
-		glClear(GL_DEPTH_BUFFER_BIT);
-		block_depth_shader.Bind("view", shadow_view[i]);
-		block_depth_shader.Bind("proj", shadow_proj[i]);
-		renderer();
+		auto scoped_lock = block_depth_shader.Use();
+		glViewport(0, 0, this->GetWidth(), this->GetHeight());
+		glCullFace(GL_FRONT);
+		glEnable(GL_DEPTH_CLAMP);
+
+
+		for (size_t i = 0; i < partition_count; ++i)
+		{
+			float near_plane_norm = part_intervals_[i];
+			float far_plane_norm = part_intervals_[i + 1];
+			ComputeShadowViewProj(camera, near_plane_norm, far_plane_norm, light_dir,
+			                      shadow_view[i], shadow_proj[i], shadow_depth[i]);
+			framebuffer_.Attach(*this, GL_DEPTH_ATTACHMENT, GLint(i));
+			glClear(GL_DEPTH_BUFFER_BIT);
+			block_depth_shader.Bind("view", shadow_view[i]);
+			block_depth_shader.Bind("proj", shadow_proj[i]);
+			renderer();
+		}
+
+		framebuffer_.Unbind();
 	}
+	{
+		auto scoped_lock = block_shader.Use();
 
-	FrameBuffer::Unbind();
-
-	block_shader.Activate();
-	block_shader.Bind("shadow_view", shadow_view);
-	block_shader.Bind("shadow_proj", shadow_proj);
-	//block_shader.Bind("shadow_depth", shadow_depth);
-	block_shader.Bind("light_dir", light_dir);
-	gl::Shader::Deactivate();
+		block_shader.Bind("shadow_view", shadow_view);
+		block_shader.Bind("shadow_proj", shadow_proj);
+		//block_shader.Bind("shadow_depth", shadow_depth);
+		block_shader.Bind("light_dir", light_dir);
+	}
 }
 
 void DepthMap::ComputeShadowViewProj(const control::Camera& camera, float near_plane_norm,

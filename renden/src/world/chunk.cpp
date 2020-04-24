@@ -73,10 +73,8 @@ bool Chunk::face_occluded(glm::ivec3 position, BlockFace face) const
 	if (offset.x < 0 || offset.x >= kChunkWidth || offset.y < 0 || offset.y >= kChunkWidth
 		|| offset.z < 0 || offset.z >= kChunkWidth)
 		return false;
-	// TODO
-	//const auto offset_block = Context<BlockManager>::Get().GetBlockById(data_[offset.y][offset.x][offset.z].id_);
-	//return offset_block && offset_block->IsOpaque;
-	return data_[offset.y][offset.x][offset.z].id();
+	const auto& offset_block = data_[offset.y][offset.x][offset.z];
+	return offset_block.id() && offset_block.table()["opaque"].as_boolean();
 }
 
 block_face_mask_t Chunk::visible_faces(glm::ivec3 position) const

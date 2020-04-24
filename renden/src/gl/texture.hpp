@@ -53,6 +53,7 @@ enum TextureTarget : GLenum
 class Texture
 {
 public:
+
 	virtual ~Texture()
 	{
 		glDeleteTextures(1, &id_);
@@ -70,6 +71,7 @@ public:
 	void Unbind() const
 	{
 #ifndef NDEBUG
+		assert(this->IsActiveTexture());
 		glActiveTexture(GL_TEXTURE0 + tex_id_);
 		glBindTexture(target_, 0);
 #endif
@@ -92,6 +94,7 @@ protected:
 
 	Texture(TextureTarget target, GLuint tex_id) : target_(target), tex_id_(tex_id)
 	{
+		glGenTextures(1, &id_);
 	}
 
 
@@ -109,6 +112,32 @@ protected:
 	{
 		glTexParameterfv(target_, GL_TEXTURE_BORDER_COLOR, value_ptr(color));
 	}
+
+private:
+#ifndef NDEBUG
+	bool IsActiveTexture() const
+	{
+		GLint id = 0;
+		switch (target_)
+		{
+		case TEXTURE_1D:
+			glGetIntegerv(GL_TEXTURE_BINDING_1D, &id);
+			break;
+		case TEXTURE_2D:
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, &id);
+			break;
+		case TEXTURE_2D_ARRAY:
+			glGetIntegerv(GL_TEXTURE_BINDING_2D_ARRAY, &id);
+			break;
+		case TEXTURE_CUBEMAP:
+			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &id);
+			break;
+		default:
+			assert(false);
+		}
+		return id == GLint(id_);
+	}
+#endif
 };
 
 /**
@@ -122,7 +151,6 @@ public:
 	Texture1D(nonstd::span<U> data, GLuint tex_id, GLenum internalformat, GLenum format, GLenum type) : Texture(
 		TEXTURE_1D, tex_id)
 	{
-		glGenTextures(1, &id_);
 		Bind();
 		// Width is in texels!
 		glTexImage1D(GL_TEXTURE_1D, 0, internalformat, GLsizei(data.size() / 4), 0, format, type, data.data());
@@ -144,7 +172,6 @@ public:
 	          TextureWrapMode wrap_mode, GLuint tex_id, GLenum internalformat, GLenum format,
 	          GLenum type) : Texture(TEXTURE_2D, tex_id)
 	{
-		glGenTextures(1, &id_);
 		Bind();
 
 		glTexImage2D(TEXTURE_2D, 0, internalformat, width, height, 0, format, type, data.data());
@@ -169,7 +196,6 @@ public:
 		: Texture(TEXTURE_2D_ARRAY, tex_id),
 		  width_(width), height_(height), size_(size)
 	{
-		glGenTextures(1, &id_);
 		Bind();
 
 		assert(mipmap_levels >= 1);
@@ -193,7 +219,6 @@ public:
 	               GLuint tex_id) : Texture(TEXTURE_2D_ARRAY, tex_id),
 	                                width_(width), height_(height), size_(paths.size())
 	{
-		glGenTextures(1, &id_);
 		Bind();
 
 		assert(mipmap_levels >= 1);
@@ -239,7 +264,6 @@ public:
 	        TextureFilterMode filter_mode, TextureWrapMode wrap_mode,
 	        GLuint tex_id) : Texture(TEXTURE_CUBEMAP, tex_id)
 	{
-		glGenTextures(1, &id_);
 		Bind();
 
 		for (int i = 0; i < 6; i++)

@@ -7,15 +7,22 @@
 
 namespace gl
 {
+enum class ColorBuffer : GLenum
+{
+	NONE = GL_NONE
+};
+
 class FrameBuffer
 {
-	GLuint fbo_{};
-
 public:
 
-	FrameBuffer()
+	FrameBuffer(ColorBuffer read_buffer, ColorBuffer draw_buffer)
 	{
 		glGenFramebuffers(1, &fbo_);
+		Bind();
+		glReadBuffer(static_cast<GLenum>(read_buffer));
+		glDrawBuffer(static_cast<GLenum>(draw_buffer));
+		Unbind();
 	}
 
 	void Bind() const
@@ -23,14 +30,16 @@ public:
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 	}
 
-	static void Unbind()
+	void Unbind() const
 	{
+		assert(this->IsActiveFrameBuffer());
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	static void Attach(const Texture& texture, GLenum attachment)
+	void Attach(const Texture& texture, GLenum attachment) const
 	{
-		switch(texture.GetTarget())
+		assert(this->IsActiveFrameBuffer());
+		switch (texture.GetTarget())
 		{
 		case TEXTURE_2D:
 			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture.GetTarget(), texture.GetID(), 0);
@@ -40,9 +49,10 @@ public:
 		}
 	}
 
-	static void Attach(const Texture& texture, GLenum attachment, GLint layer)
+	void Attach(const Texture& texture, GLenum attachment, GLint layer) const
 	{
-		switch(texture.GetTarget())
+		assert(this->IsActiveFrameBuffer());
+		switch (texture.GetTarget())
 		{
 		case TEXTURE_2D_ARRAY:
 			glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, texture.GetID(), 0, layer);
@@ -51,6 +61,18 @@ public:
 			assert(false);
 		}
 	}
+private:
+
+#ifndef NDEBUG
+	bool IsActiveFrameBuffer() const
+	{
+		GLint id;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &id);
+		return id == GLint(fbo_);
+	}
+#endif
+
+	GLuint fbo_{};
 };
 }
 #endif

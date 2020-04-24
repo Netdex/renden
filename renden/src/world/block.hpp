@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <glm/glm.hpp>
+#include <toml.hpp>
 
 #include "gl/texture.hpp"
 #include "util/bytebuffer.hpp"
@@ -51,6 +52,7 @@ public:
 	bool operator!=(const Block& o) const;
 
 	block_id_t id() const { return id_; }
+	toml::table& table() const { return block_id_to_table_[id()]; }
 
 	void AppendToVertexList(util::byte_buffer<>& vlist, glm::ivec3 position, world::block_face_mask_t faces) const;
 
@@ -63,8 +65,8 @@ private:
 	block_id_t id_;
 
 	static constexpr int MAXIMUM_BLOCKS = 256;
-	//static toml::table block_table_;
-	//static std::unordered_map<block_id_t, toml::table> block_id_to_table_;
+	static toml::value block_table_;
+	static std::unordered_map<block_id_t, toml::table> block_id_to_table_;
 
 
 	static std::unique_ptr<gl::Texture2DArray> textures_;
@@ -72,7 +74,6 @@ private:
 
 	static std::unordered_map<std::string, block_id_t> texture_name_to_layer_;
 	static std::unordered_map<std::string, block_id_t> block_name_to_id_;
-	static std::unordered_map<block_id_t, int> block_id_to_tex_offset_;
 };
 }
 

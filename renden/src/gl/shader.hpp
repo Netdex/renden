@@ -14,11 +14,29 @@ namespace gl
 {
 class Shader
 {
-	GLuint program_;
-	GLint status_;
-	GLint length_;
-
 public:
+	class ScopedShaderLock
+	{
+	public:
+		ScopedShaderLock(const Shader& shader) : shader_(shader)
+		{
+			glUseProgram(shader_.get());
+		}
+
+		~ScopedShaderLock()
+		{
+#ifndef NDEBUG
+			assert(shader_.IsActiveProgram());
+			glUseProgram(0);
+#endif
+		}
+
+		ScopedShaderLock(const ScopedShaderLock&) = delete;
+		ScopedShaderLock& operator=(const ScopedShaderLock&) = delete;
+	private:
+		const Shader& shader_;
+	};
+
 	Shader() { program_ = glCreateProgram(); }
 
 	~Shader()
@@ -30,16 +48,9 @@ public:
 
 	Shader& operator=(Shader const&) = delete;
 
-	// Public Member Functions
-	Shader& Activate()
+	ScopedShaderLock Use() const
 	{
-		glUseProgram(program_);
-		return *this;
-	}
-
-	static void Deactivate()
-	{
-		glUseProgram(0);
+		return ScopedShaderLock{*this};
 	}
 
 	Shader& Attach(std::string const& filename)
@@ -49,11 +60,12 @@ public:
 		//    std::string path = "../../renden/shaders/";
 		std::ifstream fd(path + filename);
 		auto src = std::string(std::istreambuf_iterator<char>(fd),
-		                             (std::istreambuf_iterator<char>()));
+		                       (std::istreambuf_iterator<char>()));
 
 		// Create a Shader Object
 		const char* source = src.c_str();
 		auto shader = Create(filename);
+
 		glShaderSource(shader, 1, &source, nullptr);
 		glCompileShader(shader);
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &status_);
@@ -124,7 +136,7 @@ public:
 	{
 		glUniform1ui(location, value);
 	}
-	
+
 	void Bind(GLint location, GLfloat value) const
 	{
 		glUniform1f(location, value);
@@ -161,19 +173,9 @@ public:
 	}
 
 	template <typename T>
-	void Bind(std::string const& name, T&& value, size_t size) const
-	{
-		GLint location = glGetUniformLocation(program_, name.c_str());
-		if (location == -1) spdlog::error("OGL:Shader - Missing Uniform: {}", name.c_str());
-		else
-		{
-			Bind(location, std::forward<T>(value), size);
-		}
-	}
-
-	template <typename T>
 	void Bind(std::string const& name, T&& value) const
 	{
+		assert(this->IsActiveProgram());
 		GLint location = glGetUniformLocation(program_, name.c_str());
 		if (location == -1) spdlog::error("OGL:Shader - Missing Uniform: {}", name.c_str());
 		else
@@ -181,5 +183,20 @@ public:
 			Bind(location, std::forward<T>(value));
 		}
 	}
+
+private:
+
+#ifndef NDEBUG
+	bool IsActiveProgram() const
+	{
+		GLint id;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &id);
+		return id == GLint(get());
+	}
+#endif
+
+	GLuint program_;
+	GLint status_;
+	GLint length_;
 };
 }
