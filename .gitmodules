@@ -27,3 +27,6 @@
 [submodule "vendor/imgui"]
 	path = vendor/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "vendor/toml11"]
+	path = vendor/toml11
+	url = https://github.com/ToruNiina/toml11.git

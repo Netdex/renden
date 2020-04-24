@@ -24,7 +24,7 @@ T map(T x, T a1, T a2, T b1, T b2)
 
 inline bool interval_intersects(float min_a, float max_a, float min_b, float max_b)
 {
-    return !(min_b < min_a&& max_b < min_a || min_b > max_a&& max_b > max_a);
+    return !((min_b < min_a && max_b < min_a) || (min_b > max_a&& max_b > max_a));
 }
 
 inline bool aabb_intersects(std::pair<glm::vec3, glm::vec3> a, std::pair<glm::vec3, glm::vec3> b)

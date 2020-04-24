@@ -37,6 +37,11 @@ public:
 		return *this;
 	}
 
+	static void Deactivate()
+	{
+		glUseProgram(0);
+	}
+
 	Shader& Attach(std::string const& filename)
 	{
 		// Load GLSL Shader Source from File

@@ -30,9 +30,6 @@ public:
 	std::optional<std::pair<glm::ivec3, glm::ivec3>> CastTarget(world::World& world, int distance) const;
 	glm::vec3 GetDirection() const;
 
-	float GetAspectRatio() const;
-	float GetFov() const;
-
 	/**
 	 * \brief Compute the bounding sphere of a truncated frustum defined by its projection matrix
 	 * \param near_plane_norm The 0-1 normalized position along the frustum to truncate the near plane

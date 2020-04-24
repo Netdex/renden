@@ -38,7 +38,10 @@ void Block::AppendToVertexList(util::byte_buffer<>& vlist, glm::ivec3 position,
 
 void Block::LoadTextures(const std::string& block_def_conf, const std::string& block_tex_conf)
 {
+	//block_table_ = toml::parse_file(block_tex_conf);
+	//int width = int(block_table_["width"].ref<int64_t>());
 	std::ifstream block_tex_file(block_tex_conf);
+
 	nlohmann::json tex_def_json;
 	block_tex_file >> tex_def_json;
 

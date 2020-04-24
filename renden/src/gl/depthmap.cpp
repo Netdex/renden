@@ -47,6 +47,7 @@ void DepthMap::Render(const control::Camera& camera, Shader& block_shader, Shade
 	block_shader.Bind("shadow_proj", shadow_proj);
 	//block_shader.Bind("shadow_depth", shadow_depth);
 	block_shader.Bind("light_dir", light_dir);
+	gl::Shader::Deactivate();
 }
 
 void DepthMap::ComputeShadowViewProj(const control::Camera& camera, float near_plane_norm,

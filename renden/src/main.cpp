@@ -34,12 +34,13 @@ void init(GLFWwindow* window)
 	int width, height, xpos, ypos;
 	glfwGetWindowPos(window, &xpos, &ypos);
 	glfwGetWindowSize(window, &width, &height);
-	if (const auto& window_rect = config["window_rect"])
+	if (config.contains("window_rect"))
 	{
-		xpos = int(window_rect["x"].value_or(xpos));
-		ypos = int(window_rect["y"].value_or(ypos));
-		width = int(window_rect["w"].value_or(width));
-		height = int(window_rect["h"].value_or(height));
+		auto& window_rect = config["window_rect"];
+		xpos = find_or(window_rect, "x", xpos);
+		ypos = find_or(window_rect, "y", ypos);
+		width = find_or(window_rect, "w", width);
+		height = find_or(window_rect, "h", height);
 		// We need to do this twice for some reason, or else it breaks for multi-DPI configurations.
 		glfwSetWindowPos(window, xpos, ypos);
 		glfwSetWindowPos(window, xpos, ypos);
@@ -107,14 +108,14 @@ void cleanup(GLFWwindow* window)
 	int width, height, xpos, ypos;
 	glfwGetWindowPos(window, &xpos, &ypos);
 	glfwGetWindowSize(window, &width, &height);
-	config.insert_or_assign("window_rect", toml::table{
+	config["window_rect"] = toml::table{
 		                        {
 			                        {"x", xpos},
 			                        {"y", ypos},
 			                        {"w", width},
 			                        {"h", height},
 		                        }
-	                        });
+	                        };
 
 	util::config::Save();
 
@@ -148,7 +149,7 @@ void loop(GLFWwindow* window)
 	// TODO Tidy this code up.
 	constexpr int SHADOW_WIDTH = 1024;
 
-	const glm::vec3 light_dir = glm::normalize(glm::vec3{0, -1, 0});
+	const glm::vec3 light_dir = normalize(glm::vec3{0, -1, 0});
 	const float part_intervals[] = {0.f, 0.1f, 0.4f, 1.f};
 	const gl::DepthMap shadowmap(SHADOW_WIDTH, shader::BlockDepthShader::kShadowmapTextureUnit, part_intervals);
 
@@ -184,15 +185,15 @@ void loop(GLFWwindow* window)
 		glEnable(GL_CULL_FACE);
 
 		// TODO Would like to do something similar to Skybox (i.e. WorldRenderer).
+		world::Block::GetBlockTexture().Bind();
+		world::Block::GetBlockStrTexture().Bind();
+		shadowmap.Bind();
 		block_shader.Activate();
 		//			block_shader->bind("now", now);
 		block_shader.Bind("view", cam.View);
 		block_shader.Bind("proj", cam.Proj);
 		// TODO You can probably derive this from the view matrix
 		block_shader.Bind("camera_pos", cam.Position);
-		world::Block::GetBlockTexture().Bind();
-		world::Block::GetBlockStrTexture().Bind();
-		shadowmap.Bind();
 		world.Render(block_shader, cam);
 
 		reticle_shader.Activate();

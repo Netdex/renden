@@ -10,11 +10,11 @@ namespace
 {
 	const std::string kConfigFilePath = "renden.toml";
 
-	toml::table table;
+	toml::value table;
 }
 
 
-toml::table& Get()
+toml::value& Get()
 {
 	return table;
 }
@@ -23,12 +23,13 @@ bool Load()
 {
 	try
 	{
-		table = toml::parse_file(kConfigFilePath);
+		table = toml::parse(kConfigFilePath);
 		return true;
 	}
-	catch (const toml::parse_error& e)
+	catch (const std::runtime_error& e)
 	{
 		spdlog::warn("Failed to load {}: {}", kConfigFilePath, e.what());
+		table = toml::table{};
 		return false;
 	}
 }

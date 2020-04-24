@@ -5,7 +5,6 @@
 #include <unordered_map>
 
 #include <glm/glm.hpp>
-#include <toml++/toml.h>
 
 #include "gl/texture.hpp"
 #include "util/bytebuffer.hpp"
@@ -64,6 +63,9 @@ private:
 	block_id_t id_;
 
 	static constexpr int MAXIMUM_BLOCKS = 256;
+	//static toml::table block_table_;
+	//static std::unordered_map<block_id_t, toml::table> block_id_to_table_;
+
 
 	static std::unique_ptr<gl::Texture2DArray> textures_;
 	static std::unique_ptr<gl::Texture1D<GLubyte>> str_texture_;

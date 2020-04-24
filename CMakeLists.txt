@@ -8,18 +8,6 @@ option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 add_subdirectory(vendor/glfw)
 
-#option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-#option(ASSIMP_BUILD_SAMPLES OFF)
-#option(ASSIMP_BUILD_TESTS OFF)
-#add_subdirectory(vendor/assimp)
-
-#option(BUILD_BULLET2_DEMOS OFF)
-#option(BUILD_CPU_DEMOS OFF)
-#option(BUILD_EXTRAS OFF)
-#option(BUILD_OPENGL3_DEMOS OFF)
-#option(BUILD_UNIT_TESTS OFF)
-#add_subdirectory(vendor/bullet)
-
 option(BUILD_TESTING OFF)
 add_subdirectory(vendor/json)
 
@@ -42,7 +30,7 @@ include_directories(SYSTEM
 	vendor/span-lite/include/
 	vendor/imgui/
 	vendor/imgui/examples/
-    vendor/tomlplusplus/include/
+    vendor/toml11/
 )
 
 file(GLOB VENDORS_SOURCES 
@@ -85,7 +73,6 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
                                ${VENDORS_SOURCES})
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
-#target_link_libraries(${PROJECT_NAME} PUBLIC assimp BulletDynamics BulletCollision LinearMath)
 
 if(MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE "/experimental:external" "/external:W0" "/external:anglebrackets")

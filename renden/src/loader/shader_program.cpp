@@ -23,8 +23,7 @@ BlockShader::BlockShader()
 	shader_->Bind("tex", kBlockTextureUnit);
 	shader_->Bind("str_sampler", kStrTextureUnit);
 	shader_->Bind("shadow_map", BlockDepthShader::kShadowmapTextureUnit);
-	// TODO Bind shadow buffer texture unit.
-	//shader_->Bind()
+	gl::Shader::Deactivate();
 	spdlog::debug("Loaded block shader");
 }
 
@@ -46,6 +45,7 @@ SkyboxShader::SkyboxShader()
 	};
 
 	shader_->Bind("tex",kSkyTextureUnit);
+	gl::Shader::Deactivate();
 	spdlog::debug("Loaded skybox shader");
 }
 
@@ -63,6 +63,7 @@ ReticleShader::ReticleShader()
 			3 * sizeof(GLfloat), false, 0
 		},
 	};
+	gl::Shader::Deactivate();
 	spdlog::debug("Loaded reticle shader");
 }
 }
