@@ -4,9 +4,6 @@ namespace world
 {
 void Chunk::Draw(const gl::Shader& shader) const
 {
-	const glm::vec3 translation = glm::vec3{chunk_to_block_pos(location_, glm::ivec3{})};
-	glm::mat4 chunk = translate(glm::mat4(1.f), translation);
-	shader.Bind("chunk", chunk);
 	mesh_->Draw(shader);
 }
 
@@ -40,6 +37,7 @@ bool Chunk::UpdateMesh()
 	return false;
 }
 
+
 const Block& Chunk::GetBlockAt(glm::ivec3 loc) const
 {
 	assert(
@@ -62,13 +60,6 @@ bool Chunk::face_occluded(glm::ivec3 position, BlockFace face) const
 	assert(position.x >= 0 && position.x < kChunkWidth
 		&& position.z >= 0 && position.z < kChunkWidth
 		&& position.y >= 0 && position.y < kChunkWidth);
-	// chunk boundaries can never be occluded
-	if ((position.x == 0 && face == NEG_X) || (position.y == 0 && face == NEG_Y) ||
-		(position.z == 0 && face == NEG_Z)
-		|| (position.x == kChunkWidth - 1 && face == POS_X)
-		|| (position.y == kChunkWidth - 1 && face == POS_Y)
-		|| (position.z == kChunkWidth - 1 && face == POS_Z))
-		return false;
 	const glm::ivec3 offset = kFaceToOffset[kFaceToIndex[face]] + position;
 	if (offset.x < 0 || offset.x >= kChunkWidth || offset.y < 0 || offset.y >= kChunkWidth
 		|| offset.z < 0 || offset.z >= kChunkWidth)

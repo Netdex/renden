@@ -108,14 +108,7 @@ void cleanup(GLFWwindow* window)
 	int width, height, xpos, ypos;
 	glfwGetWindowPos(window, &xpos, &ypos);
 	glfwGetWindowSize(window, &width, &height);
-	config["window_rect"] = toml::table{
-		{
-			{"x", xpos},
-			{"y", ypos},
-			{"w", width},
-			{"h", height},
-		}
-	};
+	config["window_rect"] = toml::table{{{"x", xpos}, {"y", ypos}, {"w", width}, {"h", height},}};
 
 	util::config::Save();
 
@@ -153,18 +146,17 @@ void loop(GLFWwindow* window)
 	const float part_intervals[] = {0.f, 0.1f, 0.4f, 1.f};
 	const gl::DepthMap shadowmap(SHADOW_WIDTH, shader::BlockDepthShader::kShadowmapTextureUnit, part_intervals);
 
-	auto last_tick = float(glfwGetTime());
+	double last_tick = glfwGetTime();
 	while (!static_cast<bool>(glfwWindowShouldClose(window)))
 	{
+		const double frame_begin_time = glfwGetTime();
 		control::imgui_frame_begin();
 
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
 
 		// Pre-drawing computations.
-		const auto now = float(glfwGetTime());
-		const float delta_time = now - last_tick;
-		last_tick = now;
+		const double delta_time = frame_begin_time - last_tick;
 		int fb_width, fb_height;
 		glfwGetFramebufferSize(window, &fb_width, &fb_height);
 		cam.Update(delta_time, control::state.focus);
@@ -182,7 +174,6 @@ void loop(GLFWwindow* window)
 		glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 		glCullFace(GL_BACK);
 		glDisable(GL_DEPTH_CLAMP);
-		glEnable(GL_CULL_FACE);
 
 		// TODO Would like to do something similar to Skybox (i.e. WorldRenderer).
 		world::Block::GetBlockTexture().Bind();
@@ -201,8 +192,7 @@ void loop(GLFWwindow* window)
 		{
 			auto scoped_lock = reticle_shader.Use();
 			Context<world::Reticle>::Get().Draw(reticle_shader, cam.View, cam.Proj,
-			                                    cam.Position, cam.GetDirection(),
-			                                    control::state.target
+			                                    cam.Position, cam.GetDirection(), control::state.target
 				                                    ? std::optional<glm::ivec3>(control::state.target->first)
 				                                    : std::nullopt);
 		}
@@ -214,6 +204,13 @@ void loop(GLFWwindow* window)
 			tenbox_shader.Bind("proj", cam.Proj);
 			Context<world::Skybox>::Get().Draw(tenbox_shader);
 		}
+
+		const double frame_end_time = glfwGetTime();
+		const double frame_duration = frame_end_time - frame_begin_time;
+		ImGui::Begin("renden");
+		ImGui::Text("%.3f ms active", frame_duration * 1000);
+		ImGui::End();
+		last_tick = frame_begin_time;
 
 		glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 		control::imgui_frame_end(window);

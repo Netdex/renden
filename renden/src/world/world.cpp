@@ -4,19 +4,6 @@
 
 namespace world
 {
-bool World::ivec3_map_predicate::operator()(const glm::ivec3& a, const glm::ivec3& b) const
-{
-	if (a.x > b.x) return false;
-	if (a.x == b.x)
-	{
-		if (a.y > b.y) return false;
-		if (a.y == b.y)
-		{
-			if (a.z >= b.z) return false;
-		}
-	}
-	return true;
-}
 
 Chunk* World::GetChunkAt(glm::ivec3 loc, bool create_if_not_exists)
 {
@@ -42,9 +29,7 @@ Chunk* World::CreateChunk(glm::ivec3 loc)
 		Chunk* adj = GetChunkAt(loc + offset);
 		neighbors[i] = adj;
 		if (adj)
-		{
 			adj->neighbors_[kFaceToIndex[kFaceToBlockInv[i]]] = adj;
-		}
 	}
 	ptr.reset(new Chunk{loc, neighbors});
 	return ptr.get();

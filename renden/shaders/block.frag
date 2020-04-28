@@ -7,7 +7,7 @@ const int SHADOW_MAP_PARTITIONS = 3;
 
 const vec3 LIGHT_COLOR      = vec3(1,1,1);
 
-const float SPECULAR_STR    = 0.5;
+const float SPECULAR_STR    = 0.3;
 const float AMBIENT_STR     = 0.5;
 const float DIFFUSE_STR     = 0.5;
 

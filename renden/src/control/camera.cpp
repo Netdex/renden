@@ -29,7 +29,7 @@ Camera::Camera(GLFWwindow* window) : window_(window)
 
 Camera::~Camera() = default;
 
-void Camera::Update(float deltaTime, bool focus)
+void Camera::Update(double deltaTime, bool focus)
 {
 	int width, height;
 	glfwGetFramebufferSize(window_, &width, &height);
@@ -39,12 +39,10 @@ void Camera::Update(float deltaTime, bool focus)
 		double xpos, ypos;
 		glfwGetCursorPos(window_, &xpos, &ypos);
 		glfwSetCursorPos(window_, width / 2, height / 2);
-		yaw_ += mouse_speed_ * deltaTime * float(width / 2 - xpos);
-		pitch_ += mouse_speed_ * deltaTime * float(height / 2 - ypos);
-		if (pitch_ > glm::pi<float>() / 2 - 0.01)
-			pitch_ = static_cast<float>(glm::pi<float>() / 2 - 0.01);
-		if (pitch_ < -glm::pi<float>() / 2 + 0.01)
-			pitch_ = static_cast<float>(-glm::pi<float>() / 2 + 0.01);
+		const double movement = mouse_speed_ * deltaTime;
+		yaw_ += movement * (width / 2 - xpos);
+		pitch_ += movement * (height / 2 - ypos);
+		pitch_ = glm::clamp(pitch_, -glm::pi<double>() / 2 + 0.01, glm::pi<double>() / 2 - 0.01);
 	}
 
 	// calculate camera vectors
@@ -60,30 +58,31 @@ void Camera::Update(float deltaTime, bool focus)
 		speed_ = 10.0f;
 	}
 
+	const auto movement = float(deltaTime * speed_);
 	// handle input
 	if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		Position += direction * deltaTime * speed_;
+		Position += direction * movement;
 	}
 	if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		Position -= direction * deltaTime * speed_;
+		Position -= direction * movement;
 	}
 	if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		Position += right * deltaTime * speed_;
+		Position += right * movement;
 	}
 	if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		Position -= right * deltaTime * speed_;
+		Position -= right * movement;
 	}
 	if (glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 	{
-		Position -= glm::vec3(0, 1, 0) * deltaTime * speed_;
+		Position -= glm::vec3(0, 1, 0) * movement;
 	}
 	if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS)
 	{
-		Position += glm::vec3(0, 1, 0) * deltaTime * speed_;
+		Position += glm::vec3(0, 1, 0) * movement;
 	}
 	if (glfwGetKey(window_, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
 	{
@@ -96,7 +95,7 @@ void Camera::Update(float deltaTime, bool focus)
 			fov_ += 0.01f;
 	}
 
-	View = glm::lookAt(
+	View = lookAt(
 		Position,
 		Position + direction,
 		up_

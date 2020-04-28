@@ -35,6 +35,7 @@ inline bool aabb_intersects(std::pair<glm::vec3, glm::vec3> a, std::pair<glm::ve
         && interval_intersects(min_a.y, max_a.y, min_b.y, max_b.y)
         && interval_intersects(min_a.z, max_a.z, min_b.z, max_b.z);
 }
+
 }
 
 #endif

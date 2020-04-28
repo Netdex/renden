@@ -26,7 +26,7 @@ public:
 	Camera(const Camera& o) = delete;
 	Camera& operator=(const Camera& o) = delete;
 
-	void Update(float deltaTime, bool focus);
+	void Update(double deltaTime, bool focus);
 	std::optional<std::pair<glm::ivec3, glm::ivec3>> CastTarget(world::World& world, int distance) const;
 	glm::vec3 GetDirection() const;
 
@@ -66,10 +66,10 @@ private:
 	GLFWwindow* window_ = nullptr;
 
 	float fov_ = glm::radians(45.0f);
-	float yaw_ = glm::pi<float>(); // horizontal angle : toward -Z
-	float pitch_ = 0.0f; // vertical angle : 0, look at the horizon
-	float speed_ = 10.0f;
-	float mouse_speed_ = 0.1f;
+	double yaw_ = glm::pi<double>(); // horizontal angle : toward -Z
+	double pitch_ = 0.0; // vertical angle : 0, look at the horizon
+	double speed_ = 10.0;
+	double mouse_speed_ = 0.1;
 	glm::vec3 up_ = glm::vec3(0, 1, 0);
 
 };

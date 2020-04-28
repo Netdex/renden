@@ -54,7 +54,6 @@ const vec3 CUBE_NORMALS[] = {
 // Must agree with other definitions
 const int SHADOW_MAP_PARTITIONS = 3;
 
-uniform mat4 chunk;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
@@ -86,7 +85,7 @@ void main() {
 	if((kFaceToBlock[gl_InvocationID] & gs_in[0].face) != 0){
 		for(int f = 0; f < 4; f++){
 			vec4 corner = gl_in[0].gl_Position + vec4(CUBE_VERTICES[gl_InvocationID*4+f], 0);
-			vec4 world_loc = model * chunk * corner;
+			vec4 world_loc = model * corner;
 
 			gl_Position = proj * view * world_loc;
 			texcoord = vec3(texelFetch(str_sampler, int(gs_in[0].tex_offset*(6*4) + gl_InvocationID*4+f), 0));
