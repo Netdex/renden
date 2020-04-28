@@ -40,12 +40,12 @@ bool World::ChunkExists(glm::ivec3 loc)
 	return chunks_.find(loc) != chunks_.end();
 }
 
-void World::Render(const gl::Shader& block_shader, const control::Camera& camera)
+void World::Render(const gl::Shader& block_shader, const control::Camera& camera, bool frustum_cull)
 {
 	const auto frustum_aabb = camera.ComputeFrustumAABB();
 	for (const auto& [location, chunk] : chunks_)
 	{
-		if (util::aabb_intersects(chunk->GetAABB(), frustum_aabb))
+		if (!frustum_cull || util::aabb_intersects(chunk->GetAABB(), frustum_aabb))
 			chunk->Draw(block_shader);
 	}
 }

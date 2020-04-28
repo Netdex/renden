@@ -165,7 +165,7 @@ void loop(GLFWwindow* window)
 		world.Update();
 
 		shadowmap.Render(cam, block_shader, block_depth_shader, light_dir,
-		                 [&world, &block_depth_shader, &cam] { world.Render(block_depth_shader, cam); });
+		                 [&world, &block_depth_shader, &cam] { world.Render(block_depth_shader, cam, false); });
 
 		// Drawing begins!
 		glViewport(0, 0, fb_width, fb_height);
@@ -193,8 +193,9 @@ void loop(GLFWwindow* window)
 			auto scoped_lock = reticle_shader.Use();
 			Context<world::Reticle>::Get().Draw(reticle_shader, cam.View, cam.Proj,
 			                                    cam.Position, cam.GetDirection(), control::state.target
-				                                    ? std::optional<glm::ivec3>(control::state.target->first)
-				                                    : std::nullopt);
+				                                                                      ? std::optional<glm::ivec3>(
+					                                                                      control::state.target->first)
+				                                                                      : std::nullopt);
 		}
 
 		{
