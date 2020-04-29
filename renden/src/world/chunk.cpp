@@ -13,10 +13,10 @@ std::pair<glm::vec3, glm::vec3> Chunk::GetAABB() const
 	return {glm::vec3{min}, glm::vec3{min} + glm::vec3{kChunkWidth}};
 }
 
-bool Chunk::UpdateMesh()
+bool Chunk::Update()
 {
 	// TODO Maybe use a thread pool for this?
-	if (dirty_)
+	if (IsDirty())
 	{
 		util::byte_buffer<> vlist;
 		for (int y = 0; y < kChunkWidth; y++)
@@ -31,7 +31,7 @@ bool Chunk::UpdateMesh()
 			}
 		}
 		mesh_->BufferVertexData(vlist);
-		dirty_ = false;
+		SetDirty(false);
 		return true;
 	}
 	return false;

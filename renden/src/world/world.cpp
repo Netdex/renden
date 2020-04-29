@@ -75,7 +75,7 @@ void World::Update()
 	int count = 0;
 	for (const auto& cnk : chunks_)
 	{
-		if (cnk.second->UpdateMesh())
+		if (cnk.second->Update())
 			count++;
 		if (count >= kMaximumChunksPerUpdate)
 			break;

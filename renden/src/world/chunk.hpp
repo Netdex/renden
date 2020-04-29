@@ -31,6 +31,7 @@ class Chunk
 					it_.local_pos_[component_] -= kChunkWidth;
 					it_.chunk_ = it_.chunk_->GetAdjacentChunk(adj_face[component_]);
 				}
+				assert(it_.valid());
 				return *this;
 			}
 
@@ -43,6 +44,7 @@ class Chunk
 					it_.local_pos_[component_] += kChunkWidth;
 					it_.chunk_ = it_.chunk_->GetAdjacentChunk(adj_face[component_]);
 				}
+				assert(it_.valid());
 				return *this;
 			}
 
@@ -90,12 +92,16 @@ class Chunk
 
 		T operator*() const
 		{
-			assert(this->valid());
 			return chunk_->GetBlockAt(local_pos_);
 		}
 
+		ChunkType chunk() const
+		{
+			return *chunk_;
+		}
+
 		bool valid() const { return chunk_ != nullptr; }
-		glm::ivec3 world_pos() const { return chunk_to_block_pos(chunk_->location_, local_pos_); }
+		glm::ivec3 position() const { return chunk_to_block_pos(chunk_->location_, local_pos_); }
 
 		axis x, y, z;
 
@@ -139,14 +145,17 @@ public:
 	Block& GetBlockRefAt(glm::ivec3 loc, bool taint = true);
 	Chunk* GetAdjacentChunk(Direction face) const { return neighbors_[dir_to_ord(face)]; }
 
-	bool UpdateMesh();
+	bool Update();
 	void Draw(const gl::Shader& shader) const;
+
+	void SetDirty(bool dirty) { dirty_ = dirty; }
+	bool IsDirty() const { return dirty_; }
 
 	std::pair<glm::vec3, glm::vec3> GetAABB() const;
 
 	static glm::ivec3 block_to_chunk_pos(glm::ivec3 pos)
 	{
-		return glm::ivec3( pos.x / kChunkWidth, pos.y / kChunkWidth, pos.z / kChunkWidth);
+		return glm::ivec3{ glm::floor(glm::vec3{pos} / float(kChunkWidth)) };
 	}
 
 	static constexpr glm::ivec3 chunk_to_block_pos(glm::ivec3 chunk_pos, glm::ivec3 loc)
