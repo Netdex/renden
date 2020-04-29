@@ -16,7 +16,6 @@ namespace gl
 {
 /**
  * \brief A cascaded shadow map
- * TODO Rename this class to ShadowMap.
  */
 class DepthMap : public Texture2DArray
 {
@@ -53,8 +52,6 @@ private:
 
 	nonstd::span<const float> part_intervals_;
 	FrameBuffer framebuffer_;
-
-	mutable bool imgui_depth_clamp_ = false;
 };
 }
 #endif

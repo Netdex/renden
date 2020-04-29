@@ -13,7 +13,6 @@ namespace gl
 void DepthMap::Render(const control::Camera& camera, Shader& block_shader, Shader& block_depth_shader,
                       const glm::vec3& light_dir, const std::function<void()>& renderer) const
 {
-	ImGui::Begin("Shadow-Map Render");
 	const size_t partition_count = part_intervals_.size() - 1;
 	framebuffer_.Bind();
 	std::vector<glm::mat4> shadow_view(partition_count);
@@ -22,11 +21,7 @@ void DepthMap::Render(const control::Camera& camera, Shader& block_shader, Shade
 
 	glViewport(0, 0, this->GetWidth(), this->GetHeight());
 	glCullFace(GL_FRONT);
-	ImGui::Checkbox("GL_DEPTH_CLAMP", &imgui_depth_clamp_);
-	if (imgui_depth_clamp_)
-		glEnable(GL_DEPTH_CLAMP);
-	else
-		glDisable(GL_DEPTH_CLAMP);
+	glEnable(GL_DEPTH_CLAMP);
 
 	{
 		auto scoped_lock = block_depth_shader.Use();
@@ -54,7 +49,6 @@ void DepthMap::Render(const control::Camera& camera, Shader& block_shader, Shade
 		//block_shader.Bind("shadow_depth", shadow_depth);
 		block_shader.Bind("light_dir", light_dir);
 	}
-	ImGui::End();
 }
 
 void DepthMap::ComputeShadowViewProj(const control::Camera& camera, float near_plane_norm,
