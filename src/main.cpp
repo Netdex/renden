@@ -49,19 +49,19 @@ void init(GLFWwindow* window)
 	glfwShowWindow(window);
 
 	Context<shader::BlockShader>::Initialize();
-	world::Block::LoadTextures(PROJECT_SOURCE_DIR "/renden/res/block_def.toml",
-	                           PROJECT_SOURCE_DIR "/renden/res/block_texture.toml");
+	world::Block::LoadTextures(PROJECT_SOURCE_DIR "/res/block_def.toml",
+	                           PROJECT_SOURCE_DIR "/res/block_texture.toml");
 	Context<shader::BlockDepthShader>::Initialize();
 	Context<world::World>::Initialize();
 
 	Context<shader::SkyboxShader>::Initialize();
 	const std::string cubemap_paths[6] = {
-		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_rt.tga",
-		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_lf.tga",
-		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_up.tga",
-		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_dn.tga",
-		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_bk.tga",
-		PROJECT_SOURCE_DIR "/renden/res/skybox/alps_ft.tga",
+		PROJECT_SOURCE_DIR "/res/skybox/alps_rt.tga",
+		PROJECT_SOURCE_DIR "/res/skybox/alps_lf.tga",
+		PROJECT_SOURCE_DIR "/res/skybox/alps_up.tga",
+		PROJECT_SOURCE_DIR "/res/skybox/alps_dn.tga",
+		PROJECT_SOURCE_DIR "/res/skybox/alps_bk.tga",
+		PROJECT_SOURCE_DIR "/res/skybox/alps_ft.tga",
 	};
 	Context<world::Skybox>::Initialize(cubemap_paths);
 

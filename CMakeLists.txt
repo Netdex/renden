@@ -3,21 +3,12 @@ project(renden)
 
 set(CMAKE_CXX_STANDARD 17)
 
-option(GLFW_BUILD_DOCS OFF)
-option(GLFW_BUILD_EXAMPLES OFF)
-option(GLFW_BUILD_TESTS OFF)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(vendor/glfw)
 
-option(PACKAGE_TESTS OFF)
-if(PACKAGE_TESTS)
-    enable_testing()
-    include(GoogleTest)
-    add_subdirectory()
-endif()
-
-include_directories(
-    src/
-)
+include_directories(src/)
 
 include_directories(SYSTEM
 	vendor/glad/include/
@@ -31,6 +22,19 @@ include_directories(SYSTEM
     vendor/toml11/
 )
 
+add_definitions(
+	-DGLFW_INCLUDE_NONE
+    -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+	-DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\"
+)
+
+option(PACKAGE_TESTS ON)
+if(PACKAGE_TESTS)
+    enable_testing()
+    include(GoogleTest)
+    add_subdirectory(tests)
+endif()
+
 file(GLOB VENDORS_SOURCES 
     vendor/glad/src/glad.c
     vendor/imgui/imgui.cpp
@@ -41,8 +45,11 @@ file(GLOB VENDORS_SOURCES
     vendor/imgui/examples/imgui_impl_glfw.cpp
 )
 
+SET(PROJECT_MAIN src/main.cpp)
 file(GLOB_RECURSE PROJECT_HEADERS src/*.hpp)
 file(GLOB_RECURSE PROJECT_SOURCES src/*.cpp)
+list(REMOVE_ITEM PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_MAIN})
+
 file(GLOB_RECURSE PROJECT_SHADERS 
     shaders/*.comp
 	shaders/*.frag
@@ -61,19 +68,17 @@ source_group("shaders" FILES ${PROJECT_SHADERS})
 source_group("src" FILES ${PROJECT_SOURCES})
 source_group("vendor" FILES ${VENDORS_SOURCES})
 
-add_definitions(
-	-DGLFW_INCLUDE_NONE
-    -DIMGUI_IMPL_OPENGL_LOADER_GLAD
-	-DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\"
-)
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
-                               ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
-                               ${VENDORS_SOURCES})
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
+
+add_library(${PROJECT_NAME}_lib STATIC ${PROJECT_SOURCES} ${PROJECT_HEADERS}
+									   ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
+									   ${VENDORS_SOURCES})
+add_executable(${PROJECT_NAME} ${PROJECT_MAIN})
+
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC glfw ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_lib)
 
 if(MSVC)
-	target_compile_options(${PROJECT_NAME} PRIVATE "/experimental:external" "/external:W0" "/external:anglebrackets")
-	set_source_files_properties(${PROJECT_HEADERS} ${PROJECT_SOURCES} PROPERTIES COMPILE_FLAGS "/W4 /WX")
+	set_source_files_properties(${PROJECT_SOURCES} PROPERTIES COMPILE_FLAGS "/experimental:external /external:W0 /external:anglebrackets /W4 /WX")
 	set_source_files_properties(${VENDORS_SOURCES} PROPERTIES COMPILE_FLAGS "/w")
 	target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:RELWITHDEBINFO>:/INCREMENTAL:NO>" "$<$<CONFIG:RELWITHDEBINFO>:/PROFILE>")
 else()

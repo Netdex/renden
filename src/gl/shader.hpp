@@ -56,7 +56,7 @@ public:
 	Shader& Attach(std::string const& filename)
 	{
 		// Load GLSL Shader Source from File
-		std::string path = PROJECT_SOURCE_DIR "/renden/shaders/";
+		std::string path = PROJECT_SOURCE_DIR "/shaders/";
 		//    std::string path = "../../renden/shaders/";
 		std::ifstream fd(path + filename);
 		auto src = std::string(std::istreambuf_iterator<char>(fd),

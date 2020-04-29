@@ -53,7 +53,7 @@ void Block::LoadTextures(const std::string& block_def_conf, const std::string& b
 			const auto& [tex_name, tex_path] = tex_def;
 			assert(texture_name_to_layer_.find(tex_name) == texture_name_to_layer_.end());
 			texture_name_to_layer_[tex_name] = tex_idx;
-			paths.push_back(PROJECT_SOURCE_DIR "/renden/res/tex/" + toml::get<std::string>(tex_path));
+			paths.push_back(PROJECT_SOURCE_DIR "/res/tex/" + toml::get<std::string>(tex_path));
 			++tex_idx;
 		}
 

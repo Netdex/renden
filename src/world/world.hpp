@@ -2,7 +2,6 @@
 #define RENDEN_CHUNK_MANAGER_HPP
 
 #include <unordered_map>
-#include <optional>
 
 #include <spdlog/spdlog.h>
 #include <glm/glm.hpp>
