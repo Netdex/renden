@@ -28,7 +28,7 @@ add_definitions(
 	-DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\"
 )
 
-option(PACKAGE_TESTS ON)
+option(PACKAGE_TESTS "Build tests for this project" OFF)
 if(PACKAGE_TESTS)
     enable_testing()
     include(GoogleTest)
