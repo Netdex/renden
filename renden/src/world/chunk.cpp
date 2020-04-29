@@ -55,12 +55,12 @@ Block& Chunk::GetBlockRefAt(glm::ivec3 loc, bool taint)
 	return data_[loc.y][loc.x][loc.z];
 }
 
-bool Chunk::face_occluded(glm::ivec3 position, BlockFace face) const
+bool Chunk::face_occluded(glm::ivec3 position, Direction face) const
 {
 	assert(position.x >= 0 && position.x < kChunkWidth
 		&& position.z >= 0 && position.z < kChunkWidth
 		&& position.y >= 0 && position.y < kChunkWidth);
-	const glm::ivec3 offset = kFaceToOffset[kFaceToIndex[face]] + position;
+	const glm::ivec3 offset = dir_to_offset(face) + position;
 	if (offset.x < 0 || offset.x >= kChunkWidth || offset.y < 0 || offset.y >= kChunkWidth
 		|| offset.z < 0 || offset.z >= kChunkWidth)
 		return false;
@@ -68,10 +68,10 @@ bool Chunk::face_occluded(glm::ivec3 position, BlockFace face) const
 	return offset_block.id() && offset_block.table()["opaque"].as_boolean();
 }
 
-block_face_mask_t Chunk::visible_faces(glm::ivec3 position) const
+DirectionMask Chunk::visible_faces(glm::ivec3 position) const
 {
-	block_face_mask_t mask = 0;
-	for (BlockFace face : kFaceToBlock)
+	DirectionMask mask = 0;
+	for (Direction face : kDirections)
 	{
 		if (!face_occluded(position, face))
 			mask |= face;

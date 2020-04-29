@@ -12,7 +12,7 @@
 
 namespace world
 {
-enum BlockFace : int
+enum Direction : uint_fast8_t
 {
 	NEG_Z = 1 << 0,
 	POS_Z = 1 << 1,
@@ -22,22 +22,51 @@ enum BlockFace : int
 	POS_Y = 1 << 5
 };
 
-typedef int block_face_mask_t;
+typedef uint_fast8_t DirectionMask;
 
-constexpr BlockFace kFaceToBlock[] = {NEG_Z, POS_Z, NEG_X, POS_X, NEG_Y, POS_Y};
-constexpr BlockFace kFaceToBlockInv[] = { POS_Z, NEG_Z, POS_X, NEG_X, POS_Y, NEG_Y };
+constexpr Direction kDirections[] = {NEG_Z, POS_Z, NEG_X, POS_X, NEG_Y, POS_Y};
 
-constexpr int kFaceToIndex[] = {
-	-1, 0, 1, -1, 2, -1, -1, -1,
-	3, -1, -1, -1, -1, -1, -1, -1,
-	4, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, 5
-}; // I hate this
+constexpr Direction ord_to_dir(int ord)
+{
+	return kDirections[ord];
+}
 
-constexpr glm::ivec3 kFaceToOffset[] = {
-	glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1), glm::ivec3(-1, 0, 0),
-	glm::ivec3(1, 0, 0), glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0)
-};
+constexpr Direction ord_to_dir_inv(int ord)
+{
+	constexpr Direction kFaceToBlockInv[] = {POS_Z, NEG_Z, POS_X, NEG_X, POS_Y, NEG_Y};
+	return kFaceToBlockInv[ord];
+}
+
+constexpr int dir_to_ord(Direction dir)
+{
+	constexpr int kFaceToIndex[] = {
+		-1, 0, 1, -1, 2, -1, -1, -1,
+		3, -1, -1, -1, -1, -1, -1, -1,
+		4, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, 5
+	};
+	return kFaceToIndex[static_cast<int>(dir)];
+}
+
+constexpr Direction dir_inv(Direction dir)
+{
+	return ord_to_dir_inv(dir_to_ord(dir));
+}
+
+constexpr glm::ivec3 ord_to_offset(int ord)
+{
+	constexpr glm::ivec3 kFaceToOffset[] = {
+		glm::ivec3(0, 0, -1), glm::ivec3(0, 0, 1), glm::ivec3(-1, 0, 0),
+		glm::ivec3(1, 0, 0), glm::ivec3(0, -1, 0), glm::ivec3(0, 1, 0)
+	};
+	return kFaceToOffset[ord];
+}
+
+constexpr glm::ivec3 dir_to_offset(Direction dir)
+{
+	return ord_to_offset(dir_to_ord(dir));
+}
+
 
 typedef int block_id_t;
 
@@ -55,7 +84,7 @@ public:
 	block_id_t id() const { return id_; }
 	toml::table& table() const { return block_id_to_table_[id()]; }
 
-	void AppendToVertexList(util::byte_buffer<>& vlist, glm::ivec3 position, world::block_face_mask_t faces) const;
+	void AppendToVertexList(util::byte_buffer<>& vlist, glm::ivec3 position, world::DirectionMask faces) const;
 
 	static void LoadTextures(const std::string& block_def_conf, const std::string& block_tex_conf);
 

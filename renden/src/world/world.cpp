@@ -4,7 +4,6 @@
 
 namespace world
 {
-
 Chunk* World::GetChunkAt(glm::ivec3 loc, bool create_if_not_exists)
 {
 	const auto it = chunks_.find(loc);
@@ -25,11 +24,11 @@ Chunk* World::CreateChunk(glm::ivec3 loc)
 	std::array<Chunk*, 6> neighbors{};
 	for (int i = 0; i < 6; ++i)
 	{
-		glm::ivec3 offset = kFaceToOffset[i];
+		glm::ivec3 offset = ord_to_offset(i);
 		Chunk* adj = GetChunkAt(loc + offset);
 		neighbors[i] = adj;
 		if (adj)
-			adj->neighbors_[kFaceToIndex[kFaceToBlockInv[i]]] = adj;
+			adj->neighbors_[dir_to_ord(ord_to_dir_inv(i))] = adj;
 	}
 	ptr.reset(new Chunk{loc, neighbors});
 	return ptr.get();

@@ -28,7 +28,7 @@ bool Block::operator!=(const Block& o) const
 }
 
 void Block::AppendToVertexList(util::byte_buffer<>& vlist, glm::ivec3 position,
-                               block_face_mask_t faces) const
+                               DirectionMask faces) const
 {
 	if (!id_)
 		return;
