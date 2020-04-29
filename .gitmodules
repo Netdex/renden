@@ -30,3 +30,6 @@
 [submodule "vendor/toml11"]
 	path = vendor/toml11
 	url = https://github.com/ToruNiina/toml11.git
+[submodule "vendor/googletest"]
+	path = vendor/googletest
+	url = https://github.com/google/googletest.git
