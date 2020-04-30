@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 add_subdirectory(vendor/glfw)
 
 include_directories(src/)
@@ -27,13 +28,6 @@ add_definitions(
     -DIMGUI_IMPL_OPENGL_LOADER_GLAD
 	-DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\"
 )
-
-option(PACKAGE_TESTS "Build tests for this project" OFF)
-if(PACKAGE_TESTS)
-    enable_testing()
-    include(GoogleTest)
-    add_subdirectory(tests)
-endif()
 
 file(GLOB VENDORS_SOURCES 
     vendor/glad/src/glad.c
@@ -68,14 +62,27 @@ source_group("shaders" FILES ${PROJECT_SHADERS})
 source_group("src" FILES ${PROJECT_SOURCES})
 source_group("vendor" FILES ${VENDORS_SOURCES})
 
+add_library(coverage_config INTERFACE)
+option(CODE_COVERAGE "Enable coverage reporting" OFF)
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+	target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
+	target_link_options(coverage_config INTERFACE --coverage)
+endif()
+
+option(PACKAGE_TESTS "Build tests for this project" OFF)
+if(PACKAGE_TESTS)
+    enable_testing()
+    include(GoogleTest)
+    add_subdirectory(tests)
+endif()
 
 add_library(${PROJECT_NAME}_lib STATIC ${PROJECT_SOURCES} ${PROJECT_HEADERS}
 									   ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
 									   ${VENDORS_SOURCES})
 add_executable(${PROJECT_NAME} ${PROJECT_MAIN})
 
-target_link_libraries(${PROJECT_NAME}_lib PUBLIC glfw ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_lib)
+target_link_libraries(${PROJECT_NAME}_lib PUBLIC glfw ${GLFW_LIBRARIES} ${GLAD_LIBRARIES} coverage_config)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_lib coverage_config)
 
 if(MSVC)
 	set_source_files_properties(${PROJECT_SOURCES} PROPERTIES COMPILE_FLAGS "/experimental:external /external:W0 /external:anglebrackets /W4 /WX")

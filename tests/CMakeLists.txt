@@ -1,3 +1,4 @@
+set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 add_subdirectory("${PROJECT_SOURCE_DIR}/vendor/googletest" "vendor/googletest")
 mark_as_advanced(
     BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
@@ -11,7 +12,7 @@ set_target_properties(gmock_main PROPERTIES FOLDER extern)
 
 macro(package_add_test TESTNAME)
     add_executable(${TESTNAME} ${ARGN})
-    target_link_libraries(${TESTNAME} ${PROJECT_NAME}_lib gtest gmock gtest_main)
+    target_link_libraries(${TESTNAME} PRIVATE ${PROJECT_NAME}_lib gtest gmock gtest_main)
     gtest_discover_tests(${TESTNAME}
         WORKING_DIRECTORY ${PROJECT_DIR}
         PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}"
