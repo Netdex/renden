@@ -21,7 +21,8 @@ install:
 script: bash build.sh
 
 after_success:
-- lcov --directory . --capture --output-file coverage.info
+- lcov --directory . --capture --output-file test_coverage.info
+- lcov -a base_coverage.info -a test_coverage.info -o coverage.info
 - lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' '*/tests/*' '*/vendor/*' --output-file coverage.info
 - lcov --list coverage.info
 - bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
