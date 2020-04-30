@@ -1,8 +1,9 @@
 #! /bin/bash
-
 set -euo pipefail
 
 set -v
+CC=${CC:-clang}
+CXX=${CXX:-clang++}
 BUILD="build"
 ROOT="$(pwd)"
 BASE="$ROOT/src"
@@ -25,23 +26,36 @@ function install() {
 function build() {
 	cmake --version
 	cmake -S . -B $BUILD -DCMAKE_BUILD_TYPE=Debug -DPACKAGE_TESTS=ON -DCODE_COVERAGE=ON
-	cmake --build $BUILD -- -j $(nproc)
+	cmake --build $BUILD -j $(nproc)
 }
 
 function tests() {
 	cd $BUILD
 	ctest -j $(nproc) --output-on-failure
+	
 	cd $ROOT
-	grcov $BUILD -s $ROOT -t lcov --llvm --branch --ignore-not-existing -o $BUILD/coverage.info \
+	if [ $CC = clang ]; then
+		GRCOV_FLAGS=--llvm
+	else
+		GRCOV_FLAGS=
+	fi
+	
+	if [ ${CI:-false} = true ]; then
+		GRCOV_TYPE=lcov
+		GRCOV_OUTPUT="$BUILD/coverage.info"
+	else
+		GRCOV_TYPE=html
+		GRCOV_OUTPUT="$BUILD/coverage/"
+	fi
+	
+	grcov $BUILD -s $ROOT -t $GRCOV_TYPE $GRCOV_FLAGS --branch --ignore-not-existing -o $GRCOV_OUTPUT \
 		--ignore "/usr/*" \
 		--ignore "vendor/*" \
 		--ignore "tests/*" \
 		--ignore "src/main.cpp"
-
+	
 	if [ ${CI:-false} = true ]; then
-		bash <(curl -s https://codecov.io/bash) -f $BUILD/coverage.info || echo "Codecov did not collect coverage reports"
-	else
-		genhtml $BUILD/coverage.info --output-directory $BUILD/lcov
+		bash <(curl -s https://codecov.io/bash) -f $GRCOV_OUTPUT || echo "Codecov did not collect coverage reports"
 	fi
 }
 
