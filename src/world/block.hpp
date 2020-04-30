@@ -67,7 +67,6 @@ constexpr glm::ivec3 dir_to_offset(Direction dir)
 	return ord_to_offset(dir_to_ord(dir));
 }
 
-
 typedef int block_id_t;
 
 class Block

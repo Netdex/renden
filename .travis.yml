@@ -3,19 +3,19 @@ compiler: gcc
 os: linux
 dist: bionic
 
-cache: # see https://docs.travis-ci.com/user/caching/
+# see https://docs.travis-ci.com/user/caching/
+cache:
 - directories:
   - $HOME/.cache
+
+# see https://docs.travis-ci.com/user/gui-and-headless-browsers
+services: 
+  - xvfb
 
 addons:
     apt:
         packages:
             - xorg-dev
             - lcov
-
-install:
-- mkdir -p $HOME/.cache/cmake &&
-  wget -qO- https://github.com/Kitware/CMake/releases/download/v3.17.0/cmake-3.17.0-Linux-x86_64.tar.gz | tar -xzC $HOME/.cache/cmake --strip-components 1 &&
-  export PATH=$HOME/.cache/cmake/bin:$PATH
 
 script: bash build.sh
